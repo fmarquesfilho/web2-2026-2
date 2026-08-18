@@ -1,0 +1,36 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Linux
+.directory
+*~
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Arquivos temporários
+*.tmp
+*.bak
+~$*
+
+# Saídas de build de documentação
+site/
+_site/
+.docusaurus/
+build/
+dist/
+node_modules/
+
+# Slides gerados — o PDF é distribuído pelo SIGAA, não pelo repositório
+*.pdf
+slides/*.html
