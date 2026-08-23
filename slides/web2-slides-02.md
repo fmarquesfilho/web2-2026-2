@@ -77,30 +77,22 @@ style: |
   .pill-red   { display:inline-block; background:#fee2e2; border:1.5px solid #dc2626; color:#dc2626; font-family:'Consolas',monospace; font-weight:bold; font-size:0.85em; padding:0.12em 0.6em; border-radius:20px; }
   .pill-green { display:inline-block; background:#dcfce7; border:1.5px solid #16a34a; color:#16a34a; font-family:'Consolas',monospace; font-weight:bold; font-size:0.85em; padding:0.12em 0.6em; border-radius:20px; }
   .pill-blue  { display:inline-block; background:#dbeafe; border:1.5px solid #1a56db; color:#1a56db; font-family:'Consolas',monospace; font-weight:bold; font-size:0.85em; padding:0.12em 0.6em; border-radius:20px; }
+  section.lead { justify-content: center; }
+  section.lead h1 { font-size: 2.4em; border-bottom: none; }
+  section.lead h2 { font-size: 1.5em; color: #6b7280; }
   .tag { display:inline-block; background:#f3f4f6; border:1px solid #d1d5db; color:#374151; font-size:0.85em; padding:0.1em 0.5em; border-radius:4px; font-family:'Consolas',monospace; }
+
 
 ---
 
 # Desenvolvimento de Sistemas Web II
 
-## Cache, REST e Clean Architecture
+## HTTP na prática, Cache, REST e Clean Architecture
 
 **DIM0547 — Turma 01 · Aula 02 (Sprint 0)**
 
 **Prof. Fernando** · UFRN · 2026.2
 
----
-
-# Roteiro de hoje
-
-| Bloco | O que vemos |
-|---|---|
-| **Cache HTTP** | Frescor, validação e concorrência otimista |
-| **REST** | O que o termo significa, e o que a sua API precisa atender |
-| **Clean Architecture** | A regra de dependência e como verificá-la |
-| **Mãos à obra** | Grupos, coorte e escolha do domínio |
-
-> A aula vai de fora para dentro: primeiro o que o cliente vê pela rede, depois como o servidor se organiza por dentro.
 
 ---
 
@@ -116,15 +108,93 @@ Na aula passada vimos a **superfície** do sistema:
   Erro em application/problem+json
 ```
 
-Faltaram duas peças que fecham esse assunto: **cache** e **REST**. Começamos por elas.
+Faltaram duas peças que fecham esse assunto: **cache** e **REST**.
 
-Depois entramos pela primeira vez no que acontece **dentro** do serviço.
+Antes delas, uma recapitulação rápida com o DevTools aberto — para que todo mundo esteja no mesmo ponto.
 
 ---
 
-# Parte 1 — Cache
+# Onde estudar depois
 
-## A requisição mais rápida é a que não acontece
+| Guia | Foco |
+|---|---|
+| **MDN — HTTP** · `developer.mozilla.org/docs/Web/HTTP` | Referência da web |
+| **RFC 9110** — HTTP Semantics | A especificação, quando a dúvida for fina |
+| **RFC 9111** — HTTP Caching | O assunto da Parte 2 |
+
+O MDN é a referência que vocês vão consultar o semestre inteiro.
+
+---
+
+<!-- _class: lead -->
+
+# Parte 1
+
+## HTTP na prática
+
+Abram o Chrome e o DevTools com `F12`.
+
+---
+
+# O que acontece ao abrir um site
+
+```
+ Navegador                                    Servidor
+     │                                            │
+     │  GET /index.html HTTP/1.1                  │
+     │  Host: exemplo.br                          │
+     │───────────────────────────────────────────▶│
+     │                                            │
+     │  HTTP/1.1 200 OK                           │
+     │  Content-Type: text/html                   │
+     │◀───────────────────────────────────────────│
+```
+
+Uma página comum dispara dezenas dessas trocas: HTML, CSS, imagens, fontes, chamadas de API.
+
+---
+
+# DevTools: a aba Network
+
+`F12` → **Network** → recarregue a página.
+
+| Coluna | O que mostra |
+|---|---|
+| **Name** | O recurso pedido |
+| **Status** | O código de resposta |
+| **Type** | `document`, `script`, `fetch`, `xhr`… |
+| **Size** | Tamanho, e se veio do cache |
+| **Time** | Duração da requisição |
+
+O filtro **Fetch/XHR** isola as chamadas de API e esconde imagens e scripts.
+
+---
+
+# Cabeçalhos que importam
+
+| Cabeçalho | Onde | Para quê |
+|---|---|---|
+| `Content-Type` | ambos | Formato do corpo |
+| `Accept` | requisição | Formato que o cliente prefere |
+| `Authorization` | requisição | Credencial |
+| `User-Agent` | requisição | Quem está chamando |
+| `Cache-Control` · `ETag` | ambos | Cache e revalidação |
+| `Location` | resposta | Onde o recurso criado ficou |
+| `Retry-After` | resposta | Quando tentar de novo |
+
+As três últimas linhas são o assunto das duas próximas partes.
+
+---
+
+<!-- _class: lead -->
+
+# Parte 2
+
+## Cache
+
+---
+
+# O custo de uma requisição
 
 Um `GET /produtos` que leva 200 ms envolve, no mínimo:
 
@@ -153,7 +223,7 @@ Otimizar a consulta ao banco melhora uma fatia. **Não fazer a requisição** el
 | CDN e proxy | Respostas compartilhadas entre usuários | Cabeçalhos da resposta |
 | Aplicação | Resultados de consulta, objetos | Você, no código |
 
-> As duas primeiras camadas você controla **sem escrever código**, apenas declarando cabeçalhos corretos. É o ganho mais barato que existe.
+> As duas primeiras camadas você controla **sem escrever código**, apenas declarando cabeçalhos corretos.
 
 ---
 
@@ -229,65 +299,18 @@ Como gerar a ETag: hash do corpo, número de versão da linha no banco, ou o `up
 
 > Resolução de um segundo é uma limitação real: dois updates no mesmo segundo ficam indistinguíveis. Em API, prefira ETag.
 
----
-
-# A mesma etiqueta serve para escrever
-
-O problema: dois clientes leem o produto 42 e os dois editam.
-
-```http
-PUT /produtos/42                    HTTP/1.1 412 Precondition Failed
-If-Match: "a1b2c3"           ──►    (alguém alterou antes de você)
-```
-
-Isso é **controle de concorrência otimista**, e vem de graça no protocolo:
-
-| Situação | Resposta |
-|---|---|
-| Ninguém alterou desde a leitura | `200` e a escrita acontece |
-| Alguém alterou | `412`, e o cliente relê antes de tentar de novo |
-
-> Sem `If-Match`, a segunda escrita sobrescreve a primeira em silêncio. O usuário nunca fica sabendo que perdeu o trabalho.
 
 ---
 
-# `Vary`: o cache compartilhado precisa saber
+<!-- _class: lead -->
 
-Se a resposta muda conforme um cabeçalho da requisição, o cache precisa ser avisado:
+# Parte 3
 
-```http
-Vary: Accept-Encoding, Accept-Language
-```
-
-Sem isso, um proxy pode entregar a versão em português a quem pediu inglês, ou a versão comprimida a quem não aceita compressão.
-
-| Erro | Consequência |
-|---|---|
-| Esquecer `Vary` | Resposta errada servida do cache compartilhado |
-| `Vary: Authorization` sem `private` | Resposta de um usuário servida a outro |
-
-> Esse último é uma falha de segurança, não de desempenho. Resposta que depende do usuário leva `private`, sempre.
+## REST
 
 ---
 
-# Quando não cachear
-
-| Situação | O que fazer |
-|---|---|
-| Dado que muda a cada requisição | `no-store` |
-| Resposta específica do usuário | `private`, e nunca `public` |
-| Recurso que precisa estar sempre atual | `no-cache`, com `ETag` para revalidar barato |
-| Resposta de `POST`, `PUT`, `DELETE` | Não é cacheável por padrão; não force |
-
-**Na Sprint 3** vocês vão implementar cache no serviço Go e medir a taxa de acerto. O que decidirmos aqui sobre cabeçalhos vale antes disso, na Sprint 1, sem nenhuma infraestrutura extra.
-
-> Comece declarando `Cache-Control` e `ETag` nos `GET` da sua API. É uma linha de configuração e já muda o comportamento de todo cliente.
-
----
-
-# Parte 2 — REST
-
-## Não é "API com JSON"
+# O que REST é
 
 REST é um **estilo arquitetural**, descrito por Roy Fielding em 2000, na tese em que ele explicava por que a web escalou.
 
@@ -303,7 +326,7 @@ O nome não menciona JSON, nem HTTP, nem CRUD. Descreve um conjunto de **restri�
 |---|---|---|
 | **Cliente-servidor** | Separar interface de armazenamento | Evoluir os dois lados em ritmos diferentes |
 | **Sem estado** | Cada requisição se basta | Qualquer réplica atende qualquer requisição |
-| **Cacheável** | A resposta declara se pode ser guardada | O que vimos na primeira parte |
+| **Cacheável** | A resposta declara se pode ser guardada | O que vimos na parte anterior |
 | **Interface uniforme** | Recursos identificados, manipulados por representação | Cliente genérico funciona com qualquer serviço |
 | **Em camadas** | O cliente não sabe se fala com a origem | Proxy, CDN e balanceador entram sem mudar o cliente |
 | **Código sob demanda** | Servidor pode enviar código executável | Opcional, e quase nunca usada |
@@ -343,8 +366,6 @@ If-Match: "v1"          ──►
 
 Três operações, três métodos com semântica, três status corretos, cabeçalhos coerentes.
 
-> Compare com `POST /criarPedido`, `POST /buscarPedido`, `POST /excluirPedido`, todos devolvendo `200`. Funciona — e joga fora cache, retry seguro e todo o vocabulário que proxies e clientes já entendem.
-
 ---
 
 # Checklist de uma API nível 2
@@ -361,38 +382,115 @@ Três operações, três métodos com semântica, três status corretos, cabeça
 
 ---
 
-# Parte 3 — Clean Architecture
+<!-- _class: lead -->
 
-## O problema: onde mora a regra de negócio
+# Parte 4
 
-```java
-@RestController
-class PedidoController {
-  @PostMapping("/pedidos")
-  ResponseEntity<?> criar(@RequestBody PedidoDTO dto) {
-    if (dto.itens().isEmpty()) return badRequest().build();
-    var total = dto.itens().stream().mapToDouble(...).sum();
-    if (total > 1000) total *= 0.9;              // ← regra de negócio
-    jdbcTemplate.update("INSERT INTO pedidos ..."); // ← infraestrutura
-    return ok();
-  }
-}
-```
-
-Funciona. E a regra do desconto agora só existe dentro de um controller HTTP.
+## Projetando a sua API
 
 ---
 
-# O que isso custa
+# Recurso, não ação
 
-| Você quer | E descobre que |
+A URL nomeia **coisas**; o método diz o que fazer com elas.
+
+| Evitar | Preferir |
 |---|---|
-| Testar a regra do desconto | Precisa subir Spring, e simular uma requisição HTTP |
-| Reusar a regra no serviço Go | A regra não existe fora do controller |
-| Trocar de banco | A consulta está espalhada por vinte controllers |
-| Entender o domínio | Precisa ler HTTP e SQL para achar as três linhas que importam |
+| `POST /criarPedido` | `POST /pedidos` |
+| `GET /buscarPedidoPorId?id=7` | `GET /pedidos/7` |
+| `POST /pedidos/7/deletar` | `DELETE /pedidos/7` |
+| `GET /listarPedidosDoCliente?c=3` | `GET /clientes/3/pedidos` |
 
-> O problema não é o Spring, nem o SQL. É que a única parte **do negócio** está misturada com duas partes que são detalhe de tecnologia.
+Substantivos no plural, hierarquia refletindo a relação entre entidades.
+
+O ganho não é estético: um cliente que entende `/pedidos/7` consegue prever `/clientes/3` sem ler documentação.
+
+---
+
+# Escolher o status certo
+
+| Situação | Status |
+|---|---|
+| Leitura bem-sucedida | `200 OK` |
+| Recurso criado | `201 Created` + cabeçalho `Location` |
+| Remoção bem-sucedida, sem corpo | `204 No Content` |
+| JSON malformado | `400 Bad Request` |
+| Sem credencial | `401 Unauthorized` |
+| Credencial válida, sem permissão | `403 Forbidden` |
+| Recurso inexistente | `404 Not Found` |
+| Precondição `If-Match` falhou | `412 Precondition Failed` |
+| JSON válido, regra de negócio violada | `422 Unprocessable Content` |
+
+A diferença entre `400` e `422` costuma ser cobrada em revisão de código: o primeiro é sintaxe, o segundo é semântica.
+
+---
+
+# Erros que dá para ler
+
+Um `400` sem corpo obriga quem consome a adivinhar. A RFC 9457 padroniza o formato:
+
+```http
+HTTP/1.1 422 Unprocessable Content
+Content-Type: application/problem+json
+
+{
+  "type": "https://exemplo.br/erros/pedido-sem-itens",
+  "title": "Pedido precisa de ao menos um item",
+  "status": 422,
+  "detail": "O pedido enviado tem a lista de itens vazia.",
+  "instance": "/pedidos"
+}
+```
+
+O `type` é uma URI que identifica a **classe** do erro; o `detail` descreve **aquela** ocorrência.
+
+---
+
+# Filtro, ordenação e paginação
+
+```
+GET /pedidos?status=aberto&criado_ate=2026-08-01&ordenar=data&limite=20&pagina=2
+```
+
+| Parâmetro | Papel |
+|---|---|
+| `status`, `criado_ate` | Filtro |
+| `ordenar` | Ordenação, declarada por quem consulta |
+| `limite`, `pagina` | Paginação |
+
+---
+
+# Duas estratégias de paginação
+
+| Estratégia | Como funciona | Problema |
+|---|---|---|
+| **`limit` / `offset`** | Pula N, traz M | Itens deslocam se a coleção muda |
+| **Cursor** | "continue a partir daqui" | Não permite pular para a página 7 |
+
+A resposta precisa dizer onde o cliente está: total de itens, página atual, ou um link para a próxima.
+
+Sem paginação, uma consulta ampla devolveria dezenas de milhares de registros.
+
+---
+
+# Ferramentas úteis
+
+| Ferramenta | Para quê |
+|---|---|
+| **DevTools** (`F12`) → aba Network | Ver o que a **página** pediu, e o que veio do cache |
+| **Hoppscotch** · `hoppscotch.io` | Fazer **você** a requisição, com os cabeçalhos que quiser |
+
+O Hoppscotch roda no navegador, sem cadastro, e faz o mesmp papel do Postman.
+
+> Os conceitos das partes anteriores não são teóricos: todos aparecem em cabeçalhos que dá para ler agora.
+
+---
+
+<!-- _class: lead -->
+
+# Parte 5
+
+## Arquitetura limpa
 
 ---
 
@@ -412,10 +510,8 @@ Funciona. E a regra do desconto agora só existe dentro de um controller HTTP.
         │   └──────────────────────────────┘   │
         └──────────────────────────────────────┘
 
-              As setas apontam para dentro. Sempre.
 ```
 
-**O domínio não importa nada.** Nem Spring, nem JPA, nem HTTP.
 
 ---
 
@@ -428,94 +524,33 @@ Funciona. E a regra do desconto agora só existe dentro de um controller HTTP.
 | **Adaptadores** | Controllers, implementações de repositório, mapeadores | Regra de negócio |
 | **Infraestrutura** | Configuração, cliente de banco, cliente HTTP | Regra de negócio |
 
-> A pergunta que resolve quase todo caso duvidoso: *isso continuaria verdade se trocássemos o banco e a API por outra coisa?* Se sim, é domínio.
 
 ---
 
-# Porta e adaptador
+# Aplicação e adaptador
 
 A aplicação declara **o que precisa**, sem dizer quem fornece:
 
 ```java
-// aplicação — a porta
 public interface PedidoRepository {
     Optional<Pedido> porId(PedidoId id);
     void salvar(Pedido pedido);
 }
 ```
 
-A infraestrutura fornece — o adaptador:
+A infraestrutura fornece o adaptador:
 
 ```java
-// adaptadores — o adaptador
 @Repository
 class PedidoRepositoryJpa implements PedidoRepository {
     // aqui, sim, entram JPA, entidades anotadas e SQL
 }
 ```
 
-> A interface pertence a **quem a usa**, não a quem a implementa. É essa inversão que faz a seta apontar para dentro.
-
 ---
 
-# O mesmo caso de uso, reescrito
 
-```java
-public class CriarPedido {
-    private final PedidoRepository repositorio;   // porta
-
-    public PedidoId executar(NovoPedido comando) {
-        var pedido = Pedido.novo(comando.itens());  // regra no domínio
-        repositorio.salvar(pedido);
-        return pedido.id();
-    }
-}
-```
-
-O desconto vive dentro de `Pedido`. O caso de uso não sabe se o banco é PostgreSQL, e o teste não precisa de Spring:
-
-```java
-var repo = new PedidoRepositoryEmMemoria();
-var id = new CriarPedido(repo).executar(comando);
-```
-
----
-
-# Como isso é verificado
-
-Fronteira que depende de disciplina se rompe na primeira semana de pressa. Por isso ela vira teste:
-
-```java
-@Test
-void dominioNaoDependeDeFramework() {
-    noClasses().that().resideInAPackage("..dominio..")
-        .should().dependOnClassesThat()
-        .resideInAnyPackage("..adaptadores..", "org.springframework..", "jakarta.persistence..")
-        .check(classes);
-}
-```
-
-No Java, **ArchUnit**. No Go, **arch-go** faz o equivalente.
-
-> Esse teste roda no pipeline e reprova o pull request. A partir da Sprint 1, ele é item de rúbrica: sem ele, a nota do critério de arquitetura fica limitada.
-
----
-
-# Erros que aparecem sempre
-
-| Erro | Como reconhecer |
-|---|---|
-| Entidade JPA usada como entidade de domínio | `@Entity` e `@Column` dentro de `dominio/` |
-| Repositório devolvendo DTO | A camada de fora define o formato da de dentro |
-| Caso de uso recebendo `HttpServletRequest` | O domínio passa a saber que existe HTTP |
-| Interface no pacote da implementação | A seta volta a apontar para fora |
-| Camada anêmica | Entidades só com getters, e toda regra no service |
-
-> O último é o mais comum e o mais discutido. Se todas as suas entidades são sacos de dados, você tem camadas, mas não tem domínio.
-
----
-
-# Do desenho às pastas
+# Estrutura do repositório
 
 ```
   api/src/main/java/br/ufrn/projeto/
@@ -529,7 +564,6 @@ No Java, **ArchUnit**. No Go, **arch-go** faz o equivalente.
 
 Esse mapeamento entre camada e pacote é o que o teste de arquitetura verifica.
 
-> Em **02/09** montamos o monorepo inteiro, com `mise`, Docker Compose e o primeiro workflow de CI. Hoje basta entender o desenho.
 
 ---
 
@@ -539,54 +573,20 @@ Esse mapeamento entre camada e pacote é o que o teste de arquitetura verifica.
 - Formação até a entrega da Sprint 0
 - Alterações valem a partir da sprint seguinte
 
-Registrem hoje, no `README.md` do repositório: nome do grupo, integrantes com matrícula, e o usuário GitHub de cada um.
+Registrem no `README.md` do repositório: nome do grupo, integrantes com matrícula, e o usuário GitHub de cada um.
 
-> Quem ainda não tem grupo: usem o canal do Discord. Grupo de um integrante é permitido, mas a carga é a mesma — pense bem antes.
-
----
-
-# Escolha da coorte
-
-| Coorte | Formato das apresentações |
-|---|---|
-| **B** | Online, por Google Meet |
-| **A** | Presencial, em sala de aula |
-
-A escolha vale para o semestre inteiro e é declarada na proposta da Sprint 0.
-
-> Todos os grupos apresentam em todas as sprints, exceto nesta. As datas de cada sessão estão em `docs/CRONOGRAMA.md`.
+> Quem ainda não tem grupo: usem o canal do Discord.
 
 ---
 
-# Como escolher o domínio
-
-O recorte precisa dar trabalho para os **dois** serviços. Pergunte, nesta ordem:
-
-1. Que **entidades** o sistema guarda, e que regras elas têm? → serviço Java
-2. Que trabalho acontece **fora** de uma requisição do usuário? → serviço Go
-3. Consigo nomear esse trabalho em uma frase, sem dizer "porque queríamos usar Go"?
-
-| Serve | Não serve |
-|---|---|
-| Agregador de editais, monitor de preços, painel de métricas de repositório | CRUD isolado, sem nada recorrente ou pesado para o segundo serviço |
-
-> Se a resposta ao item 3 não sai, o recorte ainda não está pronto — e é isso que a rúbrica da Sprint 0 avalia na justificativa.
-
----
-
-# Para quarta, 26/08
+# Próximos passos
 
 **Tarefas**
 
 - Fechar o grupo e registrar no `README.md` do repositório
-- Criar o monorepo **público**, com a estrutura de pastas da aula
-- Escrever a visão do produto e o recorte do domínio, no template de `docs/SPRINT-0.md`
+- Escrever a visão do produto e o recorte do domínio, usando o template de `docs/SPRINT-0.md`
 - Rascunhar a divisão entre o serviço Java e o serviço Go
-
-**Recomendado**
-
-- Instalar `mise` · `mise.jdx.dev` e o Docker Desktop
-- Ler `docs/STACK.md` do repositório da disciplina
+- Escolher uma API pública e explorá-la no Hoppscotch
 
 > Quarta é encontro **online**, no horário da aula, para dúvidas sobre a proposta e o domínio.
 
@@ -594,18 +594,22 @@ O recorte precisa dar trabalho para os **dois** serviços. Pergunte, nesta ordem
 
 # Referências da aula
 
-**Cache e REST**
+**Protocolo, cache e REST**
 
-- RFC 9111 — *HTTP Caching* · RFC 9110 §13 — *Conditional Requests*
-- MDN — *HTTP caching* · `developer.mozilla.org/docs/Web/HTTP/Caching`
+- MDN — *HTTP* e *HTTP caching* · `developer.mozilla.org/docs/Web/HTTP`
+- RFC 9110 — *HTTP Semantics* · RFC 9111 — *Caching* · RFC 9457 — *Problem Details*
 - Fielding (2000) — *Architectural Styles*, cap. 5
 - Fowler — *Richardson Maturity Model* · `martinfowler.com`
 
 **Arquitetura**
 
-- Martin, Robert C. — *Clean Architecture*
-- Cockburn — *Hexagonal Architecture*
+- Martin, Robert C. — *Clean Architecture* · Cockburn — *Hexagonal Architecture*
 - ArchUnit · `archunit.org`
+
+**Ferramentas e API da aula**
+
+- Hoppscotch · `hoppscotch.io` · GitHub REST API · `docs.github.com/rest`
+- Java 21 API · `docs.oracle.com/en/java/javase/21/docs/api`
 
 **Disciplina**
 
