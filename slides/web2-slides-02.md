@@ -480,7 +480,7 @@ Sem paginação, uma consulta ampla devolveria dezenas de milhares de registros.
 | **DevTools** (`F12`) → aba Network | Ver o que a **página** pediu, e o que veio do cache |
 | **Hoppscotch** · `hoppscotch.io` | Fazer **você** a requisição, com os cabeçalhos que quiser |
 
-O Hoppscotch roda no navegador, sem cadastro, e faz o mesmp papel do Postman.
+O Hoppscotch roda no navegador, sem cadastro, e faz o mesmo papel do Postman.
 
 > Os conceitos das partes anteriores não são teóricos: todos aparecem em cabeçalhos que dá para ler agora.
 
@@ -527,45 +527,6 @@ O Hoppscotch roda no navegador, sem cadastro, e faz o mesmp papel do Postman.
 
 ---
 
-# Aplicação e adaptador
-
-A aplicação declara **o que precisa**, sem dizer quem fornece:
-
-```java
-public interface PedidoRepository {
-    Optional<Pedido> porId(PedidoId id);
-    void salvar(Pedido pedido);
-}
-```
-
-A infraestrutura fornece o adaptador:
-
-```java
-@Repository
-class PedidoRepositoryJpa implements PedidoRepository {
-    // aqui, sim, entram JPA, entidades anotadas e SQL
-}
-```
-
----
-
-
-# Estrutura do repositório
-
-```
-  api/src/main/java/br/ufrn/projeto/
-   ├── dominio/          entidades, objetos de valor, regras
-   ├── aplicacao/        casos de uso e interfaces de repositório
-   ├── adaptadores/
-   │    ├── web/         controllers, DTOs, tratamento de erro
-   │    └── persistencia/ entidades JPA, implementações de repositório
-   └── infraestrutura/   configuração, beans, segurança
-```
-
-Esse mapeamento entre camada e pacote é o que o teste de arquitetura verifica.
-
-
----
 
 # Formação dos grupos
 
@@ -579,6 +540,27 @@ Registrem no `README.md` do repositório: nome do grupo, integrantes com matríc
 
 ---
 
+# MUSI
+
+| O que a entrega pede | Onde ver no MUSI |
+|---|---|
+| Visão do produto, no template | `docs/proposta.md` §1 |
+| MVP: dentro e fora, com hipótese de valor | `docs/proposta.md` §2 |
+| Backlog priorizado e estimado | `processo/backlog.yaml` — 13 itens |
+| **Divisão Kotlin × Go, com justificativa** | `docs/proposta.md` §4.1 |
+| Entidades principais do domínio | `docs/proposta.md` §5 e `shared/` |
+| Equipe, coorte, integração | `docs/proposta.md` §6 e §7 |
+| Monorepo com CI verde | `.github/workflows/ci.yml` |
+
+---
+
+# Para quarta, 26/08 — perguntas a trazer
+
+O encontro é **online, no horário da aula**, vocês podem até preparar um esboço do que deve ser entregue e mostrar pra mim, eu vou dar feedback ao vivo.
+
+
+---
+
 # Próximos passos
 
 **Tarefas**
@@ -587,6 +569,7 @@ Registrem no `README.md` do repositório: nome do grupo, integrantes com matríc
 - Escrever a visão do produto e o recorte do domínio, usando o template de `docs/SPRINT-0.md`
 - Rascunhar a divisão entre o serviço Java e o serviço Go
 - Escolher uma API pública e explorá-la no Hoppscotch
+- Dar uma olhada no MUSI: `github.com/fmarquesfilho/musi`
 
 > Quarta é encontro **online**, no horário da aula, para dúvidas sobre a proposta e o domínio.
 
@@ -608,9 +591,17 @@ Registrem no `README.md` do repositório: nome do grupo, integrantes com matríc
 
 **Ferramentas e API da aula**
 
-- Hoppscotch · `hoppscotch.io` · GitHub REST API · `docs.github.com/rest`
+- Hoppscotch · `hoppscotch.io`
+- MusicBrainz API · `musicbrainz.org/doc/MusicBrainz_API`
 - Java 21 API · `docs.oracle.com/en/java/javase/21/docs/api`
+
+**Ktor e implantação**
+
+- Ktor · `ktor.io/docs` · Assistente de projeto · `start.ktor.io`
+- Koin · `insert-koin.io/docs`
+- Render · `render.com/docs` · Neon · `neon.tech/docs`
 
 **Disciplina**
 
 - `github.com/fmarquesfilho/web2-2026-2`
+- Projeto de exemplo · `github.com/fmarquesfilho/musi`
