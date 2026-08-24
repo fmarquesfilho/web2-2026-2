@@ -486,14 +486,6 @@ O Hoppscotch roda no navegador, sem cadastro, e faz o mesmo papel do Postman.
 
 ---
 
-<!-- _class: lead -->
-
-# Parte 5
-
-## Arquitetura limpa
-
----
-
 # A regra de dependência
 
 ```
@@ -583,17 +575,6 @@ O encontro é **online, no horário da aula**, vocês podem até preparar um esb
 - RFC 9110 — *HTTP Semantics* · RFC 9111 — *Caching* · RFC 9457 — *Problem Details*
 - Fielding (2000) — *Architectural Styles*, cap. 5
 - Fowler — *Richardson Maturity Model* · `martinfowler.com`
-
-**Arquitetura**
-
-- Martin, Robert C. — *Clean Architecture* · Cockburn — *Hexagonal Architecture*
-- ArchUnit · `archunit.org`
-
-**Ferramentas e API da aula**
-
-- Hoppscotch · `hoppscotch.io`
-- MusicBrainz API · `musicbrainz.org/doc/MusicBrainz_API`
-- Java 21 API · `docs.oracle.com/en/java/javase/21/docs/api`
 
 **Ktor e implantação**
 
