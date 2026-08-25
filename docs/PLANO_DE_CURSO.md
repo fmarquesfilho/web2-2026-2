@@ -12,7 +12,7 @@ As aulas de 10/08, 12/08 e 17/08 não foram realizadas. O curso inicia em 19/08.
 
 ## Ementa
 
-Desenvolvimento de aplicações web em arquitetura de serviços poliglota. Microsserviços em Go com Clean Architecture e serviço de CRUD em Java com Spring Boot. Comunicação entre serviços com gRPC e Protocol Buffers. Persistência relacional gerenciada, estratégias de cache, autenticação e autorização, segurança de APIs. Testes automatizados executáveis local e remotamente, containerização, integração contínua com verificações arquiteturais e documentação publicada como site estático.
+Desenvolvimento de aplicações web em arquitetura de serviços poliglota. Microsserviços em Go com Clean Architecture e serviço de CRUD em **Kotlin com Ktor** ou **Java com Quarkus** — a critério do grupo. Comunicação entre serviços com gRPC e Protocol Buffers. Persistência relacional gerenciada, estratégias de cache, autenticação e autorização, segurança de APIs. Testes automatizados executáveis local e remotamente, containerização, integração contínua com verificações arquiteturais e documentação publicada como site estático.
 
 ---
 
@@ -27,7 +27,7 @@ Capacitar o estudante a projetar, implementar, testar e implantar sistemas web d
 Ao final do curso, o estudante será capaz de:
 
 1. Decidir a distribuição de responsabilidades entre serviços de um sistema web e justificar a decisão
-2. Implementar um serviço de CRUD em Spring Boot com Java 21 ou superior, aplicando Clean Architecture
+2. Implementar um serviço de CRUD em **Kotlin com Ktor** ou **Java com Quarkus**
 3. Implementar microsserviços em Go idiomático com Clean Architecture e gRPC
 4. Definir, versionar e evoluir contratos com Protocol Buffers, detectando quebras de compatibilidade automaticamente
 5. Modelar e evoluir esquemas relacionais com migrações versionadas em PostgreSQL gerenciado
@@ -41,7 +41,7 @@ Ao final do curso, o estudante será capaz de:
 
 ## Mudanças em relação a 2026.1
 
-O curso deixa de ser construído exclusivamente em Go e passa a adotar uma arquitetura poliglota, acrescentando um serviço de CRUD em Java com Spring Boot e comunicação entre serviços via gRPC. As listas de exercícios são extintas: o domínio técnico é verificado no projeto e em uma prova individual. O conteúdo passa a ser apresentado presencialmente, e os vídeos de 2026.1 permanecem como material de apoio.
+O curso deixa de ser construído exclusivamente em Go e passa a adotar uma arquitetura poliglota. O serviço principal pode ser implementado em **Kotlin com Ktor** ou **Java com Quarkus**, a critério do grupo. A comunicação entre serviços é feita via gRPC. As listas de exercícios são extintas: o domínio técnico é verificado no projeto e em uma prova individual. O conteúdo passa a ser apresentado presencialmente, e os vídeos de 2026.1 permanecem como material de apoio.
 
 ---
 
@@ -52,9 +52,6 @@ O curso deixa de ser construído exclusivamente em Go e passa a adotar uma arqui
 Uma Sprint 0 de quatro semanas, três sprints de projeto e um bloco final, com apresentações ao fim de cada sprint. Datas, conteúdo de cada aula e prazos: [CRONOGRAMA.md](CRONOGRAMA.md).
 
 
-### Material de apoio
-
-Os vídeos de 2026.1 sobre `net/http`, Chi, sqlc, JOINs, autenticação e gRPC permanecem publicados como material complementar. O conteúdo de Java, gRPC entre serviços, cache e integração contínua avançada é apresentado presencialmente.
 
 ### Projeto integrador
 
@@ -66,7 +63,7 @@ Equipes podem, opcionalmente, integrar este projeto com os de Sistemas Móveis (
 
 ## Arquitetura de referência
 
-Os projetos adotam uma arquitetura poliglota orientada a serviços: um serviço de CRUD em Spring Boot com Java 21, microsserviços em Go comunicando-se por gRPC, PostgreSQL gerenciado e documentação publicada como site estático. O domínio de aplicação é de escolha livre.
+Os projetos adotam uma arquitetura poliglota orientada a serviços: um serviço de CRUD em **Kotlin com Ktor** ou **Java com Quarkus** (escolha do grupo), microsserviços em Go comunicando-se por gRPC, PostgreSQL gerenciado e documentação publicada como site estático. O domínio de aplicação é de escolha livre.
 
 Diagrama, justificativas e configuração: [STACK.md](STACK.md#1-arquitetura-de-referência).
 
@@ -78,13 +75,17 @@ Diagrama, justificativas e configuração: [STACK.md](STACK.md#1-arquitetura-de-
 
 HTTP em profundidade: métodos, códigos de status, cabeçalhos, negociação de conteúdo, cache. Arquitetura de serviços: monólito, monólito modular e microsserviços. Clean Architecture: regra de dependência, portas e adaptadores. Ambiente reproduzível: `mise`, Docker Compose e estrutura de monorepo poliglota.
 
-### Sprint 1 — Serviço de CRUD em Spring Boot
+### Sprint 1 — Serviço de CRUD (Ktor ou Quarkus)
 
-Java 21 ou superior: records, sealed types, pattern matching, virtual threads. Spring Boot 3: injeção de dependências, controllers, Bean Validation, tratamento global de erros. Spring Data JPA e migrações com Flyway. Clean Architecture em Java com verificação por ArchUnit. Testes com JUnit 5, MockMvc e Testcontainers. Documentação de API com springdoc-openapi.
+**Kotlin com Ktor**: corrotinas, DSL de roteamento, injeção de dependência com Koin ou Kodein-DI, validação com Kotlinx.serialization e `kotlin-validation`, tratamento de erros com `StatusPages`, persistência com Exposed ou Ktorm, migrações com Flyway, testes com `kotlin-test` e Testcontainers. Documentação com OpenAPI via `ktor-openapi`.
+
+**Java com Quarkus**: CDI, RESTEasy Reactive, Bean Validation, tratamento de erros com `ExceptionMapper`, Hibernate ORM com Panache ou JPA, migrações com Flyway, testes com JUnit 5 e Testcontainers. Documentação com `quarkus-smallrye-openapi`.
+
+Ambos: Arquitetura verificada com **ArchUnit** no Java ou com testes de arquitetura customizados no Kotlin; testes executáveis local e remotamente.
 
 ### Sprint 2 — Microsserviços em Go e gRPC
 
-Go idiomático para serviços: pacotes, interfaces, erros, contexto, concorrência. Clean Architecture em Go com verificação por arch-go. Protocol Buffers: mensagens, serviços, evolução de esquema e compatibilidade. gRPC unário e streaming, deadlines, interceptors, health checking. Buf: lint, detecção de quebras e geração de stubs para Go e Java. Integração entre o serviço Java e o serviço Go.
+Go idiomático para serviços: pacotes, interfaces, erros, contexto, concorrência. Clean Architecture em Go com verificação por arch-go. Protocol Buffers: mensagens, serviços, evolução de esquema e compatibilidade. gRPC unário e streaming, deadlines, interceptors, health checking. Buf: lint, detecção de quebras e geração de stubs para Go, Java e Kotlin. Integração entre o serviço principal (Ktor/Quarkus) e o serviço Go.
 
 ### Sprint 3 — Dados, cache e implantação
 
@@ -92,7 +93,7 @@ PostgreSQL gerenciado com Neon: branches de banco, connection pooling, limites d
 
 ### Bloco final — Segurança, automação e documentação
 
-Documentação como parte do produto: site estático, registros de decisão de arquitetura, referência de API gerada do OpenAPI, verificação de defasagem de documentação no CI. GraphQL: aplicabilidade e comparação com REST e gRPC. Concorrência: goroutines e channels em Go, virtual threads em Java. OAuth 2.0 e OpenID Connect. JWT, refresh tokens e rotação de chaves. Spring Security 6 como resource server: filtros, autorização por rota e por método. OWASP API Security Top 10: BOLA, autenticação quebrada, exposição excessiva de dados, rate limiting. Gestão de segredos. Pipeline completo: matriz de jobs, cache de dependências, análise estática de segurança com Semgrep, atualização automática de dependências com Renovate, hooks de pre-push e tasks do `mise`.
+Documentação como parte do produto: site estático, registros de decisão de arquitetura, referência de API gerada do OpenAPI, verificação de defasagem de documentação no CI. GraphQL: aplicabilidade e comparação com REST e gRPC. Concorrência: goroutines e channels em Go, corrotinas em Kotlin, virtual threads em Java. OAuth 2.0 e OpenID Connect. JWT, refresh tokens e rotação de chaves. Spring Security 6 (para Quarkus via `quarkus-oidc`) ou Ktor com `ktor-auth` como resource server: filtros, autorização por rota e por método. OWASP API Security Top 10: BOLA, autenticação quebrada, exposição excessiva de dados, rate limiting. Gestão de segredos. Pipeline completo: matriz de jobs, cache de dependências, análise estática de segurança com Semgrep, atualização automática de dependências com Renovate, hooks de pre-push e tasks do `mise`.
 
 ---
 
@@ -101,7 +102,6 @@ Documentação como parte do produto: site estático, registros de decisão de a
 Nota final por média aritmética de três unidades, compostas pelas entregas das sprints e por duas provas escritas, valendo a maior das duas notas. Cada sprint é avaliada em entrega técnica, atividade no repositório e comunicação.
 
 Composição, pesos e regras: [AVALIACAO.md](AVALIACAO.md). Critérios de cada entrega: [RUBRICAS.md](RUBRICAS.md).
-
 
 ---
 
@@ -121,9 +121,9 @@ RICHARDS, Mark; FORD, Neal. *Fundamentals of Software Architecture*. O'Reilly, 2
 
 OWASP. *API Security Top 10*. Disponível em: https://owasp.org/API-Security/
 
-Spring Boot Reference Documentation. Disponível em: https://docs.spring.io/spring-boot/
+Quarkus Documentation. Disponível em: https://quarkus.io/guides/
 
-Spring Security Reference. Disponível em: https://docs.spring.io/spring-security/reference/
+Ktor Documentation. Disponível em: https://ktor.io/docs/
 
 *Effective Go*. Disponível em: https://go.dev/doc/effective_go
 

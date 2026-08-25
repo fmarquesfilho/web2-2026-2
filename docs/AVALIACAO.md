@@ -128,7 +128,7 @@ Condições: declaração na Sprint 0; produto comum com repositórios vinculado
 
 | Prova | Conteúdo |
 |-------|----------|
-| Prova escrita, obrigatória | Sprints 0 a 2: HTTP, arquitetura de serviços, Clean Architecture, Java 21 e Spring Boot, JPA e Flyway, testes com Testcontainers, Go, Protocol Buffers e gRPC |
+| Prova escrita, obrigatória | Sprints 0 a 2: HTTP, arquitetura de serviços, Clean Architecture, Kotlin/Ktor ou Java/Quarkus, JPA/Exposed, Flyway, testes com Testcontainers, Go, Protocol Buffers e gRPC |
 | Prova de reposição, opcional | Todo o conteúdo da primeira prova, acrescido da Sprint 3: PostgreSQL gerenciado, modelagem e índices, estratégias de cache, implantação em containers, logs estruturados e health checks |
 
 Ambas são individuais, com questões fechadas, no Multiprova, presenciais, em laboratório, aplicadas no horário da aula. Permitida consulta a uma folha A4 manuscrita, frente e verso.
@@ -152,4 +152,3 @@ O conteúdo do bloco final não é objeto de nenhuma das provas; é avaliado na 
 Permitido. Toda contribuição submetida deve ser compreendida pelo integrante que a submeteu, que pode ser questionado sobre qualquer trecho durante as apresentações. Submeter conteúdo que não consegue explicar caracteriza fraude acadêmica.
 
 O grupo mantém em `docs/uso-de-ia.md` o registro das ferramentas usadas e das tarefas em que foram aplicadas.
-

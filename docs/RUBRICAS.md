@@ -34,8 +34,8 @@ Templates, exemplos e estrutura do vídeo e da proposta: [SPRINT-0.md](SPRINT-0.
 | Critério | Peso | Excelente (10) | Suficiente (6) | Insuficiente (0–4) |
 |----------|------|----------------|----------------|--------------------|
 | ⚙️ **Estrutura do monorepo** | 25% | `api/`, `services/`, `protos/`, `docs/`, `mise.toml`, `docker-compose.yml` presentes e coerentes; `mise run build` e `mise run test` passam | Estrutura presente, alguma task não funciona | Estrutura ausente ou não builda |
-| ⚙️ **CI mínimo verde** | 25% | Workflow roda build dos dois stacks em todo push e PR, verde em `main` | CI roda, cobre só um stack | Sem CI ou vermelho |
-| **Proposta e decisão de arquitetura** | 30% | Domínio delimitado, MVP viável em 4 sprints, **e justificativa clara do que fica em Java e do que fica em Go** com base em características do trabalho | Proposta plausível, divisão de responsabilidades arbitrária | Proposta vaga ou sem divisão |
+| ⚙️ **CI mínimo verde** | 25% | Workflow roda build dos dois stacks (serviço principal e Go) em todo push e PR, verde em `main` | CI roda, cobre só um stack | Sem CI ou vermelho |
+| **Proposta e decisão de arquitetura** | 30% | Domínio delimitado, MVP viável em 4 sprints, escolha justificada entre Kotlin/Ktor e Java/Quarkus e divisão clara de responsabilidades entre o serviço principal e Go, com base em características do trabalho | Proposta plausível, decisão arbitrária | Proposta vaga ou sem decisão |
 | **Configuração do processo** | 20% | Repositório público, README completo, GitHub Projects com ≥ 10 itens, coorte declarada | Repositório e quadro criados, incompletos | Repositório privado ou sem quadro |
 
 ---
@@ -45,10 +45,10 @@ Templates, exemplos e estrutura do vídeo e da proposta: [SPRINT-0.md](SPRINT-0.
 | Critério | Peso | Excelente (10) | Suficiente (6) | Insuficiente (0–4) |
 |----------|------|----------------|----------------|--------------------|
 | **CRUD completo** | 25% | ≥ 2 entidades com relacionamento, todas as operações, paginação e filtros; respostas coerentes com os verbos e status HTTP | CRUD de 1 entidade, semântica HTTP imprecisa | Incompleto ou não roda |
-| ⚙️ **Clean Architecture + ArchUnit** | 25% | Camadas separadas; teste ArchUnit falha se o domínio importar framework/infra; roda no CI | Camadas separadas, sem teste de arquitetura | Camadas misturadas |
-| ⚙️ **Persistência e migrações** | 20% | Flyway com migrações versionadas e idempotentes; banco sobe via `docker compose`; nenhum `ddl-auto: update` | Migrações presentes, com ajustes manuais | Esquema gerado pelo Hibernate ou ausente |
+| ⚙️ **Clean Architecture + verificação** | 25% | Camadas separadas; **teste de arquitetura** falha se o domínio importar framework/infra; roda no CI | Camadas separadas, sem teste de arquitetura | Camadas misturadas |
+| ⚙️ **Persistência e migrações** | 20% | Flyway com migrações versionadas e idempotentes; banco sobe via `docker compose`; schema gerado apenas por migrações (sem `ddl-auto` ou equivalente) | Migrações presentes, com ajustes manuais | Esquema gerado automaticamente ou ausente |
 | ⚙️ **Testes local e remoto** | 20% | Unitários do domínio + integração com Testcontainers; **passam no Docker Desktop e no CI** sem alteração de configuração | Testes existem, só rodam em um dos ambientes | Sem testes ou falhando |
-| **Validação, erros e OpenAPI** | 10% | Bean Validation em todas as entradas, erros no formato *problem details* (RFC 9457), OpenAPI gerado e acessível | Validação parcial, erros inconsistentes | Ausente |
+| **Validação, erros e OpenAPI** | 10% | Validação em todas as entradas, erros no formato *problem details* (RFC 9457) ou similar, OpenAPI gerado e acessível | Validação parcial, erros inconsistentes | Ausente |
 
 ---
 
@@ -58,8 +58,8 @@ Templates, exemplos e estrutura do vídeo e da proposta: [SPRINT-0.md](SPRINT-0.
 |----------|------|----------------|----------------|--------------------|
 | **Microsserviço Go** | 25% | Serviço com responsabilidade única e **justificada** (I/O intensivo, concorrência, processamento); Go idiomático, uso correto de `context` e erros | Serviço funciona, responsabilidade arbitrária | Ausente ou não roda |
 | ⚙️ **Clean Architecture + arch-go** | 20% | `arch-go.yml` protege `internal/domain` e as fronteiras entre serviços; `compliance: 100` no CI | `arch-go` configurado com regras triviais | Ausente |
-| ⚙️ **Contratos Protobuf** | 25% | `.proto` bem modelado, com comentários; `buf lint` e `buf breaking` verdes no CI; stubs Go e Java **gerados**, com check de sincronia | `.proto` presente, `buf lint` roda | Stubs escritos à mão ou sem validação |
-| ⚙️ **Integração gRPC ponta a ponta** | 20% | Java chama Go via gRPC com deadline e tratamento de erro; teste de integração automatizado cobre o fluxo | Chamada funciona, sem teste automatizado | Não integra |
+| ⚙️ **Contratos Protobuf** | 25% | `.proto` bem modelado, com comentários; `buf lint` e `buf breaking` verdes no CI; stubs Go e (Kotlin/Java) **gerados**, com check de sincronia | `.proto` presente, `buf lint` roda | Stubs escritos à mão ou sem validação |
+| ⚙️ **Integração gRPC ponta a ponta** | 20% | Serviço principal (Ktor/Quarkus) chama Go via gRPC com deadline e tratamento de erro; teste de integração automatizado cobre o fluxo | Chamada funciona, sem teste automatizado | Não integra |
 | ⚙️ **Ambiente reproduzível** | 10% | `docker compose up` sobe API + serviço Go + banco, do zero, sem passos manuais | Sobe com ajustes manuais documentados | Não sobe |
 
 ---
@@ -86,7 +86,7 @@ Esta entrega absorve o conteúdo do bloco final: segurança de APIs, automação
 | **Autenticação** | 15% | JWT com refresh e rotação, ou OIDC com provedor externo; expiração e revogação tratadas; sem segredo hardcoded | Login funciona, sem refresh ou revogação | Ausente ou inseguro |
 | ⚙️ **Autorização e BOLA** | 15% | Autorização por perfil e por recurso, com teste automatizado provando que um usuário não acessa recurso de outro | Autorização por perfil, sem teste | Rotas abertas |
 | **Mitigação OWASP API Top 10** | 10% | `docs/seguranca.md` cobre as 10 ameaças, com a mitigação adotada e onde ela está no código; rate limiting ativo | Documento cobre parte das ameaças | Ausente ou genérico |
-| ⚙️ **Pipeline completo e higiene de segredos** | 15% | Build, testes, lint, `arch-go`, ArchUnit, `buf lint`/`breaking`, SAST e check de docs verdes em `main`; `renovate.json` ativo; `mise run ci` reproduz o pipeline; nenhum segredo versionado | Maioria dos jobs verde, automação parcial | Pipeline incompleto ou segredo no histórico |
+| ⚙️ **Pipeline completo e higiene de segredos** | 15% | Build, testes, lint, arquitetura, `buf lint`/`breaking`, SAST e check de docs verdes em `main`; `renovate.json` ativo; `mise run ci` reproduz o pipeline; nenhum segredo versionado | Maioria dos jobs verde, automação parcial | Pipeline incompleto ou segredo no histórico |
 | ⚙️ **Site de documentação público** | 15% | Site estático no ar com visão geral, arquitetura com diagrama, guia de execução local, guia de contribuição e ao menos 3 ADRs; verificação de defasagem no CI | Site no ar, conteúdo incompleto | Sem site |
 | ⚙️ **Referência de API pública** | 10% | Referência gerada do OpenAPI, acessível por URL, cobrindo todos os endpoints com exemplos | Referência publicada, incompleta | Ausente |
 | **Prontidão do repositório** | 5% | README permite a terceiros rodar em menos de 10 min; licença definida; histórico limpo | README funcional com lacunas | Não é possível rodar |
@@ -115,23 +115,23 @@ Pode ser copiado para o `README.md` do repositório.
 - [ ] Monorepo público: api/ services/ protos/ docs/ mise.toml docker-compose.yml
 - [ ] mise run build && mise run test passam localmente
 - [ ] CI verde (build dos dois stacks)
-- [ ] docs/proposta.md com justificativa Java × Go
+- [ ] docs/proposta.md com justificativa Ktor×Quarkus e serviço principal×Go
 - [ ] Coorte (A/B) e integração declaradas
 - [ ] Vídeo 5 min
 
 ### Sprint 1
 - [ ] CRUD de ≥2 entidades com relacionamento
-- [ ] Teste ArchUnit da regra de dependência rodando no CI
-- [ ] Migrações Flyway (sem ddl-auto)
+- [ ] Teste de arquitetura da regra de dependência rodando no CI
+- [ ] Migrações Flyway (sem geração automática de schema)
 - [ ] Testes com Testcontainers verdes local E no CI
-- [ ] Bean Validation + problem details + OpenAPI
+- [ ] Validação + problem details + OpenAPI
 - [ ] Vídeo 5 min
 
 ### Sprint 2
 - [ ] Microsserviço Go com responsabilidade justificada
 - [ ] arch-go.yml com compliance 100 no CI
 - [ ] protos/ com buf lint + buf breaking no CI
-- [ ] Stubs Go e Java gerados (check de sincronia)
+- [ ] Stubs Go e (Kotlin/Java) gerados (check de sincronia)
 - [ ] Teste de integração gRPC ponta a ponta
 - [ ] docker compose up sobe tudo do zero
 - [ ] Vídeo 5 min
