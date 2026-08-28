@@ -34,7 +34,7 @@ Templates, exemplos e estrutura do vídeo e da proposta: [SPRINT-0.md](SPRINT-0.
 | Critério | Peso | Excelente (10) | Suficiente (6) | Insuficiente (0–4) |
 |----------|------|----------------|----------------|--------------------|
 | ⚙️ **Estrutura do monorepo** | 25% | `api/`, `services/`, `protos/`, `docs/`, `mise.toml`, `docker-compose.yml` presentes e coerentes; `mise run build` e `mise run test` passam | Estrutura presente, alguma task não funciona | Estrutura ausente ou não builda |
-| ⚙️ **CI mínimo verde** | 25% | Workflow roda build dos dois stacks (serviço principal e Go) em todo push e PR, verde em `main` | CI roda, cobre só um stack | Sem CI ou vermelho |
+| ⚙️ **CI passando** | 25% | Workflow roda build dos dois stacks (serviço principal e Go) em todo push e PR, verde em `main` | CI roda, cobre só um stack | Sem CI ou vermelho |
 | **Proposta e decisão de arquitetura** | 30% | Domínio delimitado, MVP viável em 4 sprints, escolha justificada entre Kotlin/Ktor e Java/Quarkus e divisão clara de responsabilidades entre o serviço principal e Go, com base em características do trabalho | Proposta plausível, decisão arbitrária | Proposta vaga ou sem decisão |
 | **Configuração do processo** | 20% | Repositório público, README completo, GitHub Projects com ≥ 5 itens, coorte declarada | Repositório e quadro criados, incompletos | Repositório privado ou sem quadro |
 

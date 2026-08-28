@@ -129,4 +129,4 @@ Todos os integrantes devem falar.
 7. Equipe: nome, matrícula e papel de cada integrante
 8. Coorte de apresentação e, se houver, integração com outra disciplina
 
-Máximo 3 páginas.
+Máximo 5 páginas.
