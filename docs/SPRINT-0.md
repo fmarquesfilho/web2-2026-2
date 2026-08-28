@@ -89,7 +89,7 @@ Enuncie também a hipótese de valor: *acreditamos que [usuários] vão [comport
 
 ## Backlog inicial
 
-Formato de história de usuário: **como [papel], quero [ação] para [benefício]**. Priorize e estime.
+Mínimo de 5 itens no GitHub Projects, ao menos 3 estimados, todos priorizados. Formato de história de usuário: **como [papel], quero [ação] para [benefício]**.
 
 | Prio | História | Critérios de aceitação | Sprint |
 |---|---|---|---|
