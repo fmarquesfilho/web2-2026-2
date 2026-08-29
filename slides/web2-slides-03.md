@@ -87,7 +87,7 @@ style: |
 
 # Desenvolvimento de Sistemas Web II
 
-## Introdução a linguagem Go e ao Projeto de Exemplo
+## A estrutura do MUSI, o serviço principal e os serviços Go
 
 DIM0547 — Turma 01 · Aulas 03–04 (Sprint 0) · 31/08 e 02/09
 
@@ -97,23 +97,23 @@ Prof. Fernando · UFRN · 2026.2
 
 # Roteiro da semana
 
-**Segunda, 31/08 — Fundamentos de Go**
+**Segunda, 31/08 — Estrutura e serviço principal**
 
 | Bloco | O que vemos |
 |---|---|
-| A arquitetura do MUSI | Componentes, como conversam, dois diagramas de sequência |
-| Ktor × Quarkus | A mesma fronteira, nos dois stacks |
-| Go essencial | Pacotes, structs, interfaces, erros e `context` |
-| O esqueleto e os testes | `net/http`, JSON, e os casos de `contratos/` |
+| A estrutura do MUSI | Componentes, como conversam, as camadas em pacotes |
+| O serviço principal | Ktor (Kotlin) e Quarkus (Java 25), parte por parte |
+| Rotas · injeção · DTOs · cliente · erros · OpenAPI | O mesmo serviço, nos dois stacks |
 
-**Quarta, 02/09 — Monorepo e CI**
+**Quarta, 02/09 — Go e os serviços**
 
 | Bloco | O que vemos |
 |---|---|
-| Estrutura | As camadas em pacotes; um repo, três stacks |
-| Ambiente | Tasks do `mise` e Docker Compose |
-| CI | O workflow que compila tudo a cada push |
-| Oficina | Montar o esqueleto do monorepo do grupo |
+| Go essencial | Structs, interfaces, erros e `context` |
+| Os serviços Go | `services/busca` e `services/conciliacao` |
+| Ambiente e CI | `mise`, Docker Compose e o pipeline |
+
+> A comparação de sintaxe Kotlin × Java já vimos. Aqui olhamos a arquitetura: onde cada parte mora e como as peças se ligam.
 
 ---
 
@@ -128,13 +128,13 @@ Nas duas primeiras aulas fechamos a fronteira HTTP:
   Clean Architecture: a regra de dependência
 ```
 
-Hoje descemos uma camada: o serviço interno que a API chama. No projeto de referência ele é escrito em Go, e a escolha da linguagem é uma decisão de arquitetura.
+Hoje vemos essas ideias encarnadas no MUSI: primeiro a estrutura do projeto, depois o serviço principal que vocês vão escolher construir.
 
 ---
 
 <!-- _class: lead -->
 
-# A arquitetura do MUSI
+# A estrutura do MUSI
 
 Os componentes, e como conversam.
 
@@ -161,7 +161,7 @@ Os componentes, e como conversam.
 
 Cada componente é um processo com um papel. `contratos/` não roda: descreve o domínio que todos seguem.
 
-> Vocês escolhem um serviço principal (Ktor ou Quarkus) e pelo menos um serviço Go. Essa divisão é a decisão que a proposta registra.
+> Hoje focamos no serviço principal (a caixa do meio). Quarta descemos aos serviços Go.
 
 ---
 
@@ -196,13 +196,465 @@ Do cliente ao acervo e de volta, uma leitura:
    │◄─ 200 + Cache-Control/ETag ─│                                   │
 ```
 
-A API traduz a query em uma árvore de filtro, delega ao Go e devolve com os cabeçalhos de cache da aula 02.
+A API traduz a query numa árvore de filtro, delega ao Go e devolve com os cabeçalhos de cache da aula 02.
+
+---
+
+# A estrutura de pastas
+
+```
+musi/
+├── api-ktor/       Kotlin · Ktor · Koin     → serviço principal (opção A)
+├── api-quarkus/    Java 25 · Quarkus · CDI  → serviço principal (opção B)
+├── services/       Go                        → busca e conciliação
+├── contratos/      JSON Schema + .proto      → a fonte da verdade
+├── shared/         domínio em Kotlin (KMP)   → usado por api-ktor e pelo app
+├── http/           coleções para testar as APIs
+├── docs/           ADRs, domínio, guias
+├── mise.toml · docker-compose.yml · .github/workflows/ci.yml
+```
+
+> Abram o MUSI no IDE e sigam junto. Vocês escolhem um serviço principal, não os dois — o MUSI mantém ambos para servir às duas trilhas.
+
+---
+
+# As camadas viram pacotes
+
+A regra de dependência da aula 02 vira estrutura de diretórios, a mesma nos dois stacks:
+
+```
+  api-ktor/.../                       api-quarkus/.../
+    dominio/       ← entidades          dominio/       ← Obra, Filtro
+    aplicacao/     ← casos de uso       aplicacao/     ← BuscarObras
+    adaptadores/   ← HTTP, cliente Go   adaptadores/   ← HTTP, cliente Go
+```
+
+O `dominio` não importa HTTP nem banco. No Kotlin, o domínio vem do módulo `shared/`; no Java, é reescrito em `dominio/` — ver ADR-0001.
+
+> A arquitetura é a mesma; só muda a linguagem e o framework. É por isso que a decisão entre os stacks é sobre a equipe e o domínio, não sobre "qual é melhor".
+
+---
+
+# `contratos/`: a fonte da verdade
+
+O que impede as duas APIs (e o Go) de divergirem não é disciplina: são os arquivos de `contratos/`.
+
+| Arquivo | Papel |
+|---|---|
+| `obra.schema.json`, `filtro.schema.json` | O formato JSON na fronteira HTTP |
+| `exemplos/casos-de-busca.json` | Casos com resultado esperado |
+| `musi/busca/v1/busca.proto` | O contrato gRPC (Sprint 2) |
+
+Os testes das três linguagens carregam os mesmos casos. Se discordarem, o CI acusa.
+
+> O domínio existe em Kotlin, Java e Go. `contratos/` é o acordo entre eles — a decisão está registrada na ADR-0002.
+
+---
+
+<!-- _class: lead -->
+
+# O serviço principal
+
+Ktor e Quarkus, parte por parte.
+
+---
+
+# Duas implementações, uma decisão
+
+O mesmo serviço, dois caminhos. Vocês escolhem um e justificam.
+
+| Parte | `api-ktor` (Kotlin) | `api-quarkus` (Java 25) |
+|---|---|---|
+| Rotas | código, numa árvore | anotações numa classe |
+| Injeção de dependência | Koin, em execução | CDI, na compilação |
+| Cliente do serviço Go | classe com `HttpClient` | interface declarativa |
+| OpenAPI | plugin, do código | anotações, automático |
+| Domínio | de `shared/` | reescrito em `dominio/` |
+
+> Não há escolha certa. A qualidade da justificativa é o que a rubrica avalia. Vamos ver cada linha desta tabela no código.
+
+---
+
+# Rotas no Ktor: a árvore é código
+
+A árvore de rotas inteira cabe numa tela e se lê de cima para baixo:
+
+```kotlin
+routing {
+    get("/health") { call.respond(mapOf("status" to "UP")) }
+
+    route("/obras") {
+        get(Doc.buscaSimples)  { /* faceta pela query string */ }
+        post(Doc.buscaComposta) { /* árvore de filtro no corpo */ }
+    }
+}
+```
+
+- Cada rota é código; não há anotação espalhada por classes
+- O `Doc.buscaSimples` é o bloco de OpenAPI, mantido à parte (`RotasDoc.kt`)
+
+> `api-ktor/.../adaptadores/web/Rotas.kt`. O controller traduz HTTP em chamada de caso de uso, e nada mais.
+
+---
+
+# Rotas no Quarkus: anotações numa classe
+
+O mesmo endpoint, declarado por anotações que o Quarkus varre na compilação:
+
+```java
+@Path("/obras")
+@Produces(MediaType.APPLICATION_JSON)
+public class ObraResource {
+
+    @GET
+    public Response porFaceta(@QueryParam("dimensao") String d,
+                              @QueryParam("valor") String v) { ... }
+
+    @POST
+    public List<ObraDto> buscar(FiltroDto dto) { ... }
+}
+```
+
+> `api-quarkus/.../adaptadores/web/ObraResource.java`. As anotações também alimentam o OpenAPI, sem código extra. É a mesma rota; muda como ela é declarada.
+
+---
+
+# Injeção de dependência: quando o nó é dado
+
+As duas resolvem a mesma dependência (`BuscarObras`), em momentos diferentes:
+
+```kotlin
+// Ktor + Koin: resolvido em execução
+val buscarObras by inject<BuscarObras>()
+// no módulo:  single { BuscarObras(get()) }
+```
+
+```java
+// Quarkus + CDI: verificado na compilação
+@Inject
+public ObraResource(BuscarObras buscarObras) { ... }
+```
+
+> Koin monta o grafo quando a aplicação sobe; o CDI monta na compilação e falha o build se faltar um nó. Duas filosofias, o mesmo resultado.
+
+---
+
+# O caso de uso e a porta — iguais nos dois
+
+O coração é idêntico: um caso de uso que depende de uma porta, não de HTTP.
+
+```
+  interface FonteDeObras {           // a porta (aplicação)
+      buscar(filtro): List<Obra>
+  }
+
+  class BuscarObras(fonte: FonteDeObras) {   // o caso de uso
+      operator fun invoke(filtro) = fonte.buscar(filtro)
+  }
+```
+
+`BuscarObras` não sabe se a fonte é o serviço Go, um banco ou uma lista em memória.
+
+> É a inversão de dependência da Clean Architecture: o caso de uso define a porta; o adaptador a implementa. O mesmo desenho nos dois stacks.
+
+---
+
+# O cliente do serviço Go
+
+O adaptador que implementa `FonteDeObras` falando com o Go — cada stack a seu modo:
+
+```kotlin
+// Ktor: uma classe que usa o HttpClient (o MESMO que o app usa)
+class BuscaHttp(val cliente: HttpClient, val url: String) : FonteDeObras {
+    override suspend fun buscar(filtro) =
+        cliente.post("$url/buscar") { setBody(filtro.paraDto()) }.body()
+}
+```
+
+```java
+// Quarkus: você declara a interface; o framework gera a chamada
+@RegisterRestClient(configKey = "busca")
+interface ClienteBusca { @POST List<ObraDto> buscar(FiltroDto f); }
+```
+
+> No Ktor a chamada é escrita à mão; no Quarkus, declarada e gerada. `application.properties` aponta o `busca.url` para `http://localhost:9090`.
+
+---
+
+# DTOs na fronteira
+
+Nenhum dos dois serializa o domínio direto: um DTO faz a tradução na borda.
+
+```
+  JSON  ──►  FiltroDto / ObraDto  ──►  Filtro / Obra   (paraDominio)
+  Obra  ──►  ObraDto              ──►  JSON            (paraDto)
+```
+
+- Espelham `contratos/*.schema.json`
+- Isolam o formato público da modelagem interna: renomear um campo do domínio não quebra os clientes
+
+> `Dtos.kt` e `Dtos.java`. É o mesmo padrão nos dois lados, e também no serviço Go — cada linguagem tem seu DTO, o contrato é um só.
+
+---
+
+# Erros que o cliente consegue tratar — RFC 9457
+
+Exceção do domínio vira `application/problem+json`, nos dois stacks:
+
+```kotlin
+// Ktor: um plugin StatusPages central
+install(StatusPages) {
+    exception<IllegalArgumentException> { call, causa ->
+        call.respond(422, Problema(type=..., title="Filtro inválido", ...))
+    }
+}
+```
+
+```java
+// Quarkus: um ExceptionMapper
+@Provider
+class FiltroInvalidoMapper implements ExceptionMapper<IllegalArgumentException> { ... }
+```
+
+> Um `400` sem corpo obriga quem consome a adivinhar. O `type` é a URI da classe do erro; o `detail`, aquela ocorrência. O serviço Go emite o mesmo formato.
+
+---
+
+# Cache, do lado do servidor
+
+O assunto da aula 02, agora declarado no serviço principal:
+
+```kotlin
+// Ktor: plugins cuidam de Cache-Control, ETag e do 304
+install(CachingHeaders) { options { _, _ -> CachingOptions(maxAge = 60s) } }
+install(ConditionalHeaders)   // ETag e requisição condicional
+```
+
+```java
+// Quarkus: Cache-Control montado na resposta
+var cache = new CacheControl(); cache.setMaxAge(60);
+return Response.ok(obras).cacheControl(cache).build();
+```
+
+> `GET` declara `Cache-Control` e `ETag`; a escrita concorrente é protegida por `If-Match`. É o que a rúbrica da Sprint 1 verifica com `curl -v`.
+
+---
+
+# OpenAPI e Swagger nos dois
+
+A documentação da API, gerada — para explorar sem sair do navegador:
+
+| | `api-ktor` | `api-quarkus` |
+|---|---|---|
+| De onde vem | plugin, a partir das rotas | anotações, automático |
+| Spec | `/openapi.json` | `/q/openapi` |
+| Swagger UI | `/swagger` | `/q/swagger-ui` |
+
+> No Quarkus, o OpenAPI sai das anotações sem código. No Ktor, um plugin gera o spec a partir das rotas. A pasta `http/` traz coleções de Bruno e Postman para testar sem `curl`.
+
+---
+
+# Como escolher entre Ktor e Quarkus
+
+A decisão é da equipe, e precisa de justificativa:
+
+| Pesa a favor do Ktor | Pesa a favor do Quarkus |
+|---|---|
+| Time quer explorar Kotlin e corrotinas | Time consolida fundamentos da JVM |
+| Preferência por rotas como código | Preferência por convenção e anotações |
+| Reuso do domínio `shared/` com o app | Ecossistema Java maduro, CDI, GraalVM |
+
+> Registrem a escolha e o porquê na proposta (seção 5). Não há resposta certa; o que vale é a qualidade da justificativa — é o que a tarefa T4 da Sprint 0 cobra.
+
+---
+
+# Oficina — explorar o serviço principal <span class="pill-blue">em grupo</span>
+
+Com o MUSI aberto e `docker compose up` rodando:
+
+```
+  1. Escolham um stack (api-ktor ou api-quarkus) e o abram no IDE
+  2. Sigam uma requisição: rota → caso de uso → porta → cliente do Go
+  3. Abram o Swagger (/swagger ou /q/swagger-ui) e façam uma busca
+  4. Achem onde o erro vira problem+json, e onde o Cache-Control é setado
+  5. Comparem, no outro stack, como cada parte é declarada
+```
+
+> No fim, cada grupo diz qual stack escolheria para o próprio projeto, e por quê. Essa é a decisão da T4.
+
+---
+
+# Fecho de segunda
+
+Vocês viram o serviço principal inteiro: como recebe HTTP, resolve dependências, chama o serviço Go e devolve com cache e erro tratado — nos dois stacks.
+
+Quarta descemos ao que está do outro lado da chamada: os serviços em Go.
+
+> Entre hoje e quarta: escolham o stack do grupo, subam o MUSI com `docker compose up`, e explorem o Swagger da API escolhida.
+
+---
+
+<!-- _class: lead -->
+
+# Quarta · 02/09
+
+## Go e os serviços
+
+A sintaxe de Go, junto com os dois serviços do MUSI.
+
+---
+
+# Por que Go para os serviços
+
+Go foi desenhado para serviços de rede: compila rápido, gera um binário único e trata concorrência como recurso de primeira classe.
+
+| Bom caso para Go | Onde outra escolha cabe |
+|---|---|
+| Trabalho limitado por rede ou por taxa | Regras de negócio ricas e ramificadas |
+| Concorrência alta, muitos pedidos | Domínio que se beneficia de união etiquetada |
+| Serviço pequeno, foco único | Time que já domina outra pilha |
+
+No MUSI há dois: a **busca** (leitura rápida) e a **conciliação** (lote, limitada a 1 req/s ao MusicBrainz).
+
+> O serviço Go do MUSI não tem nenhuma dependência externa — só a biblioteca padrão. Por isso nem existe `go.sum`.
+
+---
+
+# Go essencial: structs e funções
+
+```go
+type Obra struct {
+    ID      string   `json:"id"`
+    Titulo  string   `json:"titulo"`
+    Facetas []Faceta `json:"facetas"`
+}
+
+func dividir(a, b int) (int, error) {
+    if b == 0 {
+        return 0, fmt.Errorf("divisão por zero")
+    }
+    return a / b, nil
+}
+```
+
+- `struct` agrupa campos; maiúscula inicial significa exportado
+- Go não tem exceção: o erro é um valor, devolvido junto com o resultado
+
+> `if err != nil` é o ritmo do Go. O caminho de erro fica visível na leitura, não escondido num `catch` distante.
+
+---
+
+# Go essencial: interfaces e o `switch` de tipo
+
+```go
+type Filtro interface { isFiltro() }          // fecha a hierarquia
+
+type Tem struct{ Dimensao, Valor string }
+func (Tem) isFiltro() {}
+
+func Satisfaz(o Obra, f Filtro) bool {
+    switch t := f.(type) {
+    case Tem: /* ... */
+    case Ate: return o.Ano <= t.Ano
+    default:  panic(fmt.Sprintf("filtro não tratado: %T", f))
+    }
+}
+```
+
+O método não exportado `isFiltro()` é o mais perto de `sealed` que Go tem. O `default` existe porque o compilador de Go não verifica exaustividade — nos stacks Kotlin e Java, ele não aparece.
+
+> É a mesma árvore de filtro, na terceira linguagem. Comparar essa escolha entre as três é conteúdo da disciplina.
+
+---
+
+# Go essencial: `context`
+
+Todo serviço precisa saber quando desistir. O `context.Context` carrega prazo e cancelamento, e é o primeiro parâmetro por convenção:
+
+```go
+func buscar(ctx context.Context, f Filtro) ([]Obra, error) {
+    select {
+    case <-ctx.Done():
+        return nil, ctx.Err()      // cliente desistiu ou estourou o prazo
+    default:
+    }
+    // ... segue a busca
+}
+```
+
+O `net/http` já entrega um `ctx` por requisição (`r.Context()`); a conciliação usa o dele para respeitar o cancelamento no meio de um lote longo.
+
+> Sem `context`, uma chamada externa lenta trava a requisição inteira.
+
+---
+
+# O serviço de busca: `services/busca`
+
+Um servidor HTTP com a biblioteca padrão — sem framework:
+
+```go
+func main() {
+    mux := http.NewServeMux()
+    mux.HandleFunc("/buscar", buscar)
+    mux.HandleFunc("/health", health)
+
+    srv := &http.Server{
+        Addr: ":9090", Handler: mux,
+        ReadHeaderTimeout:   5 * time.Second,
+        MaxHeaderValueCount: 100,   // Go 1.27: limita cabeçalhos abusivos
+    }
+    srv.ListenAndServe()
+}
+```
+
+> `services/cmd/servidor/main.go`. O roteador (`ServeMux`) e o servidor já vêm na linguagem. O servidor declara seus limites.
+
+---
+
+# O handler da busca
+
+Traduz HTTP em chamada ao domínio: decodifica, chama `dominio.Buscar`, codifica.
+
+```go
+func buscar(w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodPost {
+        problema(w, 405, "metodo", "Use POST."); return
+    }
+    var dto filtroDTO
+    if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
+        problema(w, 400, "json-invalido", "Corpo inválido."); return
+    }
+    w.Header().Set("Cache-Control", "public, max-age=60")
+    json.NewEncoder(w).Encode(dominio.Buscar(acervo, dto.paraDominio()))
+}
+```
+
+> Reconhecem os cabeçalhos e o `problem+json`? É a mesma fronteira HTTP das aulas 01–02, agora do lado Go. Em Go 1.27 o `encoding/json` foi reescrito e ficou mais rápido, sem mudar código.
+
+---
+
+# O serviço de conciliação: `services/conciliacao`
+
+O segundo serviço Go, e o caso em que Go se justifica por característica — ADR-0003.
+
+```
+  Curador ──► conciliacao ──► MusicBrainz (≈1 req/s) ──► candidatos
+                   │                                        │
+                   │◄──────── pendências para revisão ◄─────┘
+             (não atribui nada; a escolha é humana)
+```
+
+| Peça | Onde, no IDE |
+|---|---|
+| Porta `CatalogoExterno` (o domínio não conhece o MusicBrainz) | `conciliacao/conciliacao.go` |
+| Cliente com limite de 1 req/s | `conciliacao/musicbrainz.go` |
+| Testes sem rede (fake em memória) | `conciliacao/conciliacao_test.go` |
+
+> Mesma porta-e-adaptador do serviço principal: o núcleo não conhece a rede; um adaptador a implementa. Limitado por taxa, tolerante a falha parcial, fora do ciclo de leitura.
 
 ---
 
 # Sequência: a conciliação
-
-Fora do ciclo de leitura, na importação, com escolha humana:
 
 ```
  Curador      services/conciliacao      MusicBrainz          Acervo
@@ -216,582 +668,13 @@ Fora do ciclo de leitura, na importação, com escolha humana:
    │──────────────►│  grava o mbid escolhido ─────────────────►│
 ```
 
-O serviço só coleta e apresenta; quem decide o vínculo é uma pessoa. A gravação do MBID é o passo seguinte (issue aberta no MUSI).
+O serviço só coleta e apresenta; quem decide o vínculo é uma pessoa.
 
 ---
 
-<!-- _class: lead -->
+# Testes de contrato, carregados
 
-# Ktor × Quarkus
-
-A mesma fronteira, dois jeitos. Escolham um.
-
----
-
-# O mesmo conceito, dois stacks
-
-| Aspecto | `api-ktor` (Kotlin) | `api-quarkus` (Java) |
-|---|---|---|
-| Framework | Ktor | Quarkus |
-| Injeção de dependência | Koin, em execução | CDI, na compilação |
-| Rotas | código, numa árvore | anotações em classe |
-| Cliente do Go | classe com `HttpClient` | interface declarativa |
-| Domínio | vem de `shared/` | reescrito em `dominio/` |
-
-Nenhum é o certo. A qualidade da justificativa é o que a rubrica avalia.
-
-> O MUSI mantém os dois para servir às duas trilhas. Abrir os dois lado a lado no IDE é o melhor jeito de escolher.
-
----
-
-# Rotas: código × anotações
-
-```kotlin
-// Ktor — a árvore de rotas é código, e se lê de cima para baixo
-routing {
-    get("/health") { call.respond(mapOf("status" to "UP")) }
-    route("/obras") {
-        get  { /* busca simples pela query string */ }
-        post { /* busca composta pelo corpo */ }
-    }
-}
-```
-
-```java
-// Quarkus — o recurso é uma classe anotada
-@Path("/obras")
-public class ObraResource {
-    @GET  public Response porFaceta(...) { ... }
-    @POST public List<ObraDto> buscar(FiltroDto dto) { ... }
-}
-```
-
-> O mesmo endpoint, duas filosofias: a árvore explícita do Ktor, e as anotações que o Quarkus varre para montar as rotas e o OpenAPI.
-
----
-
-# Injeção e cliente do Go
-
-```kotlin
-// Ktor + Koin: a dependência é resolvida em execução
-val buscarObras by inject<BuscarObras>()
-// cliente: uma classe que usa o HttpClient do Ktor
-class BuscaHttp(val cliente: HttpClient) : FonteDeObras { ... }
-```
-
-```java
-// Quarkus + CDI: injeção verificada na compilação
-@Inject ObraResource(BuscarObras buscarObras) { ... }
-// cliente: uma interface; o Quarkus gera a implementação
-@RegisterRestClient interface ClienteBusca {
-    @POST List<ObraDto> buscar(FiltroDto filtro);
-}
-```
-
-> Do lado Kotlin, a chamada ao Go é escrita à mão com o mesmo `HttpClient` que o app usa. Do lado Java, você declara a interface e o Quarkus preenche o código.
-
----
-
-# Onde estudar depois
-
-| Guia | Foco |
-|---|---|
-| **Aprenda Go com Testes** — playlist da turma (YouTube) | Introdução em Go, por TDD |
-| A Tour of Go · `go.dev/tour` | A linguagem, no navegador |
-| Effective Go · `go.dev/doc/effective_go` | Idioma e convenções |
-| Go by Example · `gobyexample.com` | Receitas curtas por tópico |
-
-Comecem pela nossa playlist de Go, gravada para a turma, e pelos exercícios em
-`github.com/classrooms-fmarquesfilho/aprenda-go-com-testes`.
-Playlist: `www.youtube.com/watch?v=E-UL0nLPgQM&list=PLTr2C2xXIaIqO7Yr7FHohhgG_OgONpYIx`.
-
----
-
-<!-- _class: lead -->
-
-# Parte 1
-
-## Por que Go para este serviço
-
----
-
-# A pergunta é para qual trabalho
-
-Go foi desenhado no Google para serviços de rede: compila rápido, gera um binário único e trata concorrência como recurso de primeira classe.
-
-| Característica de Go | O que compra para um serviço |
-|---|---|
-| Binário único, estático | Imagem Docker minúscula, sobe em segundos |
-| Compilação rápida | Ciclo curto, CI barata |
-| Concorrência com *goroutines* | Muitas requisições sem *threads* caras |
-| Biblioteca padrão forte | HTTP e JSON sem dependência externa |
-| Simplicidade deliberada | Pouca sintaxe, código legível por quem chega |
-
-> No MUSI, o serviço em Go não tem nenhuma dependência externa — só a biblioteca padrão. Por isso nem existe `go.sum`.
-
----
-
-# Onde Go se encaixa bem
-
-| Bom caso para Go | Caso em que outra escolha cabe |
-|---|---|
-| Trabalho limitado por rede ou por taxa | Regras de negócio ricas e ramificadas |
-| Concorrência alta, muitos pedidos | Domínio que se beneficia de união etiquetada |
-| Serviço pequeno, foco único | Time que já domina outra pilha |
-
-No projeto de referência, o candidato natural para Go é a conciliação com o MusicBrainz — limitada a uma requisição por segundo, assíncrona, tolerante a falha parcial, fora do ciclo da requisição.
-
-> A decisão de "o que vai para Go" é sua, e precisa de justificativa, como a divisão de serviços da proposta.
-
----
-
-# A conciliação com o MusicBrainz <span class="tag">ADR-0003</span>
-
-Já implementada no MUSI. Casa a obra local com a identidade global do MusicBrainz.
-
-| Peça | Onde, no IDE |
-|---|---|
-| Campos `mbid` e `mbidComposicao` na `Obra` | `dominio` — nas três linguagens |
-| Porta `CatalogoExterno` (o domínio não conhece o MusicBrainz) | `services/conciliacao/conciliacao.go` |
-| Cliente com limite de 1 req/s | `services/conciliacao/musicbrainz.go` |
-| Testes sem rede (fake em memória) | `services/conciliacao/conciliacao_test.go` |
-
-> É Go por característica: limitado por taxa, tolerante a falha parcial, fora do ciclo de leitura. A escolha entre candidatos é humana — o serviço só coleta. Ver o diagrama de sequência da conciliação.
-
----
-
-# Uma diferença que vamos sentir hoje
-
-Kotlin e Java 21 têm união etiquetada (`sealed`): o compilador verifica se um `when` tratou todos os casos.
-
-Go não tem. Um `switch` sobre a árvore de filtro que esqueça um caso compila, e falha só ao rodar.
-
-```
-  Kotlin/Java   when exaustivo   → erro de compilação se faltar caso
-  Go            switch + default → erro em tempo de execução
-```
-
-O que se ganha em troca: simplicidade e compilação veloz.
-
-> As duas abordagens são válidas. Comparar essa escolha entre as três linguagens é conteúdo da disciplina — e aparece no domínio do MUSI, escrito nas três.
-
----
-
-<!-- _class: lead -->
-
-# Parte 2
-
-## Go essencial
-
-O suficiente para escrever um serviço. Abram `go.dev/tour`.
-
----
-
-# O primeiro programa
-
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Olá, turma")
-}
-```
-
-| Elemento | Nota |
-|---|---|
-| `package main` | Todo arquivo pertence a um pacote |
-| `import "fmt"` | Formatação e impressão, da biblioteca padrão |
-| `func main()` | Ponto de entrada do executável |
-| sem `;` | O compilador insere os pontos e vírgula |
-
-> `gofmt` formata o código por você, e a CI recusa o que estiver fora do padrão. O estilo é decidido pela ferramenta, não em revisão.
-
----
-
-# Variáveis e tipos
-
-```go
-var titulo string = "Ponteio"   // explícito
-ano := 1967                     // curto, com tipo inferido
-const limite = 20               // constante
-
-var pronto bool                 // zero value: false
-var total int                   // zero value: 0
-var nome string                 // zero value: ""
-```
-
-Toda variável nasce com um *zero value* — não existe `null` para tipos básicos.
-
-| Tipo | Exemplo |
-|---|---|
-| `int`, `int32`, `int64` | `42` |
-| `float64` | `3.14` |
-| `bool` | `true` |
-| `string` | `"texto"` |
-
-> `:=` só dentro de função; `var`/`const` valem também no nível do pacote. Declarar e não usar é erro de compilação: Go não deixa variável morta.
-
----
-
-# Structs: os dados
-
-```go
-type Faceta struct {
-    Dimensao string `json:"dimensao"`
-    Valor    string `json:"valor"`
-}
-
-type Obra struct {
-    ID      string   `json:"id"`
-    Titulo  string   `json:"titulo"`
-    Ano     int      `json:"ano"`
-    Facetas []Faceta `json:"facetas"`
-}
-```
-
-- Sem classe e sem herança: `struct` agrupa campos
-- Maiúscula inicial significa exportado; minúscula, privado ao pacote
-- A *tag* `json:"..."` diz como o campo vira JSON
-
-> É o mesmo `Obra` do domínio Kotlin e Java. O nome do campo em JSON é o contrato; o nome em Go é interno.
-
----
-
-# Funções, múltiplos retornos e erro
-
-Go não tem exceção. O erro é um valor, devolvido junto com o resultado:
-
-```go
-func dividir(a, b int) (int, error) {
-    if b == 0 {
-        return 0, fmt.Errorf("divisão por zero")
-    }
-    return a / b, nil
-}
-
-resultado, err := dividir(10, 2)
-if err != nil {
-    return                       // trate aqui, sem ignorar
-}
-fmt.Println(resultado)
-```
-
-> `if err != nil` é o ritmo do Go. Verboso de propósito: o caminho de erro fica visível na leitura, em vez de escondido num `catch` distante.
-
----
-
-# Slices e maps
-
-```go
-ritmos := []string{"ijexa", "baiao", "maracatu"}
-ritmos = append(ritmos, "coco")
-fmt.Println(len(ritmos))          // 4
-
-anos := map[string]int{
-    "Ponteio":    1967,
-    "Asa Branca": 1947,
-}
-v, ok := anos["Ponteio"]          // v=1967, ok=true
-_, existe := anos["Inexistente"]  // existe=false
-```
-
-| Tipo | Papel |
-|---|---|
-| `[]T` | Sequência de tamanho variável |
-| `map[K]V` | Dicionário chave→valor |
-
-> O segundo retorno do `map` (`ok`) diz se a chave existia. É como Go separa "ausente" de "zero".
-
----
-
-# `for` é o único laço
-
-```go
-for i := 0; i < 3; i++ { fmt.Println(i) }   // clássico
-
-for i, r := range ritmos {                   // índice e valor
-    fmt.Println(i, r)
-}
-
-for _, o := range acervo {                   // só o valor
-    fmt.Println(o.Titulo)
-}
-
-for total < 100 { total++ }                  // enquanto
-```
-
-`range` percorre slices, maps e canais. O `_` descarta o que não interessa.
-
-> Não há `while` nem `foreach` no nome. Um `for`, várias formas.
-
----
-
-# Interfaces: um método basta
-
-Uma interface é um conjunto de métodos. Quem os tem, satisfaz — sem declarar que implementa.
-
-```go
-type Filtro interface {
-    isFiltro()
-}
-
-type Tem struct{ Dimensao, Valor string }
-type Ate struct{ Ano int }
-
-func (Tem) isFiltro() {}
-func (Ate) isFiltro() {}
-```
-
-O método não exportado `isFiltro()` fecha a hierarquia: só tipos deste pacote implementam `Filtro`. É o mais perto de `sealed` que Go oferece.
-
-> Repare: `Tem` não diz `implements Filtro`. Ter o método já basta. É *duck typing* verificado na compilação.
-
----
-
-# `switch` sobre o tipo, e o `default`
-
-```go
-func Satisfaz(o Obra, f Filtro) bool {
-    switch t := f.(type) {
-    case Tem:
-        // ... t já é Tem aqui
-    case Ate:
-        return o.Ano <= t.Ano
-    default:
-        panic(fmt.Sprintf("filtro não tratado: %T", f))
-    }
-}
-```
-
-O `default` existe porque o compilador não verifica exaustividade. Nas versões Kotlin e Java ele não aparece — o `when` cobre todos os casos.
-
-> Esse `panic` é a rede de segurança de uma decisão de linguagem. É exatamente o tipo de comparação que a prova cobra.
-
----
-
-# `context`: prazo e cancelamento
-
-Todo serviço precisa saber quando desistir. O `context.Context` carrega prazo e cancelamento, e é o primeiro parâmetro por convenção:
-
-```go
-func buscar(ctx context.Context, f Filtro) ([]Obra, error) {
-    select {
-    case <-ctx.Done():
-        return nil, ctx.Err()      // cliente desistiu ou estourou o prazo
-    default:
-        // segue a busca
-    }
-}
-```
-
-- `context.Background()` — a raiz, no `main`
-- `context.WithTimeout(ctx, 2*time.Second)` — deriva com prazo
-- O `net/http` já entrega um `ctx` por requisição: `r.Context()`
-
-> Sem `context`, uma chamada externa lenta trava a requisição inteira. Ele evita que o serviço fique esperando por algo que não vem.
-
----
-
-<!-- _class: lead -->
-
-# Parte 3
-
-## O esqueleto no monorepo
-
----
-
-# A estrutura de pastas
-
-```
-services/
-├── go.mod                       módulo e versão do Go
-├── cmd/
-│   ├── servidor/main.go         o serviço de busca
-│   └── conciliar/main.go        o lote de conciliação (ADR-0003)
-├── busca/dominio/
-│   ├── dominio.go               Obra, Filtro, Buscar
-│   └── dominio_test.go          os testes do domínio
-├── conciliacao/                 a porta e o cliente do MusicBrainz
-└── arch-go.yml                  a regra de dependência do domínio
-```
-
-| Convenção | Significa |
-|---|---|
-| `cmd/<nome>` | Um executável por subpasta |
-| pacote `dominio` | A camada de domínio, sem HTTP nem banco |
-| `go.mod` | Nome do módulo e versão mínima do Go |
-
-> `dominio` não importa HTTP. No MUSI isso é verificado pelo `arch-go` na CI — deixou de ser só um comentário.
-
----
-
-# `go.mod`: o módulo
-
-```go
-module github.com/fmarquesfilho/musi/services
-
-go 1.27
-```
-
-- O caminho do módulo é o prefixo de todos os `import` internos
-- `go 1.25` é a versão mínima da linguagem
-- Sem dependência externa, sem `go.sum`. `go build` funciona de imediato
-
-```go
-import "github.com/fmarquesfilho/musi/services/busca/dominio"
-```
-
-> Um módulo Go é a unidade de versionamento. No monorepo, os serviços Go vivem sob `services/`, com um `go.mod` só.
-
----
-
-# Um servidor HTTP, sem framework
-
-```go
-func main() {
-    mux := http.NewServeMux()
-    mux.HandleFunc("/buscar", buscar)
-    mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
-        w.Write([]byte(`{"status":"UP"}`))
-    })
-
-    srv := &http.Server{
-        Addr:              ":9090",
-        Handler:           mux,
-        ReadHeaderTimeout: 5 * time.Second,
-    }
-    srv.ListenAndServe()
-}
-```
-
-`net/http` é a biblioteca padrão. O roteador (`ServeMux`) e o servidor já vêm na linguagem.
-
-> O `ReadHeaderTimeout` não é enfeite: sem um prazo, um cliente lento segura uma conexão indefinidamente. Servidor de verdade declara limites.
-
----
-
-# Um handler
-
-A assinatura é sempre a mesma: recebe onde escrever e o que foi pedido.
-
-```go
-func buscar(w http.ResponseWriter, r *http.Request) {
-    if r.Method != http.MethodPost {
-        problema(w, http.StatusMethodNotAllowed, "metodo", "Use POST.")
-        return
-    }
-
-    var dto filtroDTO
-    if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
-        problema(w, http.StatusBadRequest, "json-invalido", "Corpo inválido.")
-        return
-    }
-
-    w.Header().Set("Content-Type", "application/json")
-    w.Header().Set("Cache-Control", "public, max-age=60")
-    json.NewEncoder(w).Encode(dominio.Buscar(acervo, dto.paraDominio()))
-}
-```
-
-> Reconhecem os cabeçalhos? `Cache-Control` é o assunto da aula 02, aqui do lado do servidor. O status certo e o `problem+json` também.
-
----
-
-# JSON: decode e encode
-
-```go
-var dto filtroDTO
-json.NewDecoder(r.Body).Decode(&dto)   // JSON → struct
-json.NewEncoder(w).Encode(resultado)   // struct → JSON
-```
-
-O pacote `encoding/json` usa as *tags* do struct para mapear os nomes:
-
-```go
-type filtroDTO struct {
-    Tipo     string      `json:"tipo"`
-    Dimensao string      `json:"dimensao,omitempty"`
-    Opcoes   []filtroDTO `json:"opcoes,omitempty"`
-}
-```
-
-`omitempty` some com o campo quando ele está no zero value.
-
-> Por que um `filtroDTO` separado do `Filtro` do domínio? Porque `Filtro` é interface, e `encoding/json` não sabe instanciar interface. É o mesmo motivo do DTO em Java e Kotlin.
-
----
-
-# Erro no formato certo — RFC 9457
-
-```go
-func problema(w http.ResponseWriter, status int, tipo, detalhe string) {
-    w.Header().Set("Content-Type", "application/problem+json")
-    w.WriteHeader(status)
-    json.NewEncoder(w).Encode(map[string]any{
-        "type":   "https://musi.ufrn.br/erros/" + tipo,
-        "status": status,
-        "detail": detalhe,
-    })
-}
-```
-
-O mesmo `application/problem+json` da aula 02, agora emitido pelo serviço Go.
-
-> Três serviços, três linguagens, um formato de erro. O contrato não muda com a implementação — é o que mantém o cliente simples.
-
----
-
-# Como as camadas se mapeiam
-
-| Camada (aula 02) | No serviço Go | Nunca contém |
-|---|---|---|
-| Domínio | pacote `busca/dominio` | HTTP, JSON, banco |
-| Adaptador | o handler em `main.go` | regra de negócio |
-| Infra | `http.Server`, `ServeMux` | regra de negócio |
-
-O handler traduz HTTP em chamada ao domínio: decodifica, chama `dominio.Buscar`, codifica. Um `if` que decide algo sobre obras dentro do handler está no lugar errado.
-
-> A mesma regra de dependência das três aulas. A linguagem muda; a arquitetura não.
-
----
-
-<!-- _class: lead -->
-
-# Parte 4
-
-## Testes
-
----
-
-# `go test` e tabela de casos
-
-O teste mora ao lado do código, em `_test.go`. O idioma é a tabela de casos:
-
-```go
-func TestSatisfaz(t *testing.T) {
-    casos := []struct {
-        nome     string
-        filtro   Filtro
-        esperado bool
-    }{
-        {"tem a faceta", Tem{"ritmo", "ijexa"}, true},
-        {"não tem", Tem{"ritmo", "baiao"}, false},
-    }
-    for _, c := range casos {
-        t.Run(c.nome, func(t *testing.T) { /* verifica c.esperado */ })
-    }
-}
-```
-
-> Um subteste por caso, com nome. Quando quebra, a mensagem já diz qual caso, sem depender de assert mágico.
-
----
-
-# Os casos vêm de `contratos/`, carregados
-
-O MUSI foi além: os testes das três linguagens *carregam* os mesmos arquivos de `contratos/exemplos/`, em vez de copiá-los.
+Os testes das três linguagens carregam os mesmos arquivos de `contratos/exemplos/`:
 
 ```
   contratos/exemplos/casos-de-busca.json   ◄── único ponto de verdade
@@ -800,286 +683,63 @@ O MUSI foi além: os testes das três linguagens *carregam* os mesmos arquivos d
 ```
 
 - Um caso novo no JSON alcança as três de uma vez
-- Se Go, Java e Kotlin discordarem, o CI acusa — a concordância virou garantia, não convenção
+- Se discordarem, o CI acusa — a concordância virou garantia, não convenção
+- O domínio Go é puro: `arch-go` no CI recusa um import de `net/http` ali
 
-> Abram `dominio_test.go`, `DominioTest.java` e `CasosCompartilhadosTest.kt`: três linguagens, o mesmo arquivo de casos. É o que impede os domínios de divergirem.
-
----
-
-# O que a CI cobra no serviço Go
-
-```
-  gofmt -l .        → recusa código fora do padrão
-  go vet ./...      → apanha erros comuns antes de rodar
-  arch-go           → o domínio não importa HTTP/JSON/banco
-  go test -race     → testes com detector de corrida
-```
-
-| Passo | Por que existe |
-|---|---|
-| `gofmt` | Estilo decidido pela ferramenta |
-| `go vet` | Formatos de `Printf` errados, laços suspeitos |
-| `arch-go` | A regra de dependência do domínio, verificada |
-| `-race` | Concorrência com bug some sem o detector |
-
-> `arch-go.yml` proíbe o domínio de depender de `net/http` e `encoding/json`. Adicionar esse import ao domínio deixa o CI vermelho.
-
----
-
-# Rodando localmente
-
-```bash
-cd services
-
-go run ./cmd/servidor      # sobe na porta 9090
-go test ./...              # roda os testes
-gofmt -l .                 # lista o que está fora do padrão
-```
-
-E a checagem completa, como no CI, via `mise`:
-
-```bash
-mise run test:go           # testes
-mise run lint:go           # go vet + gofmt + arch-go
-```
-
-> `go run` compila e executa num passo. Para o dia a dia, é o comando que vocês mais vão usar.
-
----
-
-<!-- _class: lead -->
-
-# Parte 5
-
-## Mãos à obra
-
----
-
-# Oficina — 20 minutos
-
-Com o serviço de referência aberto (`services/` do MUSI):
-
-```
-  1. Suba o serviço:   go run ./cmd/servidor
-  2. Em outro terminal, chame /health com curl
-  3. Faça um POST /buscar com um filtro `tem`
-  4. Rode go test ./... e leia a saída
-  5. Acrescente um caso a contratos/exemplos/casos-de-busca.json
-     e veja o teste carregá-lo
-```
-
-Exemplo de corpo para o passo 3:
-
-```json
-{ "tipo": "tem", "dimensao": "ritmo", "valor": "baiao" }
-```
-
-> Para explorar sem `curl`, a pasta `http/` do MUSI traz coleções de Bruno, Postman e um `.http`.
-
----
-
-# Erros que aparecem sempre
-
-| Erro | O que acontece |
-|---|---|
-| Ignorar o `err` | O programa segue com dado inválido e quebra longe |
-| Esquecer o `return` após responder erro | O handler continua e escreve a resposta duas vezes |
-| Ponteiro no `Decode`: `&dto` | Sem o `&`, o JSON não preenche nada |
-| `dominio` importando HTTP | Fura a regra; o `arch-go` reprova |
-| Não rodar `gofmt` | A CI fica vermelha por formatação |
-
-> O segundo é o mais comum: em Go, responder um erro não encerra o handler. O `return` é você quem escreve.
-
----
-
-# Fecho de segunda
-
-O serviço em Go responde a uma requisição e roda `go test` verde. Ele ainda vive sozinho.
-
-Quarta juntamos as peças: um repositório, os três stacks, um comando que sobe tudo, e um CI que guarda o portão.
-
-> Entre hoje e quarta: deixem o esqueleto do serviço Go compilando no repo do grupo, com uma rota `/health` e um teste.
-
----
-
-<!-- _class: lead -->
-
-# Quarta · 02/09
-
-## O monorepo e a CI
-
-Um repositório, três stacks, um pipeline.
-
----
-
-# Por que um monorepo
-
-Todos os serviços, os contratos e a documentação no mesmo repositório, versionados juntos.
-
-| Ganho | Por quê |
-|---|---|
-| Mudança atômica | Alterar o contrato e os dois consumidores num PR só |
-| Um histórico | O que mudou junto, aparece junto |
-| Um CI | O portão de qualidade cobre tudo de uma vez |
-
-> Um repo por serviço espalha uma mudança de contrato por três PRs em três lugares, e nada garante que cheguem juntos. Foi assim que a ADR-0003 tocou as três linguagens de uma vez.
-
----
-
-# A estrutura do MUSI — abram no IDE
-
-```
-musi/
-├── api-ktor/       Kotlin · Ktor · Koin     → serviço principal (opção A)
-├── api-quarkus/    Java · Quarkus           → serviço principal (opção B)
-├── services/       Go                        → busca e conciliação
-├── contratos/      JSON Schema + .proto      → a fonte da verdade do domínio
-├── shared/         domínio em Kotlin (KMP)   → usado por api-ktor e pelo app
-├── http/           coleções para testar as APIs
-├── docs/           ADRs, domínio, guias
-├── mise.toml       versões e tasks
-├── docker-compose.yml
-└── .github/workflows/ci.yml
-```
-
-> Vocês escolhem um serviço principal (Ktor ou Quarkus), não os dois. O MUSI mantém ambos para servir às duas trilhas da disciplina.
-
----
-
-# Um repo, ciclos de build diferentes
-
-Nem tudo usa a mesma ferramenta de build, e tudo bem:
-
-| Stack | Build | Onde |
-|---|---|---|
-| Kotlin (`api-ktor`, `shared`) | Gradle | `settings.gradle.kts` inclui os módulos |
-| Java (`api-quarkus`) | Maven | ciclo próprio, `pom.xml` |
-| Go (`services`) | Go modules | ciclo próprio, `go.mod` |
-
-No MUSI, o `settings.gradle.kts` diz que `services/` e `api-quarkus/` ficam de fora, com ciclo próprio.
-
-> Monorepo não quer dizer um build único. Quer dizer um repositório único, com cada componente construído pela ferramenta que faz sentido.
-
----
-
-# As camadas viram pacotes
-
-A regra de dependência da aula 02 vira estrutura de diretórios, a mesma nos três serviços:
-
-```
-  br/ufrn/musi/                    services/busca/
-    dominio/       ← entidades       dominio/     ← Obra, Filtro, Buscar
-    aplicacao/     ← casos de uso    ...
-    adaptadores/   ← HTTP, busca
-```
-
-`dominio` não importa HTTP nem banco. No MUSI isso é verificado: `arch-go` no serviço Go, e o compilador do módulo `shared` no lado Kotlin.
-
-> Abrir `services/busca/dominio/dominio.go` ao lado de `api-ktor/.../dominio` mostra a mesma regra em duas linguagens.
+> Abram `dominio_test.go`, `DominioTest.java` e `CasosCompartilhadosTest.kt`: três linguagens, o mesmo arquivo de casos.
 
 ---
 
 # Ambiente reproduzível: `mise`
 
-O `mise.toml` fixa a versão de cada ferramenta e dá nome às tarefas, para o mesmo comando rodar na sua máquina e no CI.
-
-```toml
-[tools]
-java = "temurin-25"
-go   = "1.25"
-gradle = "8.14"
-
-[tasks.build]
-run = [
-  "./gradlew :api-ktor:build -x test",
-  "cd services && go build ./...",
-]
-```
+O `mise.toml` fixa a versão de cada ferramenta (Go 1.27, Java 25…) e dá nome às tarefas, para o mesmo comando rodar na sua máquina e no CI:
 
 ```bash
 mise run build      # constrói os stacks
 mise run test       # roda os testes
-mise run ci         # reproduz o pipeline localmente
+mise run lint:go    # go vet + gofmt + arch-go
 ```
 
-> Com a versão do Go e do Java declarada, "funciona na minha máquina" deixa de ser um problema: o ambiente está no arquivo, não combinado à parte.
-
----
-
-# Subir tudo junto: Docker Compose
-
-Um comando levanta os serviços e a rede entre eles:
+E o Docker Compose sobe tudo com um comando:
 
 ```bash
-docker compose up --build
+docker compose up --build   # api-ktor (8080) · api-quarkus (8081) · busca (9090)
 ```
 
-```yaml
-services:
-  musi-api-ktor:   { ports: ["8080:8080"], depends_on: [musi-busca] }
-  musi-busca:      { ports: ["9090:9090"] }   # o serviço Go
-```
-
-O `depends_on` e a rede do Compose deixam a api falar com o serviço Go por `http://musi-busca:9090`.
-
-> É o mesmo `docker-compose.yml` do MUSI. Subir a stack inteira com um comando é o que permite testar a integração antes de entregar.
+> Com a versão declarada, "funciona na minha máquina" deixa de ser um problema: o ambiente está no arquivo. No Codespaces é igual, sem instalar nada.
 
 ---
 
 # CI: o portão de qualidade
 
-O workflow roda a cada push e PR, e é o que a rubrica chama de "CI verde":
+O workflow roda a cada push e PR, um job por componente, e um job final que só passa se todos passarem:
 
 ```
-  push / PR ──► build dos stacks ──► testes ──► verde em main
-                    │
-                    └─ vermelho? o merge espera
+  push / PR ──► kotlin · java · go · contratos · proto · docs ──► ci ✓
 ```
 
-No MUSI, `.github/workflows/ci.yml` tem um job por componente — `kotlin`, `java`, `go`, `contratos`, `docs` — e um job final que só passa se todos passarem.
+- O build roda em todo componente, sem filtro de caminho: um filtro deixaria passar uma quebra num componente que você não tocou
+- A entrega de vocês precisa do essencial: build dos dois stacks (principal e Go), verde em `main`
 
-> O build roda em todo componente a cada push, sem filtro de caminho: um filtro deixaria passar uma quebra num componente que você não tocou.
+> `.github/workflows/ci.yml`. Comecem simples: um job que compila o serviço principal e um que compila o Go. Refinam nas próximas sprints.
 
 ---
 
-# Matriz ou job por componente?
-
-| Estratégia | Quando |
-|---|---|
-| `matrix` | Os mesmos passos em várias versões/OS (ex.: Java 21 e 25) |
-| Job por componente | Passos diferentes por stack (Gradle, Maven, Go) |
-
-O MUSI usa job por componente, porque cada stack se constrói de um jeito. A entrega de vocês precisa do essencial: build dos dois stacks (principal e Go), verde em `main`.
-
-> Comecem simples: um job que compila o serviço principal e um que compila o Go. Refinam nas próximas sprints.
-
----
-
-# A entrega de vocês — o alvo de quarta
+# Oficina — os serviços e o monorepo <span class="pill-blue">em grupo</span>
 
 ```
-  [ ] Repositório público, com api/, services/, contratos/, docs/
-  [ ] mise.toml com build e test; ambos passam localmente
-  [ ] docker-compose.yml sobe o serviço principal e o Go
-  [ ] CI verde em main, compilando os dois stacks
+  1. Subam o serviço de busca:  go run ./cmd/servidor
+  2. Chamem /health e um POST /buscar com um filtro `tem`
+  3. Acrescentem um caso a contratos/exemplos/casos-de-busca.json
+     e vejam o teste carregá-lo (go test ./...)
+  4. No repo do grupo: criem mise.toml, docker-compose.yml e o CI
+  5. Abram o PR, vejam o CI rodar, e só então dêem merge
 ```
 
-Vale metade da nota da Sprint 0 (estrutura do monorepo e CI passando). O resto é a proposta e o processo.
+Exemplo de corpo para o passo 2:
 
-> Não precisa de deploy nem de banco ainda. Precisa compilar, subir com um comando, e o CI verde.
-
----
-
-# Oficina — montar o esqueleto <span class="pill-blue">em grupo</span>
-
-Partindo do MUSI como referência:
-
-```
-  1. Criar o repositório público e as pastas
-  2. Copiar e adaptar o mise.toml: tasks build e test
-  3. Escrever o docker-compose.yml com o serviço principal e o Go
-  4. Criar .github/workflows/ci.yml: um job por stack
-  5. Abrir o PR, ver o CI rodar, e só então dar merge
+```json
+{ "tipo": "tem", "dimensao": "ritmo", "valor": "baiao" }
 ```
 
 > Deixem o primeiro push vermelho de propósito e depois consertem. Ver o CI pegar o erro é metade do aprendizado.
@@ -1095,7 +755,7 @@ O enunciado de cada entrega está em `docs/SPRINT-0-TAREFAS.md` — uma tarefa p
 | Backlog: mínimo 5 histórias (antes 10) | ≥ 3 estimadas, todas priorizadas |
 | `docs/proposta.md`: até 5 páginas (antes 3) | as 8 seções do guia |
 
-> Criem uma issue por tarefa. O guia completo, com templates e exemplos, continua em `docs/SPRINT-0.md`.
+> A entrega vale metade da nota da Sprint 0 na estrutura do monorepo e no CI passando; o resto é a proposta, a decisão do stack e a divisão com Go.
 
 ---
 
@@ -1106,7 +766,7 @@ O enunciado de cada entrega está em `docs/SPRINT-0-TAREFAS.md` — uma tarefa p
 - Monorepo público com a estrutura, `mise run build`/`test` passando
 - `docker compose up` sobe o serviço principal e o Go
 - CI verde nos dois stacks
-- Proposta com a decisão da stack e a divisão com Go, e o backlog (≥ 5 histórias)
+- Proposta com a decisão do stack (Ktor ou Quarkus) e a divisão com Go, e o backlog (≥ 5 histórias)
 
 > 09/09 é encontro online, no horário da aula, para dúvidas sobre o pipeline e o ambiente.
 
@@ -1120,12 +780,12 @@ O enunciado de cada entrega está em `docs/SPRINT-0-TAREFAS.md` — uma tarefa p
 - *A Tour of Go* · `go.dev/tour` · *Effective Go* · `go.dev/doc/effective_go`
 - *Go by Example* · `gobyexample.com` · `net/http`, `encoding/json`, `context` · `pkg.go.dev`
 
-**Monorepo, ambiente e CI**
+**Ktor, Quarkus e ambiente**
 
-- `mise` · `mise.jdx.dev` · Docker Compose · `docs.docker.com/compose`
-- GitHub Actions · `docs.github.com/actions` — *matrix* e *jobs*
+- Ktor · `ktor.io/docs` · Quarkus · `quarkus.io/guides`
+- `mise` · `mise.jdx.dev` · Docker Compose · `docs.docker.com/compose` · GitHub Actions · `docs.github.com/actions`
 
 **Disciplina e projeto de exemplo**
 
 - `github.com/fmarquesfilho/web2-2026-2`
-- MUSI · `github.com/fmarquesfilho/musi` — `services/`, `mise.toml`, `docker-compose.yml`, `.github/workflows/ci.yml`
+- MUSI · `github.com/fmarquesfilho/musi` — `api-ktor/`, `api-quarkus/`, `services/`, `contratos/`

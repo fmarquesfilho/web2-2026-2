@@ -79,8 +79,8 @@ Na Sprint 2 a ordem se inverte por causa do feriado de 12/10 e da prova de 21/10
 | 19/08 | Qua | 🟢 | Apresentação do curso, dos critérios de avaliação e da arquitetura de referência. HTTP: recurso e representação, URI, métodos, idempotência, códigos de status e cabeçalhos. Arquitetura de serviços: monólito, monólito modular e microsserviços. **Kotlin com Ktor OU Java com Quarkus — escolha do grupo** |
 | 24/08 | Seg | 🟢 | Cache HTTP: frescor e validação, `Cache-Control`, `ETag` e concorrência otimista. REST: as restrições de Fielding e o modelo de maturidade de Richardson. Clean Architecture: regra de dependência, portas e adaptadores, e como ela é verificada. Formação de grupos, escolha de coorte e definição do domínio do projeto |
 | 26/08 | Qua | 🔵 | Encontro online — dúvidas sobre a proposta e o domínio |
-| 31/08 | Seg | 🟢 | Fundamentos de Go para serviços: pacotes, interfaces, erros e contexto. Esqueleto do serviço Go dentro do monorepo |
-| 02/09 | Qua | 🟢 | Estrutura do monorepo e mapeamento das camadas em pacotes. Ambiente reproduzível: tasks do `mise`, Docker Compose e primeiro workflow de CI com matriz para Java/Kotlin e Go. Oficina de montagem do monorepo |
+| 31/08 | Seg | 🟢 | Estrutura do monorepo MUSI e mapeamento das camadas em pacotes. O serviço principal em detalhe, nos dois stacks — Kotlin com Ktor e Java 25 com Quarkus: rotas, injeção de dependência, DTOs, cliente do serviço Go, erros e OpenAPI |
+| 02/09 | Qua | 🟢 | Fundamentos de Go: pacotes, interfaces, erros e contexto. Os serviços Go do MUSI (busca e conciliação). Ambiente reproduzível: tasks do `mise`, Docker Compose e primeiro workflow de CI. Oficina de montagem do monorepo |
 | 07/09 | Seg | 🔴 | Independência do Brasil |
 | 09/09 | Qua | 🔵 | Encontro online — dúvidas sobre o pipeline e o ambiente |
 
