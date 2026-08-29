@@ -196,6 +196,8 @@ Do cliente ao acervo e de volta, uma leitura:
    │◄─ 200 + Cache-Control/ETag ─│                                   │
 ```
 
+> **Dica visual:** Você pode visualizar esse mesmo fluxo como um diagrama UML clássico usando o [Mermaid Live Editor](https://mermaid.live/).
+
 A API traduz a query em uma árvore de filtro, delega ao Go e devolve com os cabeçalhos de cache da aula 02.
 
 ---
@@ -215,6 +217,8 @@ Fora do ciclo de leitura, na importação, com escolha humana:
    │  escolhe um candidato                                     │
    │──────────────►│  grava o mbid escolhido ─────────────────►│
 ```
+
+> **Dica visual:** Teste desenhar este fluxo de integração no [Mermaid Live Editor](https://mermaid.live/).
 
 O serviço só coleta e apresenta; quem decide o vínculo é uma pessoa. A gravação do MBID é o passo seguinte (issue aberta no MUSI).
 
@@ -632,7 +636,7 @@ services/
 ```go
 module github.com/fmarquesfilho/musi/services
 
-go 1.25
+go 1.27
 ```
 
 - O caminho do módulo é o prefixo de todos os `import` internos
