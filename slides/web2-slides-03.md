@@ -296,12 +296,14 @@ class BuscaHttp(val cliente: HttpClient) : FonteDeObras { ... }
 
 | Guia | Foco |
 |---|---|
+| **Aprenda Go com Testes** — playlist da turma (YouTube) | Introdução em Go, por TDD |
 | A Tour of Go · `go.dev/tour` | A linguagem, no navegador |
 | Effective Go · `go.dev/doc/effective_go` | Idioma e convenções |
 | Go by Example · `gobyexample.com` | Receitas curtas por tópico |
-| `pkg.go.dev/net/http` | A biblioteca padrão de HTTP |
 
-O *Tour* roda no navegador, sem instalar nada. É a ordem que vamos seguir.
+Comecem pela nossa playlist de Go, gravada para a turma, e pelos exercícios em
+`github.com/classrooms-fmarquesfilho/aprenda-go-com-testes`.
+Playlist: `www.youtube.com/watch?v=E-UL0nLPgQM&list=PLTr2C2xXIaIqO7Yr7FHohhgG_OgONpYIx`.
 
 ---
 
@@ -1114,6 +1116,7 @@ O enunciado de cada entrega está em `docs/SPRINT-0-TAREFAS.md` — uma tarefa p
 
 **Go**
 
+- **Aprenda Go com Testes** — playlist da turma no YouTube · exercícios em `github.com/classrooms-fmarquesfilho/aprenda-go-com-testes`
 - *A Tour of Go* · `go.dev/tour` · *Effective Go* · `go.dev/doc/effective_go`
 - *Go by Example* · `gobyexample.com` · `net/http`, `encoding/json`, `context` · `pkg.go.dev`
 
