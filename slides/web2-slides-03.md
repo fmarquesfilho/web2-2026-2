@@ -787,7 +787,7 @@ E o Docker Compose sobe tudo com um comando:
 docker compose up --build   # api-ktor (8080) · api-quarkus (8081) · busca (9090)
 ```
 
-> Com a versão declarada, "funciona na minha máquina" deixa de ser um problema: o ambiente está no arquivo. No Codespaces é igual, sem instalar nada.
+> Com a versão declarada, "funciona na minha máquina" deixa de ser um problema: o ambiente está no arquivo, e o CI usa as mesmas tarefas. No Codespaces as ferramentas já vêm prontas — você sobe tudo com `docker compose up`, sem instalar nada.
 
 ---
 
