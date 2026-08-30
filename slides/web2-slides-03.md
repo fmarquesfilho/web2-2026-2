@@ -468,6 +468,87 @@ A decisão é da equipe, e precisa de justificativa:
 
 ---
 
+# "Mas o Ktor ficou mais verboso…"
+
+Verdade — e vale contar onde as linhas moram. O serviço principal do MUSI, sem o domínio, para comparar igual:
+
+| Preocupação | `api-ktor` | `api-quarkus` |
+|---|---|---|
+| Rotas + OpenAPI | `Rotas.kt` + `RotasDoc.kt` = **154** | `ObraResource.java` = **64** |
+| Bootstrap + injeção | `Aplicacao.kt` + `Modulos.kt` = **135** | `application.properties` + anotações |
+| DTOs · caso de uso · cliente do Go | **mais curtos** que o Java | records + switch + interface |
+
+Total, sem o domínio: `api-ktor` ~438 · `api-quarkus` ~282.
+
+> A diferença não é o Kotlin: é o Ktor. Fora da configuração, o Kotlin sai menor — DTOs, caso de uso e cliente são mais curtos que em Java.
+
+---
+
+# Explícito ou por convenção: a troca
+
+O mesmo comportamento, em lugares diferentes:
+
+| | Ktor (explícito) | Quarkus (convenção) |
+|---|---|---|
+| Plugins | `install(...)` visível em `Aplicacao.kt` | extensões automáticas |
+| Injeção | grafo à mão em `Modulos.kt` (runtime) | `@Inject` / CDI (compilação) |
+| OpenAPI | plugin, a partir do código | anotações, custo zero |
+
+- Ktor: mais linhas, mas o comportamento se lê num lugar, sem mágica; um `single` faltando vira teste (`ModulosTest.verify()`) no CI
+- Quarkus: menos linhas, mas você confia nas convenções; em troca, a injeção é verificada na compilação
+
+> A verbosidade do Ktor é o preço da explicitude: "o que está ligado está escrito". A brevidade do Quarkus é o preço da mágica. Nenhum é errado — é a troca que a T4 pede para justificar.
+
+---
+
+# Kotlin no backend não para de crescer
+
+O que começou no Android virou linguagem de servidor de primeira classe:
+
+| Sinal | 2025–2026 |
+|---|---|
+| Desenvolvedores Kotlin | ~2,5 milhões |
+| Devs de Spring que também usam Kotlin | 27% |
+| Kotlin Multiplatform | dobrou em um ano (7% → 18%) |
+| Fundação Kotlin | Meta entrou como primeiro membro Gold |
+
+Em produção: Expedia, Atlassian (Jira), Mercedes-Benz.io, entre muitos.
+
+> O Spring tornou o Kotlin *first-class*; o Ktor é escrito 100% em Kotlin. Não é aposta de nicho — é uma das cinco linguagens que os desenvolvedores mais querem adotar.
+
+---
+
+# Por que o backend escolhe Kotlin
+
+| Motivo | O que resolve |
+|---|---|
+| Null safety | Menos `NullPointerException` em produção — está no sistema de tipos |
+| Corrotinas | Concorrência e I/O em streaming, sem a complexidade das threads |
+| Concisão | Menos boilerplate que Java, sobre a mesma JVM |
+| Interoperabilidade total | Adota-se aos poucos; reusa bibliotecas e frameworks Java |
+| Uma linguagem só | Domínio compartilhado entre backend, Android e web, via KMP |
+
+> É o que o MUSI mostra: o mesmo `shared/` no serviço Ktor e no app móvel. Escolher Ktor na T4 é também se alinhar com para onde o mercado está indo — e vale tanto para quem cursa Web II quanto Móveis.
+
+---
+
+# O mesmo eixo, agora em memória
+
+Footprint medido no MUSI (RSS em repouso, mesma máquina):
+
+| Serviço | RSS idle | Startup |
+|---|---:|---:|
+| Go | ~11 MB | <1 s |
+| Quarkus nativo | ~47 MB | 0,028 s |
+| Quarkus JVM | ~113 MB | ~1 s |
+| Ktor | ~199 MB | ~2 s |
+
+DI em compilação (Quarkus) e AOT nativo pesam menos que DI em runtime (Ktor) sobre a JVM.
+
+> Não é ranking — é a mesma troca dos slides de verbosidade, agora medida em MB. A T4 pede para **justificar** a escolha; aqui vai mais um eixo. Números e método em `docs/BENCHMARK.md`.
+
+---
+
 # Oficina — explorar o serviço principal <span class="pill-blue">em grupo</span>
 
 Com o MUSI aberto e `docker compose up` rodando:
