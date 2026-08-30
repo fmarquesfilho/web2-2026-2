@@ -87,7 +87,7 @@ style: |
 
 # Desenvolvimento de Sistemas Web II
 
-## A estrutura do MUSI, o serviço principal e os serviços Go
+## HTTP API e microserviços
 
 DIM0547 — Turma 01 · Aulas 03–04 (Sprint 0) · 31/08 e 02/09
 
@@ -129,6 +129,18 @@ Nas duas primeiras aulas fechamos a fronteira HTTP:
 ```
 
 Hoje vemos essas ideias encarnadas no MUSI: primeiro a estrutura do projeto, depois o serviço principal que vocês vão escolher construir.
+
+---
+
+# Onde estudar depois
+
+| Fonte | Foco |
+|---|---|
+| Aprenda Go com Testes · playlist da turma | Go do zero, orientado a testes |
+| Ktor · `ktor.io/docs` · Quarkus · `quarkus.io/guides` | O framework que o grupo escolher |
+| Valente — *Engenharia de Software Moderna* · `engsoftmoderna.info` | Arquitetura e camadas |
+
+O material completo está nas referências do fim.
 
 ---
 
@@ -192,8 +204,8 @@ Do cliente ao acervo e de volta, uma leitura:
    │               │                            │ filtra o acervo  │
    │               │                            │─────────────────►│
    │               │                            │◄─────────────────│
-   │               │◄──────── [ obras ] ────────│                   │
-   │◄─ 200 + Cache-Control/ETag ─│                                   │
+   │               │◄──────── [ obras ] ────────│                  │
+   │◄─ 200 + Cache-Control/ETag ─│                                 │
 ```
 
 A API traduz a query numa árvore de filtro, delega ao Go e devolve com os cabeçalhos de cache da aula 02.
@@ -464,7 +476,7 @@ A decisão é da equipe, e precisa de justificativa:
 | Preferência por rotas como código | Preferência por convenção e anotações |
 | Reuso do domínio `shared/` com o app | Ecossistema Java maduro, CDI, GraalVM |
 
-> Registrem a escolha e o porquê na proposta (seção 5). Não há resposta certa; o que vale é a qualidade da justificativa — é o que a tarefa T4 da Sprint 0 cobra.
+> Registrem a escolha e o porquê na proposta (seção 5). Não há resposta certa; o que vale é a qualidade da justificativa.
 
 ---
 
@@ -497,42 +509,11 @@ O mesmo comportamento, em lugares diferentes:
 - Ktor: mais linhas, mas o comportamento se lê num lugar, sem mágica; um `single` faltando vira teste (`ModulosTest.verify()`) no CI
 - Quarkus: menos linhas, mas você confia nas convenções; em troca, a injeção é verificada na compilação
 
-> A verbosidade do Ktor é o preço da explicitude: "o que está ligado está escrito". A brevidade do Quarkus é o preço da mágica. Nenhum é errado — é a troca que a T4 pede para justificar.
+> A verbosidade do Ktor é o preço da explicitude: "o que está ligado está escrito". A brevidade do Quarkus é o preço da mágica. Nenhum dos dois está errado, e a escolha vai depender de vários fatores.
 
 ---
 
-# Kotlin no backend não para de crescer
-
-O que começou no Android virou linguagem de servidor de primeira classe:
-
-| Sinal | 2025–2026 |
-|---|---|
-| Desenvolvedores Kotlin | ~2,5 milhões |
-| Devs de Spring que também usam Kotlin | 27% |
-| Kotlin Multiplatform | dobrou em um ano (7% → 18%) |
-| Fundação Kotlin | Meta entrou como primeiro membro Gold |
-
-Em produção: Expedia, Atlassian (Jira), Mercedes-Benz.io, entre muitos.
-
-> O Spring tornou o Kotlin *first-class*; o Ktor é escrito 100% em Kotlin. Não é aposta de nicho — é uma das cinco linguagens que os desenvolvedores mais querem adotar.
-
----
-
-# Por que o backend escolhe Kotlin
-
-| Motivo | O que resolve |
-|---|---|
-| Null safety | Menos `NullPointerException` em produção — está no sistema de tipos |
-| Corrotinas | Concorrência e I/O em streaming, sem a complexidade das threads |
-| Concisão | Menos boilerplate que Java, sobre a mesma JVM |
-| Interoperabilidade total | Adota-se aos poucos; reusa bibliotecas e frameworks Java |
-| Uma linguagem só | Domínio compartilhado entre backend, Android e web, via KMP |
-
-> É o que o MUSI mostra: o mesmo `shared/` no serviço Ktor e no app móvel. Escolher Ktor na T4 é também se alinhar com para onde o mercado está indo — e vale tanto para quem cursa Web II quanto Móveis.
-
----
-
-# O mesmo eixo, agora em memória
+# Uso de memória
 
 Footprint medido no MUSI (RSS em repouso, mesma máquina):
 
@@ -549,7 +530,7 @@ DI em compilação (Quarkus) e AOT nativo pesam menos que DI em runtime (Ktor) s
 
 ---
 
-# Oficina — explorar o serviço principal <span class="pill-blue">em grupo</span>
+# Exercício — explorar o serviço principal <span class="pill-blue">em grupo</span>
 
 Com o MUSI aberto e `docker compose up` rodando:
 
@@ -561,17 +542,7 @@ Com o MUSI aberto e `docker compose up` rodando:
   5. Comparem, no outro stack, como cada parte é declarada
 ```
 
-> No fim, cada grupo diz qual stack escolheria para o próprio projeto, e por quê. Essa é a decisão da T4.
-
----
-
-# Fecho de segunda
-
-Vocês viram o serviço principal inteiro: como recebe HTTP, resolve dependências, chama o serviço Go e devolve com cache e erro tratado — nos dois stacks.
-
-Quarta descemos ao que está do outro lado da chamada: os serviços em Go.
-
-> Entre hoje e quarta: escolham o stack do grupo, subam o MUSI com `docker compose up`, e explorem o Swagger da API escolhida.
+> No fim, cada grupo diz qual stack escolheria para o próprio projeto, e por quê.
 
 ---
 
@@ -749,7 +720,7 @@ O segundo serviço Go, e o caso em que Go se justifica por característica — A
    │──────────────►│  grava o mbid escolhido ─────────────────►│
 ```
 
-O serviço só coleta e apresenta; quem decide o vínculo é uma pessoa.
+> O serviço só coleta e apresenta; quem decide o vínculo é uma pessoa. Automatiza-se o trabalho de rede, não o trabalho de curadoria, que por sua vez permanece revisado por humanos.
 
 ---
 
@@ -803,27 +774,6 @@ O workflow roda a cada push e PR, um job por componente, e um job final que só 
 - A entrega de vocês precisa do essencial: build dos dois stacks (principal e Go), verde em `main`
 
 > `.github/workflows/ci.yml`. Comecem simples: um job que compila o serviço principal e um que compila o Go. Refinam nas próximas sprints.
-
----
-
-# Oficina — os serviços e o monorepo <span class="pill-blue">em grupo</span>
-
-```
-  1. Subam o serviço de busca:  go run ./cmd/servidor
-  2. Chamem /health e um POST /buscar com um filtro `tem`
-  3. Acrescentem um caso a contratos/exemplos/casos-de-busca.json
-     e vejam o teste carregá-lo (go test ./...)
-  4. No repo do grupo: criem mise.toml, docker-compose.yml e o CI
-  5. Abram o PR, vejam o CI rodar, e só então dêem merge
-```
-
-Exemplo de corpo para o passo 2:
-
-```json
-{ "tipo": "tem", "dimensao": "ritmo", "valor": "baiao" }
-```
-
-> Deixem o primeiro push vermelho de propósito e depois consertem. Ver o CI pegar o erro é metade do aprendizado.
 
 ---
 
