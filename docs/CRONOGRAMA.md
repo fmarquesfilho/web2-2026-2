@@ -5,6 +5,8 @@
 
 As aulas de 10/08, 12/08 e 17/08 não foram realizadas. O curso inicia em 19/08.
 
+**Ajuste de 11/09.** Por remanejamento de aulas no início de setembro, a Sprint 0 foi estendida e sua entrega passou para **16/09** (quarta), 23:59. A Sprint 1 foi condensada em duas aulas de conteúdo (**14 e 21/09**), com encontros de acompanhamento de projeto em **16 e 23/09**. As seções abaixo já refletem o ajuste.
+
 ---
 
 ## Legenda
@@ -14,7 +16,7 @@ As aulas de 10/08, 12/08 e 17/08 não foram realizadas. O curso inicia em 19/08.
 | 🟢 | Aula presencial |
 | 🎤 | Apresentação dos grupos (presencial ou online, conforme a coorte) |
 | 🔵 | Encontro online no Google Meet — aula ou apoio ao projeto |
-| 🚀 | Entrega da sprint, sexta-feira às 23:59 |
+| 🚀 | Entrega da sprint, às 23:59 |
 | 📚 | Prova escrita, presencial, em laboratório |
 | 🔴 | Feriado ou atividades suspensas |
 | — | Sem encontro |
@@ -25,7 +27,7 @@ As aulas de 10/08, 12/08 e 17/08 não foram realizadas. O curso inicia em 19/08.
 
 Uma Sprint 0 de quatro semanas, três sprints de projeto e um bloco final. Cada sprint tem duas ou três aulas presenciais com o conteúdo, um ou dois encontros online no horário da aula, e dois dias de apresentação na última semana — uma sessão online e uma em sala.
 
-Todos os grupos apresentam em todas as sprints, exceto na Sprint 0. A entrega vence na sexta-feira que encerra a sprint. As regras de nota estão em [AVALIACAO.md](AVALIACAO.md).
+Todos os grupos apresentam em todas as sprints, exceto na Sprint 0. As regras de nota estão em [AVALIACAO.md](AVALIACAO.md).
 
 ---
 
@@ -33,7 +35,7 @@ Todos os grupos apresentam em todas as sprints, exceto na Sprint 0. A entrega ve
 
 | Bloco | Período | Tema | Apresentações | Entrega |
 |-------|---------|------|---------------|---------|
-| Sprint 0 | 17/08 a 11/09 | Fundamentos e ambiente poliglota | — | 11/09 |
+| Sprint 0 | 17/08 a 14/09 | Fundamentos e ambiente poliglota | — | 16/09 |
 | Sprint 1 | 14/09 a 02/10 | Serviço de CRUD em Ktor ou Quarkus | 28 e 30/09 | 02/10 |
 | Sprint 2 | 05/10 a 23/10 | Microsserviço Go e gRPC | 14 e 19/10 | 23/10 |
 | Sprint 3 | 26/10 a 20/11 | Dados, cache e implantação | 16 e 18/11 | 20/11 |
@@ -71,7 +73,7 @@ Na Sprint 2 a ordem se inverte por causa do feriado de 12/10 e da prova de 21/10
 
 ## Sprint 0 — Fundamentos e ambiente poliglota
 
-**17/08 a 11/09. Entrega: 11/09 (sexta), 23:59.**
+**17/08 a 14/09. Entrega: 16/09 (quarta), 23:59.**
 
 | Data | Dia | Tipo | Atividade |
 |------|-----|------|-----------|
@@ -79,10 +81,10 @@ Na Sprint 2 a ordem se inverte por causa do feriado de 12/10 e da prova de 21/10
 | 19/08 | Qua | 🟢 | Apresentação do curso, dos critérios de avaliação e da arquitetura de referência. HTTP: recurso e representação, URI, métodos, idempotência, códigos de status e cabeçalhos. Arquitetura de serviços: monólito, monólito modular e microsserviços. **Kotlin com Ktor OU Java com Quarkus — escolha do grupo** |
 | 24/08 | Seg | 🟢 | Cache HTTP: frescor e validação, `Cache-Control`, `ETag` e concorrência otimista. REST: as restrições de Fielding e o modelo de maturidade de Richardson. Clean Architecture: regra de dependência, portas e adaptadores, e como ela é verificada. Formação de grupos, escolha de coorte e definição do domínio do projeto |
 | 26/08 | Qua | 🔵 | Encontro online — dúvidas sobre a proposta e o domínio |
-| 31/08 | Seg | 🟢 | Estrutura do monorepo MUSI e mapeamento das camadas em pacotes. O serviço principal em detalhe, nos dois stacks — Kotlin com Ktor e Java 25 com Quarkus: rotas, injeção de dependência, DTOs, cliente do serviço Go, erros e OpenAPI |
-| 02/09 | Qua | 🟢 | Fundamentos de Go: pacotes, interfaces, erros e contexto. Os serviços Go do MUSI (busca e conciliação). Ambiente reproduzível: tasks do `mise`, Docker Compose e primeiro workflow de CI. Oficina de montagem do monorepo |
+| 31/08 | Seg | 🔵 | Encontro online de acompanhamento de projetos (aula remanejada) |
+| 02/09 | Qua | 🔴 | Aula cancelada — conteúdo remanejado para 09 e 14/09 |
 | 07/09 | Seg | 🔴 | Independência do Brasil |
-| 09/09 | Qua | 🔵 | Encontro online — dúvidas sobre o pipeline e o ambiente |
+| 09/09 | Qua | 🟢 | Estrutura do monorepo MUSI e mapeamento das camadas em pacotes. O serviço principal em detalhe (Ktor/Quarkus): rotas, injeção de dependência, DTOs, cliente do serviço Go, erros e OpenAPI. |
 
 O que entregar e como é avaliado: [RUBRICAS.md](RUBRICAS.md#sprint-0). Guia com templates e exemplos: [SPRINT-0.md](SPRINT-0.md).
 
@@ -94,10 +96,10 @@ O que entregar e como é avaliado: [RUBRICAS.md](RUBRICAS.md#sprint-0). Guia com
 
 | Data | Dia | Tipo | Atividade |
 |------|-----|------|-----------|
-| 14/09 | Seg | 🟢 | **Visão comparativa**: Kotlin/Ktor × Java/Quarkus. Kotlin: corrotinas, DSL de roteamento, Koin. Java: CDI, RESTEasy Reactive, Panache. |
-| 16/09 | Qua | 🟢 | **Persistência e migrações**: Exposed (Kotlin) × Hibernate/Panache (Java). Flyway em ambos. Testes com Testcontainers |
-| 21/09 | Seg | 🔵 | Encontro online — dúvidas sobre o projeto |
-| 23/09 | Qua | 🟢 | **Testes e documentação**: JUnit 5 × kotlin-test; OpenAPI com `ktor-openapi` × `quarkus-smallrye-openapi`. Oficina sobre o projeto |
+| 14/09 | Seg | 🟢 | Conclui as pendências da Sprint 0 (Go, ambiente reproduzível e CI). Início da Sprint 1 — **visão comparativa**: Kotlin/Ktor × Java/Quarkus. Kotlin: corrotinas, DSL de roteamento, Koin. Java: CDI, RESTEasy Reactive, Panache |
+| 16/09 | Qua | 🔵 | Encontro online de acompanhamento de projetos. **Entrega da Sprint 0, 23:59** |
+| 21/09 | Seg | 🟢 | **Persistência e migrações**: Exposed (Kotlin) × Hibernate/Panache (Java), Flyway e Testcontainers. **Testes e documentação**: JUnit 5 × kotlin-test; OpenAPI com `ktor-openapi` × `quarkus-smallrye-openapi`. Oficina sobre o projeto |
+| 23/09 | Qua | 🔵 | Encontro online de acompanhamento de projetos |
 | 28/09 | Seg | 🎤 | Apresentações da Coorte B, online |
 | 30/09 | Qua | 🎤 | Apresentações da Coorte A, em sala de aula |
 
