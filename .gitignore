@@ -31,6 +31,10 @@ build/
 dist/
 node_modules/
 
+# Saídas e cache de build JVM (Gradle e Maven) — inclui exemplos/
+.gradle/
+target/
+
 # Slides gerados — o PDF é distribuído pelo SIGAA, não pelo repositório
 *.pdf
 slides/*.html
