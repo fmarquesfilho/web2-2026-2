@@ -20,6 +20,8 @@ Cada informação vive em um único documento. Em caso de divergência, vale o d
 | [Sistemática de Avaliação](docs/AVALIACAO.md) | **Pesos e regras de nota**, bônus, grupos, provas e integridade acadêmica |
 | [Rúbricas](docs/RUBRICAS.md) | **O que entregar** em cada sprint e como é avaliado |
 | [Guia da Sprint 0](docs/SPRINT-0.md) | Templates de visão do produto, MVP e da divisão Java × Go |
+| [Guia da Sprint 1](docs/SPRINT-1.md) · [tarefas](docs/SPRINT-1-TAREFAS.md) | Serviço de CRUD: persistência, migrações, arquitetura verificada, testes e OpenAPI |
+| [Leituras](leituras/) | Guias de leitura de cada aula (`web2-s1-pte1.md`, `web2-s1-pte2.md`, ...) |
 | [Stack Tecnológica](docs/STACK.md) | **Arquitetura de referência**, tecnologias, hospedagem gratuita e ambiente |
 
 ---
