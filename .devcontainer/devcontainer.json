@@ -1,0 +1,43 @@
+{
+  // Codespace de Web II: Java 25 e Maven para os exemplos Ktor e Quarkus, Docker para
+  // o PostgreSQL (docker compose, Testcontainers e Dev Services) e Go para a Sprint 2.
+  "name": "Web II — Kotlin, Java, Go e Docker",
+
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+
+  // 4 núcleos: Gradle ou Maven, a API e o PostgreSQL em container ao mesmo tempo.
+  "hostRequirements": { "cpus": 4 },
+
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "25",
+      "jdkDistro": "tem",
+      "installMaven": true
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/go:1": {}
+  },
+
+  // Baixa dependências e as imagens do PostgreSQL antes da aula, não durante.
+  "postCreateCommand": "bash .devcontainer/preparar.sh",
+
+  "forwardPorts": [8080, 8081],
+  "portsAttributes": {
+    "8080": { "label": "ktor-tarefas" },
+    "8081": { "label": "quarkus-tarefas" }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "fwcd.kotlin",
+        "redhat.java",
+        "redhat.vscode-quarkus",
+        "golang.go",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+
+  "remoteUser": "vscode"
+}

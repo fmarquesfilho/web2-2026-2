@@ -18,6 +18,11 @@ dependência (Koin × CDI) · **6** banco e migração (Flyway) · **7** reposit
 Os dois usam PostgreSQL 17 e a mesma migração (`V1__cria_tarefas.sql`). Testes e o modo dev
 do Quarkus precisam de Docker aberto.
 
+Sem Docker na máquina (no laboratório, por exemplo), use um Codespace deste repositório
+(Code → Codespaces). O `.devcontainer/` traz Java 25, Maven, Go e Docker, e já deixa as
+dependências e as imagens do PostgreSQL baixadas; a criação leva cerca de 5 minutos. Lá
+dentro, os comandos são os mesmos, e as portas 8080 e 8081 aparecem na aba **Portas**.
+
 A mesma requisição nos dois:
 
 ```bash
