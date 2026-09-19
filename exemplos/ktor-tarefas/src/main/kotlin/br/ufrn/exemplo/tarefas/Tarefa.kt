@@ -10,26 +10,20 @@ data class Tarefa(val id: Int, val titulo: String, val feita: Boolean = false)
 @Serializable
 data class NovaTarefa(val titulo: String)
 
-// A "porta": o que as rotas precisam, sem dizer quem fornece (regra de dependência).
+// A porta. `suspend`: a implementação com banco não pode travar a thread do servidor.
 interface RepositorioDeTarefas {
-    fun listar(): List<Tarefa>
-    fun adicionar(nova: NovaTarefa): Tarefa
+    suspend fun listar(): List<Tarefa>
+    suspend fun buscar(id: Int): Tarefa?
+    suspend fun adicionar(nova: NovaTarefa): Tarefa
 }
 
-// Implementação em memória. Na Sprint 1 (21/09) ela vira Postgres — e as rotas
-// não mudam, porque dependem da interface, não desta classe.
+// Implementação em memória: continua útil nos testes de rota, sem banco (RotasTest).
 class RepositorioEmMemoria : RepositorioDeTarefas {
-    private val tarefas = mutableListOf(
-        Tarefa(1, "Estudar Ktor"),
-        Tarefa(2, "Estudar Quarkus"),
-    )
+    private val tarefas = mutableListOf(Tarefa(1, "Estudar Ktor"), Tarefa(2, "Estudar Quarkus"))
     private var proximoId = 3
 
-    override fun listar(): List<Tarefa> = tarefas
-
-    override fun adicionar(nova: NovaTarefa): Tarefa {
-        val tarefa = Tarefa(proximoId++, nova.titulo)
-        tarefas.add(tarefa)
-        return tarefa
-    }
+    override suspend fun listar(): List<Tarefa> = tarefas.toList()
+    override suspend fun buscar(id: Int): Tarefa? = tarefas.find { it.id == id }
+    override suspend fun adicionar(nova: NovaTarefa): Tarefa =
+        Tarefa(proximoId++, nova.titulo).also { tarefas.add(it) }
 }
