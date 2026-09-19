@@ -1,13 +1,12 @@
 package br.ufrn.exemplo.tarefas;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-// @ApplicationScoped: um único bean gerenciado pelo CDI, injetado onde for pedido.
-// É o equivalente Java ao `single { ... }` do Koin no lado Ktor.
-// Na Sprint 1 (21/09) esta implementação vira Postgres com Panache.
-@ApplicationScoped
+// Sem @ApplicationScoped desde 21/09: o bean agora é o RepositorioPanache. Com os dois
+// anotados, o CDI não saberia qual injetar (dependência ambígua). Fica para testes
+// de unidade, que o constroem com `new`.
 public class RepositorioEmMemoria implements RepositorioDeTarefas {
 
     private final List<Tarefa> tarefas = new ArrayList<>(List.of(
@@ -17,7 +16,12 @@ public class RepositorioEmMemoria implements RepositorioDeTarefas {
 
     @Override
     public List<Tarefa> listar() {
-        return tarefas;
+        return List.copyOf(tarefas);
+    }
+
+    @Override
+    public Optional<Tarefa> buscar(int id) {
+        return tarefas.stream().filter(t -> t.id() == id).findFirst();
     }
 
     @Override
