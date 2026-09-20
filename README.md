@@ -34,6 +34,46 @@ O semestre é organizado em uma Sprint 0, três sprints de projeto e um bloco fi
 
 ---
 
+## Exemplos das aulas
+
+Construídos do zero em aula, passo a passo. Cada `PASSOS.md` reconstrói o exemplo do
+primeiro comando ao último, e a pasta contém o estado final.
+
+| Exemplo | Stack | Passos |
+|---|---|---|
+| [`exemplos/ktor-tarefas`](exemplos/ktor-tarefas) | Kotlin · Ktor · Koin · Exposed | [`PASSOS.md`](exemplos/ktor-tarefas/PASSOS.md) |
+| [`exemplos/quarkus-tarefas`](exemplos/quarkus-tarefas) | Java 25 · Quarkus · CDI · Panache | [`PASSOS.md`](exemplos/quarkus-tarefas/PASSOS.md) |
+
+Os dois têm os mesmos nove passos, numerados igual, para a leitura lado a lado. Do Passo 6
+em diante é preciso ter o **Docker** aberto: o Ktor sobe o PostgreSQL com `docker compose`,
+e o Quarkus, com o Dev Services.
+
+### Como rodar
+
+O [`mise.toml`](mise.toml) da raiz fixa as versões (JDK 25, Maven 3.9) e dá um nome curto a
+cada comando dos passos:
+
+```bash
+mise install                 # uma vez: baixa o JDK e o Maven
+mise tasks                   # a lista completa
+
+mise run ktor:banco          # PostgreSQL do exemplo Ktor
+mise run ktor:run            # API Ktor na 8080
+mise run ktor:test           # testes (o de integração precisa de Docker)
+
+mise run quarkus:dev         # API Quarkus na 8081, com banco do Dev Services
+mise run quarkus:test
+```
+
+O `mise` é conveniência, não requisito: cada task mostra, no `mise.toml`, o comando completo
+(`./gradlew run`, `mvn quarkus:dev`) que continua valendo. Instalação:
+[mise.jdx.dev](https://mise.jdx.dev/getting-started.html).
+
+**Sem instalar nada:** crie um Codespace (Code → Codespaces). O
+[`.devcontainer/`](.devcontainer) traz Java 25, Maven, Go, Docker e o próprio `mise`.
+
+---
+
 ## Licença
 
 Material licenciado sob [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).

@@ -26,8 +26,8 @@ fun main() {
 
 Testar: `curl localhost:8080` → `no ar`.
 
-> O servidor é código: `embeddedServer` + engine (CIO). Não há é necessário instanciar 
-> contêiner algum de aplicação, e não é necessário configurar nenhum XML.
+> O servidor é código: `embeddedServer` + engine (CIO). Não é necessário instanciar
+> contêiner de aplicação nem configurar XML nenhum.
 
 📖 [Ktor — configuration in code](https://ktor.io/docs/server-configuration-code.html)
 
@@ -212,3 +212,41 @@ Abra `http://localhost:8080/docs`; a especificação fica em `/docs/documentatio
 > `describe` é **experimental** no Ktor 3.5 (`@OptIn(ExperimentalKtorApi::class)`).
 
 📖 [Ktor — OpenAPI specification generation](https://ktor.io/docs/openapi-spec-generation.html)
+
+---
+
+## Passo 10 — o ambiente em tasks
+
+Os comandos dos nove passos viram nomes curtos no [`mise.toml`](../../mise.toml) da raiz do
+repositório, que também fixa as versões do JDK e do Maven:
+
+```toml
+[tools]
+java  = "temurin-25"
+maven = "3.9"
+
+[tasks."ktor:banco"]
+description = "Sobe o PostgreSQL 17 do exemplo Ktor (porta 5432)"
+dir = "exemplos/ktor-tarefas"
+run = "docker compose up -d"
+
+[tasks."ktor:run"]
+dir = "exemplos/ktor-tarefas"
+run = "./gradlew run"
+```
+
+```bash
+mise install          # uma vez: JDK 25 e Maven
+mise tasks            # a lista
+mise run ktor:banco   # == docker compose up -d
+mise run ktor:run     # == ./gradlew run
+mise run ktor:test    # == ./gradlew test
+mise run ktor:demo    # cria e lista uma tarefa, com curl
+```
+
+> Isto não muda o projeto: cada task é o mesmo comando dos passos anteriores, com nome. O
+> ganho é o `mise install`, que dá a mesma versão de JDK para todo mundo, e o
+> `mise tasks`, que documenta o projeto sozinho. No Codespace, o `.devcontainer` já instala
+> tudo isso.
+
+📖 [mise — tasks](https://mise.jdx.dev/tasks/)

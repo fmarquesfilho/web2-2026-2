@@ -204,3 +204,36 @@ Abra `http://localhost:8081/q/swagger-ui` (modo dev); a especificação fica em 
 > `quarkus.swagger-ui.always-include=true`.
 
 📖 [Quarkus — OpenAPI and Swagger UI](https://quarkus.io/guides/openapi-swaggerui)
+
+---
+
+## Passo 10 — o ambiente em tasks
+
+Os comandos dos nove passos viram nomes curtos no [`mise.toml`](../../mise.toml) da raiz do
+repositório, que também fixa as versões do JDK e do Maven:
+
+```toml
+[tools]
+java  = "temurin-25"
+maven = "3.9"
+
+[tasks."quarkus:dev"]
+description = "Sobe a API Quarkus na 8081, em modo dev (banco pelo Dev Services)"
+dir = "exemplos/quarkus-tarefas"
+run = "mvn -B quarkus:dev"
+```
+
+```bash
+mise install            # uma vez: JDK 25 e Maven
+mise tasks              # a lista
+mise run quarkus:dev    # == mvn -B quarkus:dev
+mise run quarkus:test   # == mvn -B -ntp test
+mise run quarkus:pacote # empacota e roda como em produção (java -jar)
+mise run quarkus:demo   # cria e lista uma tarefa, com curl
+```
+
+> O mesmo `mise.toml` serve aos dois exemplos, com os prefixos `ktor:` e `quarkus:`. Repare
+> que a versão do Java deixa de depender do que está instalado na máquina — é a mesma ideia
+> do `maven.compiler.release` no `pom.xml`, agora para a ferramenta.
+
+📖 [mise — tasks](https://mise.jdx.dev/tasks/)

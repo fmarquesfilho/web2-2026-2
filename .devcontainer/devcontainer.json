@@ -15,7 +15,10 @@
       "installMaven": true
     },
     "ghcr.io/devcontainers/features/docker-in-docker:2": {},
-    "ghcr.io/devcontainers/features/go:1": {}
+    "ghcr.io/devcontainers/features/go:1": {},
+    // Executor das tasks do mise.toml (`mise tasks`). As ferramentas continuam vindo
+    // das features acima; o `mise install` do preparar.sh alinha as versões.
+    "ghcr.io/devcontainers-contrib/features/mise:1": {}
   },
 
   // Baixa dependências e as imagens do PostgreSQL antes da aula, não durante.
