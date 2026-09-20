@@ -98,7 +98,7 @@ O que entregar e como é avaliado: [RUBRICAS.md](RUBRICAS.md#sprint-0). Guia com
 |------|-----|------|-----------|
 | 14/09 | Seg | 🟢 | Conclui as pendências da Sprint 0 (Go e ambiente reproduzível). Início da Sprint 1 — **visão comparativa**: Kotlin/Ktor × Java/Quarkus. Kotlin: corrotinas, DSL de roteamento, Koin. Java: CDI e Quarkus REST |
 | 16/09 | Qua | 🔵 | Encontro online de acompanhamento de projetos. **Entrega da Sprint 0, 23:59** |
-| 21/09 | Seg | 🟢 | **Persistência e migrações**: Exposed (Kotlin) × Hibernate/Panache (Java), Flyway e Testcontainers. **Testes e documentação**: JUnit 5 × kotlin-test; OpenAPI com `ktor-openapi` × `quarkus-smallrye-openapi`. Oficina sobre o projeto |
+| 21/09 | Seg | 🔵 | **Persistência e migrações**: Exposed (Kotlin) × Hibernate/Panache (Java), Flyway e Testcontainers. **Testes e documentação**: JUnit 5 × kotlin-test; OpenAPI com `ktor-openapi` × `quarkus-smallrye-openapi`. |
 | 23/09 | Qua | 🔵 | Encontro online de acompanhamento de projetos |
 | 28/09 | Seg | 🎤 | Apresentações da Coorte B, online |
 | 30/09 | Qua | 🎤 | Apresentações da Coorte A, em sala de aula |
