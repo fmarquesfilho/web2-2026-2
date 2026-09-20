@@ -465,6 +465,23 @@ Os exemplos: `exemplos/ktor-tarefas` e `exemplos/quarkus-tarefas`, **passos 6 a 
 
 ---
 
+# No MUSI
+
+| O que a rubrica pede | Onde ver |
+|---|---|
+| Duas entidades com relacionamento | `Obra` 1:N `Anotação`, com FK e `ON DELETE CASCADE` |
+| Rota aninhada | `/obras/{id}/anotacoes/{anotacaoId}` |
+| Paginação e filtros no SQL | `?pagina=&tamanho=&ordem=&artista=&dimensao=&valor=` |
+| A mesma migração em dois stacks | `db/migration` igual nos dois; o CI compara com `diff -r` |
+| Teste de arquitetura | ArchUnit no Ktor **e** no Quarkus |
+| Decisão registrada | `docs/decisoes/0004-persistencia-postgresql-flyway.md` |
+
+`github.com/fmarquesfilho/musi` · a busca por faceta continua no serviço Go, em `/busca`
+
+> Sem banco configurado, as duas APIs sobem assim mesmo: a busca funciona e o CRUD responde `503`.
+
+---
+
 # Entrega da Sprint 1 — 02/10, 23:59
 
 | Critério | Peso |

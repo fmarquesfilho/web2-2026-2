@@ -67,7 +67,7 @@ Além da entrega técnica, a nota da sprint tem a atividade no repositório (30%
 
 - Validem todas as entradas: Bean Validation no Quarkus (`@NotBlank`, `@Valid`), validação explícita ou biblioteca de validação no Ktor. Entrada inválida é `400` (ou `422`), nunca `500`.
 - Erros no formato *problem details* (`application/problem+json`), tratados num lugar só (`StatusPages` no Ktor, `ExceptionMapper` no Quarkus).
-- OpenAPI gerado do código: `describe` do Ktor (ou o `ktor-openapi` do MUSI) com Swagger UI; `quarkus-smallrye-openapi` no Quarkus. Tipos corretos nos parâmetros e todas as respostas documentadas, inclusive as de erro.
+- OpenAPI gerado do código: `describe` do Ktor (o gerador nativo, usado no exemplo e no MUSI) ou o `ktor-openapi` do smiley4, com Swagger UI; `quarkus-smallrye-openapi` no Quarkus. Tipos corretos nos parâmetros e todas as respostas documentadas, inclusive as de erro.
 
 ---
 

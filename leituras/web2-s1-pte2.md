@@ -921,11 +921,12 @@ paths:
 > ele chega como texto. Quem gera cliente a partir dessa especificação recebe o tipo
 > errado. Declare o tipo real.
 
-O MUSI usa outra biblioteca para o mesmo fim: `io.github.smiley4:ktor-openapi` (o
+Há uma alternativa mantida pela comunidade, `io.github.smiley4:ktor-openapi` (o
 "ktor-openapi" do plano de curso), em que a documentação vai como primeiro argumento de
-`get`/`post` e a especificação sai em `/openapi.json`. O exemplo usa o gerador nativo do
-Ktor, mantido pela própria JetBrains. Os dois produzem OpenAPI a partir do código; o grupo
-escolhe um.
+`get`/`post`. Os dois produzem OpenAPI a partir do código, e o grupo escolhe um. O MUSI
+usava o smiley4 e passou para o gerador nativo, mantido pela própria JetBrains: lá, os
+blocos `describe` de todas as rotas ficam num arquivo à parte (`RotasDoc.kt`), o que
+mantém a árvore de rotas legível sem perder a geração a partir do código.
 
 📖 Ref. Ktor — OpenAPI specification generation: <https://ktor.io/docs/openapi-spec-generation.html>
 
@@ -1056,6 +1057,48 @@ não faria nada: os dois exemplos compartilham a mesma migração.
 As duas primeiras linhas são escolhas defensáveis. A terceira é uma falha do Quarkus sem
 validação (seção 5.6).
 
+### 9.4 No MUSI: o mesmo assunto, em escala de projeto
+
+O exemplo desta aula tem uma entidade e um repositório. O projeto de referência
+(`github.com/fmarquesfilho/musi`) faz o que a rubrica da Sprint 1 pede, nos dois stacks, e
+serve para ver as mesmas ideias com mais peças:
+
+| Para ver | Onde, no MUSI |
+|---|---|
+| Duas entidades com relacionamento | `Obra` 1:N `Anotação`, com chave estrangeira e `ON DELETE CASCADE`, na migração `V1` |
+| Rota aninhada | `/obras/{id}/anotacoes/{anotacaoId}` |
+| Paginação e filtros no SQL | `?pagina=&tamanho=&ordem=&artista=&anoDe=&anoAte=&dimensao=&valor=`, com teto de 100 |
+| A mesma migração em dois stacks | pastas `db/migration` iguais em `api-ktor` e `api-quarkus`, comparadas pelo CI |
+| Teste de arquitetura | `ArquiteturaTest`, com ArchUnit, nos dois stacks |
+| Decisão registrada | `docs/decisoes/0004-persistencia-postgresql-flyway.md` |
+
+Quatro armadilhas que apareceram ao montar isso, e que provavelmente aparecerão no projeto
+de vocês:
+
+> Erro comum (Quarkus): a aplicação não sobe sem banco.
+> Sem URL, o Quarkus desativa o datasource sozinho — mas o Hibernate e o Flyway continuam
+> exigindo um, e a subida falha com `Unable to find datasource '<default>'`. Para subir sem
+> banco (o caso de um deploy antes de ter Postgres), é preciso desligar os dois:
+> `quarkus.hibernate-orm.active=false` e `quarkus.flyway.active=false`.
+
+> Erro comum (Quarkus): parâmetro de consulta com tipo errado vira `404`.
+> `?pagina=abc` em `@QueryParam("pagina") Integer pagina` não dá `400`: a especificação
+> Jakarta REST manda devolver `404`. É a mesma regra da tabela da seção 9.3, agora na query
+> string. Para responder `400`, receba como `String` e converta à mão.
+
+> Erro comum (Exposed 1.5): `uuid()` não é `java.util.UUID`.
+> Os pacotes agora são `org.jetbrains.exposed.v1.core` e `.v1.jdbc`, e `uuid()` mapeia
+> `kotlin.uuid.Uuid`. Para a `java.util.UUID` de sempre, a coluna é `javaUUID()`.
+
+> Erro comum (Hibernate): trocar uma lista inteira num `PUT`.
+> Com `@ElementCollection` e `@OrderColumn`, substituir a lista pode violar a chave da
+> tabela filha quando os itens só trocam de posição. Esvaziar a coleção e dar `flush()`
+> antes de repor resolve.
+
+O MUSI também mostra como rodar a suíte sem Docker: os testes de integração levam a tag
+`integracao`, e `./gradlew test -PsemDocker` (ou `mvn test -DexcludedGroups=integracao`)
+deixa só os que não precisam de banco. No CI, tudo roda.
+
 ---
 
 ## 10. Exercícios e dúvidas frequentes
@@ -1130,7 +1173,7 @@ Ktor e Exposed
 - Ktor — OpenAPI specification generation: <https://ktor.io/docs/openapi-spec-generation.html>
 - Ktor — OpenAPI: <https://ktor.io/docs/server-openapi.html>
 - Ktor — Swagger UI: <https://ktor.io/docs/server-swagger-ui.html>
-- ktor-openapi-tools (smiley4), usado no MUSI: <https://github.com/SMILEY4/ktor-openapi-tools>
+- ktor-openapi-tools (smiley4), a alternativa da comunidade: <https://github.com/SMILEY4/ktor-openapi-tools>
 
 Quarkus
 - Simplified Hibernate ORM with Panache: <https://quarkus.io/guides/hibernate-orm-panache>

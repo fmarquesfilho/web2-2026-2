@@ -144,7 +144,7 @@ em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **02/10, 23:59**.
 **Objetivo.** Documentação da API que sai do código e não fica desatualizada.
 
 **O que fazer.**
-- [ ] Ktor: `ktor-server-routing-openapi` com `describe`, e Swagger UI (ou o `ktor-openapi` do MUSI); Quarkus: `quarkus-smallrye-openapi`
+- [ ] Ktor: `ktor-server-routing-openapi` com `describe`, e Swagger UI (ou o `ktor-openapi` do smiley4); Quarkus: `quarkus-smallrye-openapi`
 - [ ] Documentar todas as rotas, com os tipos certos nos parâmetros e as respostas de erro
 - [ ] Deixar a especificação e a Swagger UI acessíveis e o endereço no `README.md`
 
