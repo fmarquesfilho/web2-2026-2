@@ -19,11 +19,26 @@ Docker aberto.
 `src/main/java/br/ufrn/exemplo/tarefas/RecursoDeTarefas.java`:
 
 ```java
+package br.ufrn.exemplo.tarefas;
+
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+
 @Path("/tarefas")
 public class RecursoDeTarefas {
     @GET
     public String listar() { return "no ar"; }
 }
+```
+
+E a porta, em `src/main/resources/application.properties` — sem ela, o Quarkus sobe na
+8080, a mesma do exemplo Ktor:
+
+```properties
+# Porta 8081 para rodar lado a lado com o exemplo Ktor (8080).
+quarkus.http.port=8081
+# Porta dos testes fora da 8081, para testar com o dev mode aberto.
+quarkus.http.test-port=8083
 ```
 
 Testar: `curl localhost:8081/tarefas` → `no ar`.
