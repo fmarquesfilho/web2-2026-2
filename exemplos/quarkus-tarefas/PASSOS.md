@@ -1,7 +1,9 @@
 # Passos — API de Tarefas em Quarkus
 
-Esta pasta contém o estado final (depois de concluído o Passo 9); use os passos para reconstruir
-ao vivo a partir de um projeto limpo. Passos 1 a 5: aula de 14/09. Passos 6 a 9: aula de 21/09. Os passos são numerados igual aos do Ktor, para a
+Esta pasta contém o estado final (depois de concluído o Passo 12); use os passos para reconstruir
+ao vivo a partir de um projeto limpo. Passos 1 a 5: aula de 14/09. Passos 6 a 12: segunda parte
+da Sprint 1, em vídeo. Até o Passo 11, todo o código fica no pacote `br.ufrn.exemplo.tarefas`;
+no Passo 12 ele se divide em `dominio` e `adaptadores`. Os passos são numerados igual aos do Ktor, para a
 comparação ficar lado a lado.
 
 Para partir de um repositório limpo, gere com
@@ -252,3 +254,87 @@ mise run quarkus:demo   # cria e lista uma tarefa, com curl
 > do `maven.compiler.release` no `pom.xml`, agora para a ferramenta.
 
 📖 [mise — tasks](https://mise.jdx.dev/tasks/)
+
+
+---
+
+## Passo 11 — Validação e erros em *problem details*
+
+A regra fica no domínio, em Java puro; o recurso só lança; os `@ServerExceptionMapper`
+decidem o status.
+
+```java
+// NovaTarefa.java — `null` também conta: com Jackson, `{}` chega como título nulo
+public record NovaTarefa(String titulo) {
+    public List<String> violacoes() {
+        if (titulo == null || titulo.isBlank()) return List.of("titulo: não pode ficar em branco");
+        if (titulo.length() > 200) return List.of("titulo: no máximo 200 caracteres");
+        return List.of();
+    }
+}
+
+// RecursoDeTarefas.java
+@POST
+public Response criar(NovaTarefa nova) {
+    if (nova == null) throw new BadRequestException("O corpo da requisição é obrigatório");
+    List<String> violacoes = nova.violacoes();
+    if (!violacoes.isEmpty()) throw new EntradaInvalida(violacoes);
+    Tarefa criada = repositorio.adicionar(nova);
+    return Response.created(URI.create("/tarefas/" + criada.id())).entity(criada).build();
+}
+
+// Erros.java — o equivalente do StatusPages
+@ServerExceptionMapper
+public Response entradaInvalida(EntradaInvalida e) { return problema(422, /* ... */); }
+```
+
+`Erros.java` também traduz `WebApplicationException` (o `404` e o `400` do próprio Jakarta
+REST), `MismatchedInputException` (campo com tipo errado) e qualquer `RuntimeException`
+(`500`, sem detalhe interno), sempre em `application/problem+json`.
+
+| Pedido | Resposta |
+|---|---|
+| `POST {"titulo":"   "}` | `422` |
+| `POST {}` | `422` — antes deste passo, `500` (o `NULL` chegava ao banco) |
+| `POST` sem corpo | `400` |
+| `GET /tarefas/abc` | `404` — a especificação Jakarta REST manda |
+| `GET /tarefas/9999` | `404` |
+| `POST` válido | `201`, com `Location` |
+
+> Alternativa comum no Quarkus: Bean Validation (`quarkus-hibernate-validator`,
+> `@NotBlank` no record, `@Valid` no parâmetro). Aqui a regra fica numa função do domínio,
+> igual à do Ktor, para o domínio não depender de anotação de framework (Passo 12). O MUSI
+> usa as duas: Bean Validation para a forma, regras do domínio para o conteúdo.
+
+📖 [RFC 9457 — Problem Details](https://www.rfc-editor.org/rfc/rfc9457) · [Quarkus REST — exception mapping](https://quarkus.io/guides/rest#exception-mapping)
+
+---
+
+## Passo 12 — Camadas em pacotes e o teste de arquitetura
+
+```
+br.ufrn.exemplo.tarefas
+├── dominio/       Tarefa, NovaTarefa, EntradaInvalida, RepositorioDeTarefas
+└── adaptadores/
+    ├── http/      RecursoDeTarefas, Erros, Problema
+    ├── banco/     TarefaEntidade, RepositorioPanache
+    └── memoria/   RepositorioEmMemoria
+```
+
+```java
+// src/test/java/.../arquitetura/ArquiteturaTest.java (ArchUnit 1.5.0)
+static final ArchRule REGRA_DO_DOMINIO = noClasses().that().resideInAPackage("..dominio..")
+        .should().dependOnClassesThat().resideInAnyPackage(
+                "jakarta..", "io.quarkus..", "org.hibernate..", "com.fasterxml..", "java.sql..",
+                "..adaptadores..");
+```
+
+Dependência nova: `com.tngtech.archunit:archunit:1.5.0`, escopo `test`.
+
+Confira que a regra **falha** quando deve: dê à `Tarefa` um método que devolva
+`jakarta.ws.rs.core.Response` e rode `mvn test` — `Architecture Violation ... was violated (3 times)`.
+
+> Mudou de pacote e o `mvn quarkus:dev` acusou `GET /tarefas is declared by` duas classes?
+> São `.class` antigos no `target/`: `mvn clean` resolve.
+
+📖 [ArchUnit — User Guide](https://www.archunit.org/userguide/html/000_Index.html)

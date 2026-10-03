@@ -52,7 +52,7 @@
       <artifactId>quarkus-rest-jackson</artifactId>
     </dependency>
 
-    <!-- Persistência (21/09): Hibernate ORM com Panache, driver, migrações -->
+    <!-- Persistência (Passo 6): Hibernate ORM com Panache, driver, migrações -->
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-hibernate-orm-panache</artifactId>
@@ -65,7 +65,7 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-flyway</artifactId>
     </dependency>
-    <!-- OpenAPI gerado dos recursos + Swagger UI -->
+    <!-- OpenAPI gerado dos recursos + Swagger UI (Passo 9) -->
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-openapi</artifactId>
@@ -79,6 +79,13 @@
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- Teste de arquitetura: a regra de dependência verificada no bytecode (Passo 12) -->
+    <dependency>
+      <groupId>com.tngtech.archunit</groupId>
+      <artifactId>archunit</artifactId>
+      <version>1.5.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

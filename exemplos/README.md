@@ -1,7 +1,8 @@
 # Exemplos da aula — a mesma API em dois stacks
 
-Uma API de tarefas, construída do zero. Serve às aulas de **14/09** (visão comparativa Kotlin/Ktor ×
-Java/Quarkus) e **21/09** (persistência, migrações, testes e OpenAPI).
+Uma API de tarefas, construída do zero. Serve à aula de **14/09** (visão comparativa Kotlin/Ktor ×
+Java/Quarkus) e à segunda parte da Sprint 1, em vídeo (persistência, migrações, testes, OpenAPI,
+validação e arquitetura).
 
 | Pasta | Stack | Roda em | Reconstruir ao vivo |
 |-------|-------|---------|---------------------|
@@ -13,7 +14,9 @@ As versões acompanham o MUSI (Kotlin 2.4.10 / Ktor 3.5.2 / Quarkus 3.28.2 / Jav
 Os passos são numerados igualmente nos dois: **1** servidor no ar · **2** modelo e
 `GET` em JSON · **3** `POST` · **4** repositório por interface · **5** injeção de
 dependência (Koin × CDI) · **6** banco e migração (Flyway) · **7** repositório com banco
-(Exposed × Panache) · **8** testes (Testcontainers × Dev Services) · **9** OpenAPI.
+(Exposed × Panache) · **8** testes (Testcontainers × Dev Services) · **9** OpenAPI ·
+**10** tasks do `mise` · **11** validação e *problem details* · **12** camadas e teste de
+arquitetura (ArchUnit).
 
 Os dois usam PostgreSQL 17 e a mesma migração (`V1__cria_tarefas.sql`). Testes e o modo dev
 do Quarkus precisam de Docker aberto.

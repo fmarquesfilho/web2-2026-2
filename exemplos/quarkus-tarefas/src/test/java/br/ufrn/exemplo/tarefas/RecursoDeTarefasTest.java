@@ -1,6 +1,8 @@
 package br.ufrn.exemplo.tarefas;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 
@@ -22,10 +24,12 @@ class RecursoDeTarefasTest {
 
     @Test
     void criaEDepoisBuscaPeloId() {
-        int id = given().contentType(ContentType.JSON).body("{\"titulo\":\"Escrever testes\"}")
+        var resposta = given().contentType(ContentType.JSON).body("{\"titulo\":\"Escrever testes\"}")
                 .when().post("/tarefas")
                 .then().statusCode(201)
-                .extract().path("id");
+                .extract();
+        int id = resposta.path("id");
+        assertThat(resposta.header("Location"), endsWith("/tarefas/" + id));
 
         given().when().get("/tarefas/" + id)
                 .then().statusCode(200)
@@ -35,5 +39,22 @@ class RecursoDeTarefasTest {
     @Test
     void idInexistenteDevolve404() {
         given().when().get("/tarefas/9999").then().statusCode(404);
+    }
+
+    @Test
+    void tituloEmBrancoDevolve422EmProblemDetails() {
+        given().contentType(ContentType.JSON).body("{\"titulo\":\"   \"}")
+                .when().post("/tarefas")
+                .then().statusCode(422)
+                .contentType("application/problem+json")
+                .body("violacoes", hasItem("titulo: não pode ficar em branco"));
+    }
+
+    @Test
+    void corpoSemTituloNaoChegaAoBanco() {
+        // Antes do Passo 11, este POST dava 500: o título nulo violava o NOT NULL da tabela.
+        given().contentType(ContentType.JSON).body("{}")
+                .when().post("/tarefas")
+                .then().statusCode(422);
     }
 }
