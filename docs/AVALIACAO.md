@@ -10,15 +10,14 @@ Média aritmética das três unidades. Não há listas de exercícios: o domíni
 
 | Unidade | Componente | Peso |
 |---------|-----------|------|
-| U1 | Sprint 0 | 20% |
-| | Sprint 1 | 40% |
-| | Sprint 2 | 40% |
-| U2 | Sprint 3 | 60% |
-| | Prova | 40% |
-| U3 | Entrega final | 60% |
-| | Prova | 40% |
+| U1 | Sprint 0 | 30% |
+| | Sprint 1 | 70% |
+| U2 | Prova | 100% |
+| U3 | Sprint 2 (entrega final) | 100% |
 
-São aplicadas duas provas: a prova escrita, obrigatória, e a prova de reposição, opcional e cumulativa. Vale a **maior das duas notas**, e é ela que entra na U2 e na U3. A U1 não tem prova, e fecha antes da prova de reposição, de modo que cada estudante conhece o próprio desempenho antes de decidir se vai refazer.
+São aplicadas duas provas: a prova escrita, obrigatória, e a prova de reposição, opcional e cumulativa. Vale a **maior das duas notas**, e é ela a nota da U2. A U1 fecha com a entrega da Sprint 1, e a nota da primeira prova sai antes da reposição, de modo que cada estudante conhece o próprio desempenho antes de decidir se vai refazer.
+
+Esta divisão vale desde o ajuste de 03/10, que reduziu o semestre a três entregas: Sprint 0, Sprint 1 e Sprint 2 (ver [CRONOGRAMA.md](CRONOGRAMA.md)).
 
 Datas de fechamento das unidades e de todas as entregas: [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral).
 
@@ -32,7 +31,7 @@ Aprovação conforme o Regulamento dos Cursos de Graduação da UFRN: média igu
 |------------|------|
 | A. Entrega técnica, conforme [RUBRICAS.md](RUBRICAS.md) | 50% |
 | B. Atividade no repositório | 30% |
-| C. Comunicação: vídeo e apresentação | 20% |
+| C. Comunicação: vídeo e *daily meeting* | 20% |
 
 ```
 Nota do grupo   = 0,50·A + 0,30·B + 0,20·C
@@ -90,20 +89,15 @@ O fator não eleva a nota individual acima da nota do grupo.
 
 Obrigatório em todas as sprints. Link não listado ou público no YouTube, registrado no `README.md`. Todos os integrantes devem falar.
 
-### 4.2 Apresentação
+### 4.2 Daily meeting
 
-Todos os grupos apresentam ao final de cada sprint, exceto na Sprint 0.
+No fim de cada sprint, exceto na Sprint 0, o professor conversa com cada grupo no formato de uma *daily meeting*. Ela substitui as apresentações por coorte previstas no início do semestre; as coortes A e B deixam de valer.
 
-| Coorte | Formato |
-|--------|---------|
-| B | Online, por Google Meet |
-| A | Presencial, em sala de aula |
+É uma conversa rápida, **online, pelo Google Meet**. O grupo não precisa preparar nada: mostra o que fez e diz o que pretende fazer até a entrega. O professor chama os grupos um a um pelo Discord; não é preciso ficar na chamada antes da sua vez. O grupo que preferir conversar em sala avisa com antecedência e faz a sua *daily* na aula presencial anterior às sessões online.
 
-As datas de cada sessão estão em [CRONOGRAMA.md](CRONOGRAMA.md#apresentações).
+As datas estão em [CRONOGRAMA.md](CRONOGRAMA.md#daily-meetings). As reuniões de 28 e 30/09 foram as *daily meetings* da Sprint 1.
 
-A coorte é escolhida na Sprint 0 e vale para o semestre. Se a enquete indicar preferência majoritária pelo online, a sessão presencial também passa a ser online.
-
-C é a média entre vídeo e apresentação. Na Sprint 0, C é a nota do vídeo. O docente pode dirigir perguntas a qualquer integrante sobre qualquer parte da entrega.
+C é a média entre o vídeo e a *daily meeting*. Na Sprint 0, C é a nota do vídeo. O docente pode dirigir perguntas a qualquer integrante sobre qualquer parte da entrega.
 
 ---
 
@@ -120,22 +114,20 @@ Condições: declaração na Sprint 0; produto comum com repositórios vinculado
 - De 1 a 4 integrantes. Cinco apenas mediante justificativa aprovada.
 - Formação até a entrega da Sprint 0.
 - Alterações de composição valem a partir da sprint seguinte, comunicadas antes do encerramento da sprint em curso.
-- Não são aceitas alterações após a entrega da Sprint 3.
+- Não são aceitas alterações após a entrega da Sprint 1.
 
 ---
 
 ## 7. Provas escritas
 
-| Prova | Conteúdo |
-|-------|----------|
-| Prova escrita, obrigatória | Sprints 0 a 2: HTTP, arquitetura de serviços, Clean Architecture, Kotlin/Ktor ou Java/Quarkus, JPA/Exposed, Flyway, testes com Testcontainers, Go, Protocol Buffers e gRPC |
-| Prova de reposição, opcional | Todo o conteúdo da primeira prova, acrescido da Sprint 3: PostgreSQL gerenciado, modelagem e índices, estratégias de cache, implantação em containers, logs estruturados e health checks |
+| Prova | Data | Conteúdo |
+|-------|------|----------|
+| Prova escrita, obrigatória | 09/11 | Sprints 0, 1 e 2: HTTP, arquitetura de serviços, Clean Architecture, Kotlin/Ktor ou Java/Quarkus, JPA/Exposed, Flyway, testes com Testcontainers, validação e *problem details*, Go, Protocol Buffers, gRPC e implantação em containers |
+| Prova de reposição, opcional | 02/12 | O mesmo conteúdo da prova escrita |
 
 Ambas são individuais, com questões fechadas, no Multiprova, presenciais, em laboratório, aplicadas no horário da aula. Permitida consulta a uma folha A4 manuscrita, frente e verso.
 
 A prova de reposição é aberta a qualquer estudante, inclusive a quem já obteve nota alta na primeira. Ela não substitui automaticamente a nota anterior: **vale a maior das duas**. Quem não comparecer permanece com a nota da primeira prova.
-
-O conteúdo do bloco final não é objeto de nenhuma das provas; é avaliado na entrega final e na apresentação.
 
 ---
 
@@ -149,6 +141,6 @@ O conteúdo do bloco final não é objeto de nenhuma das provas; é avaliado na 
 
 ## 9. Uso de ferramentas de IA
 
-Permitido. Toda contribuição submetida deve ser compreendida pelo integrante que a submeteu, que pode ser questionado sobre qualquer trecho durante as apresentações. Submeter conteúdo que não consegue explicar caracteriza fraude acadêmica.
+Permitido. Toda contribuição submetida deve ser compreendida pelo integrante que a submeteu, que pode ser questionado sobre qualquer trecho durante as *daily meetings*. Submeter conteúdo que não consegue explicar caracteriza fraude acadêmica.
 
 O grupo mantém em `docs/uso-de-ia.md` o registro das ferramentas usadas e das tarefas em que foram aplicadas.

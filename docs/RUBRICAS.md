@@ -54,42 +54,15 @@ Templates, exemplos e estrutura do vídeo e da proposta: [SPRINT-0.md](SPRINT-0.
 
 ## Sprint 2
 
+Última sprint do semestre (ajuste de 03/10): substitui a Sprint 2, a Sprint 3 e a Entrega Final previstas no início do período. O que for entregue aqui é o produto final.
+
 | Critério | Peso | Excelente (10) | Suficiente (6) | Insuficiente (0–4) |
 |----------|------|----------------|----------------|--------------------|
 | **Microsserviço Go** | 25% | Serviço com responsabilidade única e **justificada** (I/O intensivo, concorrência, processamento); Go idiomático, uso correto de `context` e erros | Serviço funciona, responsabilidade arbitrária | Ausente ou não roda |
-| ⚙️ **Clean Architecture + arch-go** | 20% | `arch-go.yml` protege `internal/domain` e as fronteiras entre serviços; `compliance: 100` no CI | `arch-go` configurado com regras triviais | Ausente |
-| ⚙️ **Contratos Protobuf** | 25% | `.proto` bem modelado, com comentários; `buf lint` e `buf breaking` verdes no CI; stubs Go e (Kotlin/Java) **gerados**, com check de sincronia | `.proto` presente, `buf lint` roda | Stubs escritos à mão ou sem validação |
-| ⚙️ **Integração gRPC ponta a ponta** | 20% | Serviço principal (Ktor/Quarkus) chama Go via gRPC com deadline e tratamento de erro; teste de integração automatizado cobre o fluxo | Chamada funciona, sem teste automatizado | Não integra |
-| ⚙️ **Ambiente reproduzível** | 10% | `docker compose up` sobe API + serviço Go + banco, do zero, sem passos manuais | Sobe com ajustes manuais documentados | Não sobe |
-
----
-
-## Sprint 3
-
-| Critério | Peso | Excelente (10) | Suficiente (6) | Insuficiente (0–4) |
-|----------|------|----------------|----------------|--------------------|
-| ⚙️ **Banco gerenciado (Neon)** | 20% | Banco no Neon com migrações aplicadas automaticamente por task/CI; connection string em segredo, nunca no repo | Banco no Neon, migração manual | Só banco local |
-| **Estratégia de cache** | 30% | Política declarada e justificada (o que cacheia, TTL, quando invalida); trata *stampede*; **métricas de hit/miss expostas e demonstradas com número real** | Cache funciona, sem métricas ou sem política de invalidação | Sem cache |
-| ⚙️ **Deploy remoto** | 25% | Sistema no ar em Northflank/Render/Railway, URL pública no README, imagens no ghcr.io publicadas pelo CI | No ar, deploy manual | Não está no ar |
-| ⚙️ **Testes continuam verdes local e remoto** | 15% | Toda a suíte roda no Docker Desktop e no CI, incluindo os testes de integração da Sprint 2 | Roda em um dos ambientes | Suíte quebrada |
-| **Observabilidade** | 10% | Logs estruturados (JSON) com correlação de requisição, health check em todos os serviços | Logs e health parciais | Ausente |
-
----
-
-## Entrega Final
-
-Esta entrega absorve o conteúdo do bloco final: segurança de APIs, automação do pipeline e documentação.
-
-| Critério | Peso | Excelente (10) | Suficiente (6) | Insuficiente (0–4) |
-|----------|------|----------------|----------------|--------------------|
-| ⚙️ **Sistema em produção** | 15% | URL pública estável, todos os fluxos do MVP funcionam, deploy automatizado a partir de `main` | No ar com falhas menores ou deploy manual | Fora do ar |
-| **Autenticação** | 15% | JWT com refresh e rotação, ou OIDC com provedor externo; expiração e revogação tratadas; sem segredo hardcoded | Login funciona, sem refresh ou revogação | Ausente ou inseguro |
-| ⚙️ **Autorização e BOLA** | 15% | Autorização por perfil e por recurso, com teste automatizado provando que um usuário não acessa recurso de outro | Autorização por perfil, sem teste | Rotas abertas |
-| **Mitigação OWASP API Top 10** | 10% | `docs/seguranca.md` cobre as 10 ameaças, com a mitigação adotada e onde ela está no código; rate limiting ativo | Documento cobre parte das ameaças | Ausente ou genérico |
-| ⚙️ **Pipeline completo e higiene de segredos** | 15% | Build, testes, lint, arquitetura, `buf lint`/`breaking`, SAST e check de docs verdes em `main`; `renovate.json` ativo; `mise run ci` reproduz o pipeline; nenhum segredo versionado | Maioria dos jobs verde, automação parcial | Pipeline incompleto ou segredo no histórico |
-| ⚙️ **Site de documentação público** | 15% | Site estático no ar com visão geral, arquitetura com diagrama, guia de execução local, guia de contribuição e ao menos 3 ADRs; verificação de defasagem no CI | Site no ar, conteúdo incompleto | Sem site |
-| ⚙️ **Referência de API pública** | 10% | Referência gerada do OpenAPI, acessível por URL, cobrindo todos os endpoints com exemplos | Referência publicada, incompleta | Ausente |
-| **Prontidão do repositório** | 5% | README permite a terceiros rodar em menos de 10 min; licença definida; histórico limpo | README funcional com lacunas | Não é possível rodar |
+| ⚙️ **Contrato Protobuf e integração gRPC** | 30% | `.proto` comentado, com `buf lint` verde no CI e stubs **gerados**; o serviço principal (Ktor/Quarkus) chama o Go por gRPC com deadline e tratamento de erro, e um teste de integração automatizado cobre o fluxo | Chamada funciona com stubs gerados, sem teste automatizado ou sem `buf lint` | Não integra, ou stubs escritos à mão |
+| ⚙️ **Sistema no ar** | 25% | API, serviço Go e banco gerenciado no ar numa plataforma de container, com URL pública no README; migrações aplicadas por task ou CI; connection string em segredo, nunca no repositório; health check em cada serviço | No ar, com deploy ou migração manual | Não está no ar |
+| ⚙️ **Ambiente e testes** | 10% | `docker compose up` sobe API, serviço Go e banco do zero, sem passos manuais; a suíte inteira, inclusive a da Sprint 1, verde local e no CI | Sobe com ajustes manuais documentados, ou suíte verde em um ambiente só | Não sobe, ou suíte quebrada |
+| **Prontidão do repositório** | 10% | README permite a terceiros rodar em menos de 10 min; OpenAPI acessível por URL; ao menos 2 ADRs novas (o serviço Go e a implantação); licença definida | README funcional com lacunas | Não é possível rodar |
 
 ---
 
@@ -102,7 +75,7 @@ Esta entrega absorve o conteúdo do bloco final: segurança de APIs, automação
 | **Justificativa técnica** | 25% | Explica **por que** cada decisão de arquitetura foi tomada, com alternativa descartada | Descreve o que foi feito, sem justificar | Sem justificativa |
 | **Participação da equipe** | 15% | Todos falam sobre o que fizeram | Maioria participa | Um só fala pelo grupo |
 
-Nas apresentações, o docente pode solicitar a execução de um teste, a abertura de um arquivo ou a explicação de um trecho específico. A incapacidade de explicar a própria contribuição afeta o Fator de Participação individual.
+A rubrica vale para o vídeo e para a *daily meeting*, que não exige slides nem preparação: conta o que o grupo mostra e explica. Nas *daily meetings*, o docente pode solicitar a execução de um teste, a abertura de um arquivo ou a explicação de um trecho específico. A incapacidade de explicar a própria contribuição afeta o Fator de Participação individual.
 
 ---
 
@@ -127,33 +100,14 @@ Pode ser copiado para o `README.md` do repositório.
 - [ ] Validação + problem details + OpenAPI
 - [ ] Vídeo 5 min
 
-### Sprint 2
+### Sprint 2 (final)
 - [ ] Microsserviço Go com responsabilidade justificada
-- [ ] arch-go.yml com compliance 100 no CI
-- [ ] protos/ com buf lint + buf breaking no CI
-- [ ] Stubs Go e (Kotlin/Java) gerados (check de sincronia)
+- [ ] protos/ com buf lint no CI e stubs gerados
 - [ ] Teste de integração gRPC ponta a ponta
 - [ ] docker compose up sobe tudo do zero
+- [ ] Sistema no ar, com URL pública no README e banco gerenciado
+- [ ] Migrações por task ou CI; nenhum segredo no repositório
+- [ ] Suíte verde local E no CI
+- [ ] README roda em menos de 10 min; OpenAPI acessível; 2 ADRs novas
 - [ ] Vídeo 5 min
-
-### Sprint 3
-- [ ] Banco no Neon com migrações via CI/task
-- [ ] Cache com política declarada + métricas hit/miss
-- [ ] Deploy no ar (Northflank/Render/Railway) com URL no README
-- [ ] Imagens publicadas no ghcr.io pelo CI
-- [ ] Logs estruturados + health checks
-- [ ] Suíte verde local E remoto
-- [ ] Vídeo 5 min
-
-### Entrega Final
-- [ ] Sistema no ar, deploy automatizado de main
-- [ ] Auth (JWT+refresh ou OIDC) + teste anti-BOLA
-- [ ] docs/seguranca.md cobrindo OWASP API Top 10
-- [ ] renovate.json ativo, Semgrep no CI, zero segredos versionados
-- [ ] Pipeline completo verde
-- [ ] Site de documentação público (≥3 ADRs)
-- [ ] Referência de API pública gerada do OpenAPI
-- [ ] README permite rodar em <10 min + licença
-- [ ] Vídeo 10 min
-- [ ] Apresentação ao vivo
 ```

@@ -7,7 +7,7 @@ O **como** está em [SPRINT-1.md](SPRINT-1.md) e nas leituras da sprint
 ([`leituras/web2-s1-pte1.md`](../leituras/web2-s1-pte1.md) e
 [`leituras/web2-s1-pte2.md`](../leituras/web2-s1-pte2.md)) — as tarefas apontam para a
 seção certa em vez de repeti-la. Os pesos vêm de [RUBRICAS.md](RUBRICAS.md#sprint-1). Prazo
-em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **02/10, 23:59**.
+em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **16/10, 23:59** (adiada; era 02/10).
 
 | # | Tarefa | Critério da rubrica |
 |---|---|---|
@@ -20,10 +20,10 @@ em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **02/10, 23:59**.
 | T7 | Validar as entradas e responder erros em *problem details* | Validação, erros e OpenAPI (10%) |
 | T8 | Gerar e publicar o OpenAPI | Validação, erros e OpenAPI (10%) |
 | T9 | Escrever os testes e rodá-los no CI | Testes local e remoto (20%) |
-| T10 | Gravar o vídeo de 5 minutos e preparar a apresentação | Comunicação |
+| T10 | Gravar o vídeo de 5 minutos | Comunicação |
 
 > Exemplos de referência: `exemplos/ktor-tarefas/` e `exemplos/quarkus-tarefas/` deste
-> repositório, passos 6 a 9 de cada `PASSOS.md`. Projeto de referência:
+> repositório, passos 6 a 12 de cada `PASSOS.md`. Projeto de referência:
 > `github.com/fmarquesfilho/musi`.
 
 ---
@@ -119,7 +119,7 @@ em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **02/10, 23:59**.
 
 **Pronto quando.** As camadas estão separadas, e o teste de arquitetura falha quando a regra é violada e passa no CI.
 
-**Referência.** [SPRINT-1.md](SPRINT-1.md) *Clean Architecture + verificação* · `web2-s1-pte1.md`, capítulo 7 · [STACK.md](STACK.md#clean-architecture-com-verificação-automática).
+**Referência.** [SPRINT-1.md](SPRINT-1.md) *Clean Architecture + verificação* · `web2-s1-pte1.md`, capítulo 7 · [STACK.md](STACK.md#clean-architecture-com-verificação-automática) · exemplos, Passo 12.
 
 ---
 
@@ -135,7 +135,7 @@ em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **02/10, 23:59**.
 
 **Pronto quando.** Toda entrada inválida recebe `400`/`422` em *problem details*, com mensagem útil.
 
-**Referência.** `web2-s1-pte1.md`, capítulo 6 · `web2-s1-pte2.md`, seção 5.6.
+**Referência.** `web2-s1-pte1.md`, capítulo 6 · `web2-s1-pte2.md`, seção 5.6 · exemplos, Passo 11.
 
 ---
 
@@ -170,7 +170,7 @@ em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **02/10, 23:59**.
 
 ---
 
-## T10 — Gravar o vídeo de 5 minutos e preparar a apresentação
+## T10 — Gravar o vídeo de 5 minutos
 
 **Objetivo.** Mostrar o incremento funcionando e explicar as escolhas.
 
@@ -178,7 +178,7 @@ em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **02/10, 23:59**.
 - [ ] Seguir o roteiro do guia (entidades e CRUD · migrações e compose · arquitetura · testes e CI)
 - [ ] Garantir que **todos os integrantes falam**
 - [ ] Publicar o vídeo e linkar no `README.md`
-- [ ] Ensaiar a apresentação da coorte (28/09 online ou 30/09 em sala)
+- [ ] Mostrar o andamento na reunião online do grupo (28 ou 30/09)
 
 **Pronto quando.** O vídeo tem ~5 min, cobre o roteiro, todos falam, e está acessível pelo link.
 

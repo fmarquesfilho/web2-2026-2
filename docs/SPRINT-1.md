@@ -1,6 +1,6 @@
 # Guia da Sprint 1 — DIM0547
 
-Prazo em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): entrega em **02/10 (sexta), 23:59**, com apresentações em 28/09 (Coorte B, online) e 30/09 (Coorte A, em sala). O que entregar e como é avaliado: [RUBRICAS.md](RUBRICAS.md#sprint-1). Os enunciados, prontos para virar cartões no quadro, estão em [SPRINT-1-TAREFAS.md](SPRINT-1-TAREFAS.md).
+Prazo em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): entrega em **16/10 (sexta), 23:59** (adiada; era 02/10). As *daily meetings* da sprint foram as reuniões online de 28 e 30/09. O que entregar e como é avaliado: [RUBRICAS.md](RUBRICAS.md#sprint-1). Os enunciados, prontos para virar cartões no quadro, estão em [SPRINT-1-TAREFAS.md](SPRINT-1-TAREFAS.md).
 
 A Sprint 1 é a sprint do **serviço de CRUD**: o serviço principal, em Kotlin/Ktor ou Java/Quarkus conforme a decisão da Sprint 0, passa a ter entidades persistidas em PostgreSQL, esquema versionado por migrações, arquitetura verificada por teste, testes de integração com banco real e documentação OpenAPI gerada do código.
 
@@ -23,7 +23,7 @@ Além da entrega técnica, a nota da sprint tem a atividade no repositório (30%
 ## Material de apoio
 
 - Leituras da sprint: [`leituras/web2-s1-pte1.md`](../leituras/web2-s1-pte1.md) (serviço de CRUD em Ktor × Quarkus, 14/09) e [`leituras/web2-s1-pte2.md`](../leituras/web2-s1-pte2.md) (persistência, migrações, testes e OpenAPI, 21/09).
-- Exemplos: `exemplos/ktor-tarefas/` e `exemplos/quarkus-tarefas/`, passos 1 a 9 de cada `PASSOS.md`. A mesma API nos dois stacks, com PostgreSQL, Flyway, testes com Testcontainers (Ktor) e Dev Services (Quarkus) e OpenAPI.
+- Exemplos: `exemplos/ktor-tarefas/` e `exemplos/quarkus-tarefas/`, passos 1 a 12 de cada `PASSOS.md`. A mesma API nos dois stacks, com PostgreSQL, Flyway, testes com Testcontainers (Ktor) e Dev Services (Quarkus), OpenAPI, validação com *problem details* (Passo 11) e teste de arquitetura com ArchUnit (Passo 12). O exemplo tem uma entidade só: duas entidades com relacionamento, `PUT`/`DELETE`, paginação e filtros estão no MUSI.
 - Projeto de referência: `github.com/fmarquesfilho/musi` (`api-ktor/`, `api-quarkus/`).
 - Ambiente sem instalação: o `.devcontainer/` deste repositório abre um Codespace com Java 25, Maven, Go e Docker, onde os exemplos, o `docker compose`, o Testcontainers e o Dev Services funcionam. É também um modelo para o `.devcontainer/` do projeto do grupo.
 
@@ -89,4 +89,4 @@ Todos os integrantes devem falar. Link no `README.md`.
 
 - **Entrega técnica (50%)**: a rubrica da Sprint 1, sobre o estado da branch principal no prazo (hash do último commit).
 - **Atividade no repositório (30%)**: CI verde, commits distribuídos pelas semanas, ao menos um PR integrado por integrante, PRs revisados por outro integrante e cartões do quadro ligados a PRs. O Fator de Participação individual segue [AVALIACAO.md](AVALIACAO.md#32-fator-de-participação).
-- **Comunicação (20%)**: média entre o vídeo e a apresentação da coorte.
+- **Comunicação (20%)**: média entre o vídeo e a *daily meeting* (a reunião online de 28 ou 30/09).

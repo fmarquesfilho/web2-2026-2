@@ -63,7 +63,7 @@ A regra de dependência — camadas internas não conhecem camadas externas — 
 
 ## 4. Hospedagem gratuita
 
-O sistema deve estar acessível publicamente a partir da Sprint 3.
+O sistema deve estar acessível publicamente na entrega da Sprint 2, a última do semestre.
 
 | Plataforma | Situação em 2026 | Recomendação |
 |-----------|------------------|--------------|
@@ -109,12 +109,9 @@ O pipeline de CI, construído ao longo do semestre, deve conter ao final:
 | Build do serviço principal e Go | Sprint 0 |
 | Testes unitários e de integração | Sprint 1 |
 | Teste de arquitetura (ArchUnit ou equivalente) | Sprint 1 |
-| `buf lint` e `buf breaking` | Sprint 2 |
+| `buf lint` | Sprint 2 |
 | Sincronia dos stubs gerados | Sprint 2 |
-| arch-go | Sprint 2 |
-| Publicação de imagens no GHCR | Sprint 3 |
-| Aplicação de migrações | Sprint 3 |
-| Semgrep e secret scanning | Bloco final |
-| Renovate | Bloco final |
-| Verificação de defasagem da documentação | Bloco final |
+| Publicação de imagens no GHCR | Sprint 2 |
+| Aplicação de migrações | Sprint 2 |
+| `buf breaking`, arch-go, Semgrep, Renovate, verificação de defasagem da documentação | Opcionais (fora do semestre desde o ajuste de 03/10) |
 

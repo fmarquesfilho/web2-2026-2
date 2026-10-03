@@ -49,7 +49,7 @@ O curso deixa de ser construído exclusivamente em Go e passa a adotar uma arqui
 
 ### Estrutura das sprints
 
-Uma Sprint 0 de quatro semanas, três sprints de projeto e um bloco final, com apresentações ao fim de cada sprint. Datas, conteúdo de cada aula e prazos: [CRONOGRAMA.md](CRONOGRAMA.md).
+Uma Sprint 0 de quatro semanas e duas sprints de projeto (a Sprint 2 é a entrega final), com uma *daily meeting* de cada grupo com o professor ao fim de cada sprint. Datas, conteúdo de cada aula e prazos: [CRONOGRAMA.md](CRONOGRAMA.md).
 
 
 
@@ -83,17 +83,9 @@ HTTP em profundidade: métodos, códigos de status, cabeçalhos, negociação de
 
 Ambos: Arquitetura verificada com **ArchUnit** no Java ou com testes de arquitetura customizados no Kotlin; testes executáveis local e remotamente.
 
-### Sprint 2 — Microsserviços em Go e gRPC
+### Sprint 2 — Serviço Go, gRPC e implantação
 
-Go idiomático para serviços: pacotes, interfaces, erros, contexto, concorrência. Clean Architecture em Go com verificação por arch-go. Protocol Buffers: mensagens, serviços, evolução de esquema e compatibilidade. gRPC unário e streaming, deadlines, interceptors, health checking. Buf: lint, detecção de quebras e geração de stubs para Go, Java e Kotlin. Integração entre o serviço principal (Ktor/Quarkus) e o serviço Go.
-
-### Sprint 3 — Dados, cache e implantação
-
-PostgreSQL gerenciado com Neon: branches de banco, connection pooling, limites de uso. Modelagem, índices e planos de execução. Estratégias de cache: cache-aside, write-through, TTL, invalidação, cache stampede. Serviço de cache em Go com métricas de acerto. Implantação em plataformas de container gratuitas e publicação de imagens no GitHub Container Registry. Logs estruturados, health checks e métricas.
-
-### Bloco final — Segurança, automação e documentação
-
-Documentação como parte do produto: site estático, registros de decisão de arquitetura, referência de API gerada do OpenAPI, verificação de defasagem de documentação no CI. GraphQL: aplicabilidade e comparação com REST e gRPC. Concorrência: goroutines e channels em Go, corrotinas em Kotlin, virtual threads em Java. OAuth 2.0 e OpenID Connect. JWT, refresh tokens e rotação de chaves. Spring Security 6 (para Quarkus via `quarkus-oidc`) ou Ktor com `ktor-auth` como resource server: filtros, autorização por rota e por método. OWASP API Security Top 10: BOLA, autenticação quebrada, exposição excessiva de dados, rate limiting. Gestão de segredos. Pipeline completo: matriz de jobs, cache de dependências, análise estática de segurança com Semgrep, atualização automática de dependências com Renovate, hooks de pre-push e tasks do `mise`.
+Go idiomático para serviços: pacotes, interfaces, erros e contexto. Protocol Buffers: mensagens e serviços. Buf: lint e geração de stubs para Go, Java e Kotlin. gRPC unário, deadlines e tratamento de erro. Integração entre o serviço principal (Ktor/Quarkus) e o serviço Go. Implantação em plataformas de container gratuitas, PostgreSQL gerenciado, publicação de imagens no GitHub Container Registry e health checks.
 
 ---
 
