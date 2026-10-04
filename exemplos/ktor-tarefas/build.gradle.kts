@@ -31,6 +31,10 @@ dependencies {
     implementation("org.flywaydb:flyway-core:13.7.0")
     implementation("org.flywaydb:flyway-database-postgresql:13.7.0")
 
+    // OpenAPI gerado das rotas + Swagger UI (Passo 9).
+    implementation("io.ktor:ktor-server-routing-openapi:3.5.2")
+    implementation("io.ktor:ktor-server-swagger:3.5.2")
+
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-server-test-host:3.5.2")
     testImplementation("io.ktor:ktor-client-content-negotiation:3.5.2")

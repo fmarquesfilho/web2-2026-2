@@ -65,6 +65,11 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-flyway</artifactId>
     </dependency>
+    <!-- OpenAPI gerado dos recursos + Swagger UI (Passo 9) -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-smallrye-openapi</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>io.quarkus</groupId>

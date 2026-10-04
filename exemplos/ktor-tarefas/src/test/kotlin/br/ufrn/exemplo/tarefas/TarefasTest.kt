@@ -5,6 +5,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
@@ -52,5 +53,12 @@ class TarefasTest {
     fun `id inexistente devolve 404`() = testApplication {
         appComBanco()
         assertEquals(HttpStatusCode.NotFound, client.get("/tarefas/9999").status)
+    }
+
+    @Test
+    fun `openapi descreve as rotas`() = testApplication {
+        appComBanco()
+        val especificacao = client.get("/docs/documentation.yaml").bodyAsText()
+        assertTrue("/tarefas/{id}:" in especificacao)
     }
 }
