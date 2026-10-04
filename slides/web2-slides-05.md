@@ -87,44 +87,119 @@ style: |
 
 # Desenvolvimento de Sistemas Web II
 
-## Persistência, migrações, testes e OpenAPI
+## Persistência, testes, OpenAPI, validação e arquitetura
 
-DIM0547 — Turma 01 · Sprint 1 · 21/09
+DIM0547 — Turma 01 · Sprint 1 · parte 2 (vídeo)
 
 Prof. Fernando · UFRN · 2026.2
 
 ---
 
-# Roteiro da semana
+# Errata do material já publicado
 
-**Segunda, 21/09 — Do repositório em memória ao banco**
-
-| Bloco | O que vemos |
+| Onde | O que corrigir |
 |---|---|
-| Banco | JDBC, pool de conexões, PostgreSQL |
-| Migrações | Flyway: versionadas, idempotentes |
-| Exposed × Panache | O adaptador de persistência nos dois stacks |
-| Testes | Rota sem banco · integração com Testcontainers e Dev Services |
-| OpenAPI | Documentação gerada do código |
+| Slides 04, "Bloqueante vs Não bloqueante" | No Quarkus, método que devolve tipo comum (`List<Tarefa>`, `Response`) roda numa **thread de trabalho**, não no event loop. Detalhe no próximo slide |
+| Slides 04, "Para a próxima aula" | O OpenAPI do Ktor, no exemplo e no MUSI, é o gerador **nativo** (`describe`). O `ktor-openapi` (smiley4) é a alternativa da comunidade |
+| Slides 04, "Passo 1" | O exemplo responde `no ar` em `GET /`; o slide mostrou `GET /tarefas` |
+| Slides 04, "Passo 3" | O `POST` usa a lista direto; `repositorio.adicionar` só aparece no Passo 4 |
+| Cronograma | Entrega da Sprint 1 adiada para **16/10 (sexta), 23:59**. A aula de 23/09 foi cancelada; em 28 e 30/09, no lugar das apresentações, houve uma *daily meeting* online com cada grupo. O semestre passa a ter só mais uma sprint, a de novembro |
 
-**Quarta, 23/09 — Acompanhamento online** (projeto)
-**28 e 30/09 — Apresentações** · 🚀 **Entrega da Sprint 1: 02/10, 23:59**
+---
+
+# Errata: qual thread executa o método no Quarkus
+
+Quem decide é a **assinatura** do método (conferido pelo nome da thread):
+
+| O método devolve | Roda em | Nome da thread |
+|---|---|---|
+| objeto comum: `List<Tarefa>`, `String`, `Response` | thread de trabalho (pool grande) | `executor-thread-1` |
+| `Uni`, `Multi`, `CompletionStage` | event loop (poucas threads) | `vert.x-eventloop-thread-1` |
+
+- `@Blocking` e `@NonBlocking` trocam a escolha; `@Transactional` conta como bloqueante
+- O exemplo, imperativo, roda no modelo de **uma thread por requisição**, com um pool grande
+- O erro grave é o contrário: **bloquear dentro de um método reativo** prende o event loop
+
+📖 **Ref.** `leituras/web2-s1-pte1.md`, seção 9.4 · [Quarkus — REST: execution model](https://quarkus.io/guides/rest#execution-model-blocking-non-blocking)
 
 ---
 
 # Onde paramos
 
-Em 14/09 a API de tarefas ficou pronta nos dois stacks:
+No vídeo da parte 1, a API de tarefas nos dois stacks, **passos 1 a 4**:
 
 ```
   Rotas (DSL) × recursos (anotações)
   JSON, POST, 201 com o corpo criado
   RepositorioDeTarefas: a porta
   RepositorioEmMemoria: a implementação
-  Koin × CDI
 ```
 
-Hoje só a implementação da porta muda. **As rotas não mudam.**
+| Hoje | O que entra |
+|---|---|
+| 5 | Injeção de dependência: Koin × CDI |
+| 6 e 7 | PostgreSQL, Flyway, Exposed × Panache |
+| 8 | Testes: sem banco e com banco de verdade |
+| 9 e 10 | OpenAPI · o ambiente em tasks do `mise` |
+| 11 e 12 | Validação em *problem details* · camadas e teste de arquitetura |
+
+---
+
+<!-- _class: lead -->
+
+# Passo 5
+
+## Injeção de dependência
+
+---
+
+# Passo 5 — Koin × CDI
+
+<div class="columns">
+<div class="col">
+
+**<span class="pill-blue">Ktor + Koin</span>** — grafo em código
+
+```kotlin
+fun Application.configurar(
+    repositorio: RepositorioDeTarefas,
+) {
+  install(Koin) {
+    modules(module {
+      single<RepositorioDeTarefas> { repositorio }
+    })
+  }
+  install(ContentNegotiation) { json() }
+  rotas()
+}
+
+// Rotas.kt
+val repositorio by inject<RepositorioDeTarefas>()
+```
+
+</div>
+<div class="col">
+
+**<span class="pill-red">Quarkus + CDI</span>** — por anotação
+
+```java
+@ApplicationScoped
+public class RepositorioEmMemoria
+    implements RepositorioDeTarefas { }
+
+// RecursoDeTarefas.java
+@Inject
+RepositorioDeTarefas repositorio;
+```
+
+</div>
+</div>
+
+| Falta quem forneça `RepositorioDeTarefas` | Koin | CDI |
+|---|---|---|
+| O erro aparece | ao **subir** a aplicação | no **build** (`Unsatisfied dependency`) |
+
+> `configurar(repositorio)` recebe a porta de fora: é o que vai deixar o teste de rota rodar **sem banco** (Passo 8).
 
 ---
 
@@ -151,16 +226,16 @@ Hoje só a implementação da porta muda. **As rotas não mudam.**
                (testes de rota)                             RepositorioPanache (Quarkus)
 ```
 
-- A separação de 14/09 paga agora: **uma classe nova**, a mesma interface
+- A separação do Passo 4 mostra seu valor agora: **uma classe nova**, a mesma interface
 - A implementação em memória **fica**: é a dos testes sem Docker
 
 ---
 
 <!-- _class: lead -->
 
-# Banco
+# Passo 6
 
-## JDBC, pool e onde fica a senha
+## Banco: JDBC, pool e onde fica a senha
 
 ---
 
@@ -207,9 +282,9 @@ Em dev e test, **sem URL**: Dev Services
 
 <!-- _class: lead -->
 
-# Migrações
+# Passo 6
 
-## O esquema do banco sob controle de versão
+## Migrações: o esquema sob controle de versão
 
 ---
 
@@ -253,9 +328,9 @@ Migration checksum mismatch for migration version 1
 
 <!-- _class: lead -->
 
-# Exposed × Panache
+# Passo 7
 
-## O mesmo adaptador, dois estilos
+## Exposed × Panache: o mesmo adaptador, dois estilos
 
 ---
 
@@ -310,7 +385,8 @@ public class RepositorioPanache
 | Estilo | SQL em Kotlin | ORM: objeto ↔ tabela |
 | Transação | `suspendTransaction { }` explícito | `@Transactional` |
 | Pool | HikariCP, configurado por você | Agroal, pela extensão |
-| Banco em dev/teste | Testcontainers, no teste | Dev Services, automático |
+| Banco em dev | `docker compose up -d` | Dev Services, automático |
+| Banco nos testes | Testcontainers | Dev Services |
 | Esquema | nunca `SchemaUtils.create` | `strategy=none` |
 
 > Exposed: cada SQL visível. Panache: CRUD quase pronto — mas conheçam o que o Hibernate faz por baixo (N+1, carregamento preguiçoso).
@@ -332,15 +408,15 @@ ERROR: null value in column "titulo" of relation "tarefas"
 |---|---|---|
 | `POST {}` | `400` (kotlinx exige `titulo`) | **`500`** |
 
-> O dado ruim não entrou, mas o cliente recebeu erro **do servidor**. A primeira barreira é **validar** — critério da rubrica.
+> O dado ruim não entrou, mas o cliente recebeu erro **do servidor**. A primeira barreira é **validar** — critério da rubrica, e o Passo 11.
 
 ---
 
 <!-- _class: lead -->
 
-# Testes
+# Passo 8
 
-## Da rota ao banco de verdade
+## Testes: da rota ao banco de verdade
 
 ---
 
@@ -390,7 +466,7 @@ Quarkus: `@QuarkusTest` + **Dev Services**, nenhuma linha sobre banco
 - Primeira vez baixa a imagem (a `postgres:17` tem 158 MB)
 - Testcontainers 2.x: `testcontainers-postgresql`, pacote `org.testcontainers.postgresql`
 
-**Achado desta semana** — Docker Desktop atualizado:
+**Cuidado com o Docker Engine 29** (Docker Desktop atualizado):
 
 ```
 Could not find a valid Docker environment
@@ -403,9 +479,9 @@ O Quarkus 3.28 traz o Testcontainers **1.21.3**, que não conversa com o Docker 
 
 <!-- _class: lead -->
 
-# OpenAPI
+# Passo 9
 
-## A documentação que sai do código
+## OpenAPI: a documentação que sai do código
 
 ---
 
@@ -461,11 +537,224 @@ curl -s -i -X POST localhost:8080/tarefas \
   -H 'Content-Type: application/json' -d '{"titulo":"Persistir"}'
 ```
 
-Os exemplos: `exemplos/ktor-tarefas` e `exemplos/quarkus-tarefas`, **passos 6 a 9** do `PASSOS.md`.
+Os exemplos: `exemplos/ktor-tarefas` e `exemplos/quarkus-tarefas`, **passos 5 a 12** do `PASSOS.md`.
+
+> **Sem Java 25 ou Docker na máquina, ou no laboratório:** crie um Codespace do repositório (Code → Codespaces). Ele traz Java, Maven, Go e Docker, com tudo já baixado; os comandos são os mesmos, e as portas 8080 e 8081 aparecem na aba **Portas**. Pare o Codespace ao terminar: o uso gratuito mensal é limitado.
 
 ---
 
-# No MUSI
+# Passo 10 — o ambiente em tasks
+
+```toml
+# mise.toml, na raiz do repositório
+[tools]
+java  = "temurin-25"
+maven = "3.9"
+
+[tasks."ktor:banco"]
+dir = "exemplos/ktor-tarefas"
+run = "docker compose up -d"
+```
+
+```bash
+mise install          # a mesma versão do JDK e do Maven para todo mundo
+mise tasks            # a lista: ktor:banco, ktor:run, ktor:test, quarkus:dev, quarkus:test...
+mise run test         # os testes dos dois exemplos, como no CI
+```
+
+> Nada muda no código: cada task é o comando dos passos anteriores, com nome. O ganho é o `[tools]` — e é a mesma tarefa T3 da Sprint 1 (`mise run up`).
+
+📖 **Ref.** [mise — tasks](https://mise.jdx.dev/tasks/)
+
+---
+
+<!-- _class: lead -->
+
+# Passo 11
+
+## Validação e erros em *problem details*
+
+---
+
+# 400 ou 422?
+
+| O que está errado | Status | Exemplo |
+|---|---|---|
+| A **forma**: JSON quebrado, campo faltando, tipo errado | `400` | `{}` no Ktor · `{"titulo":[1]}` |
+| A **regra**: a forma está certa, o conteúdo não | `422` | `{"titulo":"   "}` |
+| O recurso não existe | `404` | `GET /tarefas/9999` |
+| Erro nosso | `500`, **sem** detalhe interno | exceção não prevista |
+
+Todos no formato da **RFC 9457**, `application/problem+json`:
+
+```json
+{"type":"/problemas/entrada-invalida","title":"Entrada inválida","status":422,
+ "detail":"A entrada viola 1 regra(s).","violacoes":["titulo: não pode ficar em branco"]}
+```
+
+> `type` identifica a **classe** do erro; `detail`, esta ocorrência. `violacoes` é um membro de extensão, que a RFC permite.
+
+📖 **Ref.** [RFC 9457 — Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457)
+
+---
+
+# A regra no domínio, a resposta num lugar só
+
+<div class="columns">
+<div class="col">
+
+**<span class="pill-blue">Ktor</span>** · `StatusPages`
+
+```kotlin
+// Tarefa.kt: Kotlin puro
+fun violacoes(): List<String> = when {
+  titulo.isBlank() ->
+    listOf("titulo: não pode ficar em branco")
+  titulo.length > 200 ->
+    listOf("titulo: no máximo 200 caracteres")
+  else -> emptyList()
+}
+
+// Rotas.kt: a rota só lança
+if (violacoes.isNotEmpty())
+  throw EntradaInvalida(violacoes)
+
+// Erros.kt
+install(StatusPages) {
+  exception<EntradaInvalida> { call, e ->
+    call.responderProblema(
+      HttpStatusCode.UnprocessableEntity, ...)
+  }
+}
+```
+
+</div>
+<div class="col">
+
+**<span class="pill-red">Quarkus</span>** · `@ServerExceptionMapper`
+
+```java
+// NovaTarefa.java: Java puro
+public List<String> violacoes() {
+  if (titulo == null || titulo.isBlank())
+    return List.of(
+      "titulo: não pode ficar em branco");
+  ...
+}
+
+// RecursoDeTarefas.java: o recurso só lança
+if (!violacoes.isEmpty())
+  throw new EntradaInvalida(violacoes);
+
+// Erros.java
+@ServerExceptionMapper
+public Response entradaInvalida(
+    EntradaInvalida e) {
+  return problema(422, ...);
+}
+```
+
+</div>
+</div>
+
+---
+
+# As mesmas perguntas, antes e depois
+
+| Pedido | Ktor antes → depois | Quarkus antes → depois |
+|---|---|---|
+| `POST {"titulo":"   "}` | `201` → **`422`** | `201` → **`422`** |
+| `POST {}` | `400` → `400` *problem* | **`500`** → **`422`** |
+| `GET /tarefas/abc` | `400` → `400` *problem* | `404` → `404` *problem* |
+| `GET /tarefas/9999` | `404` → `404` *problem* | `404` → `404` *problem* |
+| `POST` válido | `201` → `201` + `Location` | `201` → `201` + `Location` |
+
+- O `500` do Quarkus some: a entrada inválida **não chega** ao banco
+- `Location: /tarefas/{id}` no `201`, como pede a tarefa T5
+- Alternativa no Quarkus: **Bean Validation** (`@NotBlank`, `@Valid`); o MUSI usa as duas
+
+---
+
+<!-- _class: lead -->
+
+# Passo 12
+
+## Camadas em pacotes e o teste de arquitetura
+
+---
+
+# A regra de dependência, em pacotes
+
+```
+br.ufrn.exemplo.tarefas
+├── dominio/          Tarefa, NovaTarefa, EntradaInvalida, RepositorioDeTarefas
+└── adaptadores/
+    ├── http/         rotas ou recurso, erros
+    ├── banco/        Exposed ou Panache
+    └── memoria/      RepositorioEmMemoria
+```
+
+```
+  adaptadores  ──────►  dominio         a seta só aponta para dentro
+```
+
+- O **domínio** não importa framework web, banco nem injeção de dependência
+- No Ktor, `Aplicacao.kt` (na raiz) liga as camadas; no Quarkus, o CDI
+- Pacote é só convenção: sem um teste, nada impede um `import` errado
+
+---
+
+# ArchUnit: a regra vira teste
+
+<div class="columns">
+<div class="col">
+
+**<span class="pill-blue">Ktor</span>**
+
+```kotlin
+noClasses().that()
+  .resideInAPackage("..dominio..")
+  .should().dependOnClassesThat()
+  .resideInAnyPackage(
+    "io.ktor..", "org.koin..",
+    "org.jetbrains.exposed..",
+    "java.sql..", "..adaptadores..",
+  )
+```
+
+</div>
+<div class="col">
+
+**<span class="pill-red">Quarkus</span>**
+
+```java
+noClasses().that()
+  .resideInAPackage("..dominio..")
+  .should().dependOnClassesThat()
+  .resideInAnyPackage(
+    "jakarta..", "io.quarkus..",
+    "org.hibernate..", "java.sql..",
+    "..adaptadores..");
+```
+
+</div>
+</div>
+
+Um `import jakarta.ws.rs.core.Response` no domínio, e `mvn test`:
+
+```
+Architecture Violation [Priority: MEDIUM] - Rule 'no classes that reside in a package
+'..dominio..' should depend on classes that reside in any package ['jakarta..', ...]'
+was violated (3 times)
+```
+
+> A rubrica pede que o teste **falhe** quando a regra é violada: o exemplo prova isso com uma classe-fixture só dos testes (`violacao/dominio/Contaminado`).
+
+📖 **Ref.** [ArchUnit — User Guide](https://www.archunit.org/userguide/html/000_Index.html)
+
+---
+
+# No MUSI: o que o exemplo não tem
 
 | O que a rubrica pede | Onde ver |
 |---|---|
@@ -482,7 +771,7 @@ Os exemplos: `exemplos/ktor-tarefas` e `exemplos/quarkus-tarefas`, **passos 6 a 
 
 ---
 
-# Entrega da Sprint 1 — 02/10, 23:59
+# Entrega da Sprint 1 — 16/10, 23:59
 
 | Critério | Peso |
 |---|---|
@@ -492,16 +781,58 @@ Os exemplos: `exemplos/ktor-tarefas` e `exemplos/quarkus-tarefas`, **passos 6 a 
 | Unitários + Testcontainers, local **e** no CI | 20% |
 | Validação, *problem details*, OpenAPI | 10% |
 
-Guia e tarefas: `docs/SPRINT-1.md` e `docs/SPRINT-1-TAREFAS.md`. Apresentações: 28/09 (Coorte B, online) e 30/09 (Coorte A, em sala).
+Guia e tarefas: `docs/SPRINT-1.md` e `docs/SPRINT-1-TAREFAS.md`. Exemplos: passos 11 e 12 para validação e arquitetura; MUSI para duas entidades, paginação e filtros.
 
 ---
 
-# Próximas aulas
+# O que muda no semestre
 
-- **23/09** — acompanhamento online: tragam o banco subindo e os testes rodando
-- **28 e 30/09** — apresentações da Sprint 1
-- **05/10** — Sprint 2: Go idiomático e Clean Architecture em Go, Protocol Buffers e Buf
-- **07/10** — gRPC e a integração do serviço principal com o serviço Go
+| | Antes | Agora |
+|---|---|---|
+| Entrega da Sprint 1 | 02/10 | **16/10** (sexta), 23:59 |
+| Depois da Sprint 1 | Sprint 2, Sprint 3 e bloco final | **só a Sprint 2**, que é a entrega final, em **30/11** |
+| Prova escrita | 21/10 | **09/11** (segunda), em laboratório |
+| Prova de reposição | 30/11 | **02/12** (quarta) |
+| Fim de cada sprint | apresentação por coorte | ***daily meeting*** online com cada grupo, como em 28 e 30/09 |
+| Unidades | três sprints e duas provas espalhadas | U1 = Sprint 0 (30%) + Sprint 1 (70%) · U2 = prova · U3 = Sprint 2 |
+
+- Dentro de cada sprint, **nada muda**: entrega técnica 50%, atividade no repositório 30%, comunicação 20%
+- A *daily meeting* entra onde antes entrava a apresentação; as de 28 e 30/09 valeram para a Sprint 1
+- Vale a **maior nota** entre a prova e a reposição
+
+> Tudo está em `docs/CRONOGRAMA.md`, `docs/AVALIACAO.md` e `docs/RUBRICAS.md`.
+
+---
+
+# O calendário até dezembro
+
+| Semana | Segunda | Quarta |
+|---|---|---|
+| 05 e 07/10 | 🟢 em sala: conteúdo da Sprint 1 | 🟢 em sala: conteúdo da Sprint 1 |
+| 12 e 14/10 | feriado | 🔵 online: acompanhamento · 🚀 **sexta, 16/10: entrega da Sprint 1** |
+| 19 e 21/10 | 🟢 em sala: conteúdo da Sprint 2 | 🟢 em sala: conteúdo da Sprint 2 |
+| 26 e 28/10 | 🔵 online: acompanhamento | feriado |
+| 02 e 04/11 | feriado | 🔵 online: revisão para a prova |
+| 09 e 11/11 | 🟢 em sala: **prova escrita** | 🔵 online: acompanhamento |
+| 16 e 18/11 | 🔵 online: acompanhamento | 🟢 em sala: oficina de projeto |
+| 23 e 25/11 | 🔵 online: *daily meetings* | 🔵 online: *daily meetings* |
+| 30/11 e 02/12 | a definir · 🚀 **entrega final** | 🟢 em sala: **prova de reposição** |
+
+> O conteúdo da Sprint 2 cabe em duas aulas porque vai ser liberado **antes, em vídeo** (aula invertida): assistam antes de 19/10.
+
+---
+
+# A Sprint 2, a última
+
+| Critério | Peso |
+|---|---|
+| Microsserviço Go, com responsabilidade justificada | 25% |
+| Contrato Protobuf e integração gRPC, com teste automatizado | 30% |
+| Sistema no ar: API, serviço Go e banco gerenciado, com URL pública | 25% |
+| Ambiente e testes: `docker compose up` e suíte verde local e no CI | 10% |
+| Prontidão do repositório: README, OpenAPI, 2 ADRs novas | 10% |
+
+> O que vocês entregarem em 30/11 é o produto final. A prova de 09/11 cobre as Sprints 0, 1 e 2.
 
 ---
 

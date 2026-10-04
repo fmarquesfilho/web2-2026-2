@@ -22,7 +22,7 @@ Além da entrega técnica, a nota da sprint tem a atividade no repositório (30%
 
 ## Material de apoio
 
-- Leituras da sprint: [`leituras/web2-s1-pte1.md`](../leituras/web2-s1-pte1.md) (serviço de CRUD em Ktor × Quarkus, 14/09) e [`leituras/web2-s1-pte2.md`](../leituras/web2-s1-pte2.md) (persistência, migrações, testes e OpenAPI, 21/09).
+- Leituras da sprint: [`leituras/web2-s1-pte1.md`](../leituras/web2-s1-pte1.md) (serviço de CRUD em Ktor × Quarkus, 14/09) e [`leituras/web2-s1-pte2.md`](../leituras/web2-s1-pte2.md) (persistência, migrações, testes, OpenAPI, validação com *problem details* e teste de arquitetura; segunda parte da sprint).
 - Exemplos: `exemplos/ktor-tarefas/` e `exemplos/quarkus-tarefas/`, passos 1 a 12 de cada `PASSOS.md`. A mesma API nos dois stacks, com PostgreSQL, Flyway, testes com Testcontainers (Ktor) e Dev Services (Quarkus), OpenAPI, validação com *problem details* (Passo 11) e teste de arquitetura com ArchUnit (Passo 12). O exemplo tem uma entidade só: duas entidades com relacionamento, `PUT`/`DELETE`, paginação e filtros estão no MUSI.
 - Projeto de referência: `github.com/fmarquesfilho/musi` (`api-ktor/`, `api-quarkus/`).
 - Ambiente sem instalação: o `.devcontainer/` deste repositório abre um Codespace com Java 25, Maven, Go e Docker, onde os exemplos, o `docker compose`, o Testcontainers e o Dev Services funcionam. É também um modelo para o `.devcontainer/` do projeto do grupo.

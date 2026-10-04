@@ -103,7 +103,7 @@ em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **16/10, 23:59** (adiada; era 02
 
 **Pronto quando.** Todas as operações existem para ≥ 2 entidades, a listagem pagina e filtra, e os status seguem os verbos.
 
-**Referência.** [SPRINT-1.md](SPRINT-1.md) *CRUD completo* · `web2-s1-pte1.md`, capítulos 1, 2 e 6.
+**Referência.** [SPRINT-1.md](SPRINT-1.md) *CRUD completo* · `web2-s1-pte1.md`, capítulos 1, 2 e 6 · `web2-s1-pte2.md`, seção 11.3 (relacionamento, paginação e filtros).
 
 ---
 
@@ -119,7 +119,7 @@ em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **16/10, 23:59** (adiada; era 02
 
 **Pronto quando.** As camadas estão separadas, e o teste de arquitetura falha quando a regra é violada e passa no CI.
 
-**Referência.** [SPRINT-1.md](SPRINT-1.md) *Clean Architecture + verificação* · `web2-s1-pte1.md`, capítulo 7 · [STACK.md](STACK.md#clean-architecture-com-verificação-automática) · exemplos, Passo 12.
+**Referência.** [SPRINT-1.md](SPRINT-1.md) *Clean Architecture + verificação* · `web2-s1-pte1.md`, capítulo 7 · `web2-s1-pte2.md`, capítulo 11 · [STACK.md](STACK.md#clean-architecture-com-verificação-automática) · exemplos, Passo 12.
 
 ---
 
@@ -135,7 +135,7 @@ em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **16/10, 23:59** (adiada; era 02
 
 **Pronto quando.** Toda entrada inválida recebe `400`/`422` em *problem details*, com mensagem útil.
 
-**Referência.** `web2-s1-pte1.md`, capítulo 6 · `web2-s1-pte2.md`, seção 5.6 · exemplos, Passo 11.
+**Referência.** `web2-s1-pte1.md`, capítulo 6 · `web2-s1-pte2.md`, seção 5.6 e capítulo 10 · exemplos, Passo 11.
 
 ---
 

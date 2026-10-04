@@ -1,20 +1,29 @@
-# Leitura — Persistência, migrações, testes e OpenAPI: Ktor × Quarkus (21/09)
+# Leitura — Persistência, testes, OpenAPI, validação e arquitetura: Ktor × Quarkus (Sprint 1, parte 2)
 
-Guia de apoio para a segunda aula da Sprint 1. Na aula de 14/09, a API de tarefas guardava
-tudo numa lista em memória. Aqui ela passa a usar PostgreSQL, com o esquema criado por
-migrações, testes que sobem um banco de verdade num container e a documentação OpenAPI
-gerada a partir do código. Os dois stacks seguem lado a lado: Kotlin/Ktor com Exposed e
-Java/Quarkus com Hibernate ORM e Panache.
+Guia de apoio para a segunda parte da Sprint 1 (vídeo e aulas de 05 e 07/10). Na aula de
+14/09, a API de tarefas guardava tudo numa lista em memória. Aqui ela passa a usar
+PostgreSQL, com o esquema criado por migrações, testes que sobem um banco de verdade num
+container, a documentação OpenAPI gerada a partir do código, validação com erros em
+*problem details* e um teste que verifica a arquitetura. Os dois stacks seguem lado a lado:
+Kotlin/Ktor com Exposed e Java/Quarkus com Hibernate ORM e Panache.
 
-O código deste guia é a versão de 21/09 dos exemplos `exemplos/ktor-tarefas` e
-`exemplos/quarkus-tarefas` do repositório `web2-2026-2`, passos 6 a 9 de cada `PASSOS.md`.
+O código deste guia é o dos exemplos `exemplos/ktor-tarefas` e `exemplos/quarkus-tarefas` do
+repositório `web2-2026-2`, passos 6 a 12 de cada `PASSOS.md`. Os capítulos 1 a 8 mostram o
+código como ele fica até o Passo 9, num pacote só; os capítulos 10 e 11 mostram o que muda
+nos passos 11 e 12.
 Versões: Kotlin 2.4.10, Ktor 3.5.2, Exposed 1.5.0, HikariCP 7.1.0, driver PostgreSQL
 42.7.13, Flyway 13.7.0, Testcontainers 2.0.5 (Ktor) e 1.21.4 (Quarkus), Quarkus 3.28.2,
 PostgreSQL 17 e Java 25. Mensagens de erro, tempos e respostas
 citados foram conferidos rodando os exemplos nessas versões, com Docker Engine 29.
 
 Como ler: os capítulos seguem a ordem da aula. Quem vai usar só um stack pode pular o
-capítulo do outro (4 para Ktor, 5 para Quarkus); os capítulos 3, 7 e 8 valem para os dois.
+capítulo do outro (4 para Ktor, 5 para Quarkus); os capítulos 3, 7, 8, 10 e 11 valem para os
+dois.
+
+Onde rodar: os exemplos pedem Java 25 e Docker. Quem não tiver os dois na máquina, ou estiver
+no laboratório, usa um Codespace do repositório (Code → Codespaces): ele já traz Java, Maven,
+Go, Docker e as dependências baixadas, e os comandos são os mesmos. A seção 12.3 tem os
+detalhes.
 
 Capítulos:
 
@@ -27,7 +36,9 @@ Capítulos:
 7. Testes: da rota ao banco de verdade
 8. OpenAPI: a documentação que sai do código
 9. Rodar tudo junto
-10. Exercícios e dúvidas frequentes
+10. Validação e erros em *problem details*
+11. Camadas, teste de arquitetura e o CRUD completo
+12. Exercícios e dúvidas frequentes
 
 ---
 
@@ -37,7 +48,7 @@ Capítulos:
 
 Em 14/09, as rotas (Ktor) e o recurso (Quarkus) dependiam de uma interface,
 `RepositorioDeTarefas`, e a implementação era `RepositorioEmMemoria`. Essa separação
-paga agora: a troca para o banco é uma classe nova que implementa a mesma interface. As
+mostra seu valor agora: a troca para o banco é uma classe nova que implementa a mesma interface. As
 rotas mudam só porque ganharam `GET /tarefas/{id}` e a descrição para o OpenAPI; a lógica
 de acesso a dados fica toda no adaptador.
 
@@ -163,8 +174,9 @@ data class ConfigBanco(val url: String, val usuario: String, val senha: String) 
 %prod.quarkus.datasource.password=${DB_PASSWORD:tarefas}
 ```
 
-Na Sprint 3, o banco passa a ser o Neon, e essas variáveis vêm de segredos do ambiente de
-implantação. A rubrica pede exatamente isso: connection string em segredo, nunca no repo.
+Na Sprint 2, o banco passa a ser um PostgreSQL gerenciado, e essas variáveis vêm de segredos
+do ambiente de implantação. A rubrica pede exatamente isso: connection string em segredo,
+nunca no repositório.
 
 ---
 
@@ -173,7 +185,7 @@ implantação. A rubrica pede exatamente isso: connection string em segredo, nun
 ### 3.1 O problema
 
 O esquema do banco muda ao longo do projeto: uma coluna nova, um índice, uma tabela. Cada
-máquina (a sua, a do colega, o CI, o Neon) precisa chegar ao mesmo esquema, na mesma
+máquina (a sua, a do colega, o CI, o banco de produção) precisa chegar ao mesmo esquema, na mesma
 ordem, sem ninguém rodar SQL à mão. Migração é um script versionado que leva o banco de
 uma versão para a próxima.
 
@@ -583,9 +595,9 @@ org.hibernate.exception.ConstraintViolationException: could not execute statemen
 ```
 
 A resposta é `500 Internal Server Error`. O dado ruim não entrou, mas o cliente recebeu um
-erro do servidor por uma falha dele, que deveria ser `400`. A restrição do banco é a
-última barreira; a primeira é validar a entrada (Bean Validation no Quarkus, validação no
-Ktor), que é critério da rubrica e está no capítulo 6 do guia de 14/09.
+erro do servidor por uma falha dele, que deveria ser `400` ou `422`. A restrição do banco é
+a última barreira; a primeira é validar a entrada, que é critério da rubrica. O Passo 11 do
+exemplo faz isso nos dois stacks (capítulo 10).
 
 ---
 
@@ -599,7 +611,8 @@ Ktor), que é critério da rubrica e está no capítulo 6 do guia de 14/09.
 | Transação | `suspendTransaction(db) { ... }` explícito | `@Transactional` no método |
 | Pool | escolhido e configurado por você (HikariCP) | Agroal, pela extensão |
 | Migração na subida | chamada a `Flyway.migrate()` no código | `quarkus.flyway.migrate-at-start=true` |
-| Banco em dev/teste | Testcontainers, no teste | Dev Services, automático |
+| Banco em desenvolvimento | `docker compose up -d` | Dev Services, automático |
+| Banco nos testes | Testcontainers, declarado no teste | Dev Services, automático |
 | Esquema | nunca `SchemaUtils.create` | `schema-management.strategy=none` |
 | Bloqueio de thread | `suspend` + `suspendTransaction` | método comum roda em worker thread |
 
@@ -823,8 +836,7 @@ Dá para misturar os dois no mesmo projeto Kotlin.
 
 OpenAPI é um formato (YAML ou JSON) que descreve uma API HTTP: caminhos, métodos,
 parâmetros, corpos e respostas com seus esquemas. A partir dele saem a Swagger UI (uma
-página para explorar e testar a API), clientes gerados e a referência publicada que a
-rubrica pede no bloco final.
+página para explorar e testar a API) e clientes gerados.
 
 Gerar a especificação do código evita a defasagem: se a rota mudar, a documentação muda
 junto.
@@ -974,8 +986,8 @@ public Tarefa buscar(@PathParam("id") int id) {
 | Swagger UI | `/docs` | `/q/swagger-ui` (dev e test; em prod, com `always-include`) |
 | Estabilidade | experimental no Ktor 3.5 | estável |
 
-O Quarkus sai na frente em esforço: sem escrever nada, a especificação já existe. No Ktor,
-como as rotas são código e não anotações, a descrição também é código.
+No Quarkus o esforço é menor: sem escrever nada, a especificação já existe. No Ktor, como
+as rotas são código e não anotações, a descrição também é código.
 
 ---
 
@@ -1004,8 +1016,9 @@ volumes:
 - Os valores de ambiente batem com os padrões de `ConfigBanco.doAmbiente()` e do perfil
   `%prod` do Quarkus, então as duas APIs usam esse banco sem configuração extra.
 
-A rubrica pede mais: `docker compose up` subindo API, serviço Go e banco, do zero. Este
-arquivo é o começo; a API entra quando houver um `Dockerfile` (como os do MUSI).
+Na Sprint 1, a rubrica pede o banco subindo por `docker compose`. Na Sprint 2, o mesmo
+arquivo cresce: `docker compose up` passa a subir a API, o serviço Go e o banco, do zero. A
+API entra quando houver um `Dockerfile` (como os do MUSI).
 
 📖 Ref. Docker Compose: <https://docs.docker.com/compose/>
 
@@ -1054,8 +1067,8 @@ não faria nada: os dois exemplos compartilham a mesma migração.
 | `GET /tarefas/999` | `404` | `404` |
 | `POST` com `{}` | `400`, `Failed to convert request body to class ...NovaTarefa` (kotlinx.serialization exige `titulo`) | `500` (chega ao banco e viola `NOT NULL`) |
 
-As duas primeiras linhas são escolhas defensáveis. A terceira é uma falha do Quarkus sem
-validação (seção 5.6).
+As duas primeiras linhas são escolhas defensáveis. A terceira mostra o que acontece sem
+validação (seção 5.6); o capítulo 10 a resolve.
 
 ### 9.4 No MUSI: o mesmo assunto, em escala de projeto
 
@@ -1072,8 +1085,7 @@ serve para ver as mesmas ideias com mais peças:
 | Teste de arquitetura | `ArquiteturaTest`, com ArchUnit, nos dois stacks |
 | Decisão registrada | `docs/decisoes/0004-persistencia-postgresql-flyway.md` |
 
-Quatro armadilhas que apareceram ao montar isso, e que provavelmente aparecerão no projeto
-de vocês:
+Quatro cuidados que apareceram ao montar isso, e que valem para o projeto de vocês:
 
 > Erro comum (Quarkus): a aplicação não sobe sem banco.
 > Sem URL, o Quarkus desativa o datasource sozinho — mas o Hibernate e o Flyway continuam
@@ -1101,9 +1113,331 @@ deixa só os que não precisam de banco. No CI, tudo roda.
 
 ---
 
-## 10. Exercícios e dúvidas frequentes
+## 10. Validação e erros em *problem details*
 
-### 10.1 Perguntas de fixação
+É o Passo 11 dos exemplos. A rubrica pede validação em todas as entradas, erros no formato
+*problem details* e nenhuma resposta `500` para erro do cliente.
+
+### 10.1 400 ou 422
+
+| O que está errado | Status | Exemplo |
+|---|---|---|
+| A forma: JSON quebrado, campo faltando, tipo errado, id que não é número | `400` | `{"titulo":[1]}` |
+| A regra: a forma está certa, o conteúdo não | `422` | `{"titulo":"   "}` |
+| O recurso não existe | `404` | `GET /tarefas/9999` |
+| Erro do servidor | `500`, sem detalhe interno | exceção não prevista |
+
+O capítulo 6 da leitura de 14/09 explica a RFC 9457 e a escolha entre `400` e `422`. Aqui
+está como o exemplo aplica.
+
+### 10.2 A regra fica no domínio
+
+A regra não sabe de HTTP. Ela devolve a lista do que está errado, e quem chama decide o que
+fazer:
+
+```kotlin
+// Tarefa.kt
+@Serializable
+data class NovaTarefa(val titulo: String) {
+    fun violacoes(): List<String> = when {
+        titulo.isBlank() -> listOf("titulo: não pode ficar em branco")
+        titulo.length > 200 -> listOf("titulo: no máximo 200 caracteres")
+        else -> emptyList()
+    }
+}
+
+class EntradaInvalida(val violacoes: List<String>) : RuntimeException(violacoes.joinToString("; "))
+```
+
+```java
+// NovaTarefa.java
+public record NovaTarefa(String titulo) {
+    public List<String> violacoes() {
+        if (titulo == null || titulo.isBlank()) {
+            return List.of("titulo: não pode ficar em branco");
+        }
+        if (titulo.length() > 200) {
+            return List.of("titulo: no máximo 200 caracteres");
+        }
+        return List.of();
+    }
+}
+```
+
+No Java, `null` também conta: com Jackson, o corpo `{}` chega como título nulo.
+
+A rota e o recurso só lançam a exceção:
+
+```kotlin
+post {
+    val nova = call.receive<NovaTarefa>()
+    val violacoes = nova.violacoes()
+    if (violacoes.isNotEmpty()) throw EntradaInvalida(violacoes)
+    val criada = repositorio.adicionar(nova)
+    call.response.header(HttpHeaders.Location, "/tarefas/${criada.id}")
+    call.respond(HttpStatusCode.Created, criada)
+}
+```
+
+```java
+@POST
+public Response criar(NovaTarefa nova) {
+    if (nova == null) {
+        throw new BadRequestException("O corpo da requisição é obrigatório");
+    }
+    List<String> violacoes = nova.violacoes();
+    if (!violacoes.isEmpty()) {
+        throw new EntradaInvalida(violacoes);
+    }
+    Tarefa criada = repositorio.adicionar(nova);
+    return Response.created(URI.create("/tarefas/" + criada.id())).entity(criada).build();
+}
+```
+
+O `201` passa a levar o cabeçalho `Location` com o endereço da tarefa criada, como pede a
+tarefa T5.
+
+### 10.3 Um lugar só decide a resposta
+
+No Ktor, o plugin `StatusPages` (dependência `io.ktor:ktor-server-status-pages`) associa cada
+exceção a uma resposta:
+
+```kotlin
+fun Application.tratarErros() {
+    install(StatusPages) {
+        exception<BadRequestException> { call, causa ->
+            call.responderProblema(
+                HttpStatusCode.BadRequest, "requisicao-malformada", "Requisição malformada",
+                causa.cause?.message ?: causa.message,
+            )
+        }
+        exception<NotFoundException> { call, causa ->
+            call.responderProblema(HttpStatusCode.NotFound, "nao-encontrado", "Recurso inexistente", causa.message)
+        }
+        exception<EntradaInvalida> { call, causa ->
+            call.responderProblema(
+                HttpStatusCode.UnprocessableEntity, "entrada-invalida", "Entrada inválida",
+                "A entrada viola ${causa.violacoes.size} regra(s).", causa.violacoes,
+            )
+        }
+        exception<Throwable> { call, causa ->
+            call.application.environment.log.error("erro não tratado", causa)
+            call.responderProblema(HttpStatusCode.InternalServerError, "interno", "Erro interno")
+        }
+    }
+}
+```
+
+No Quarkus REST, o equivalente é uma classe com um método `@ServerExceptionMapper` por tipo
+de exceção:
+
+```java
+public class Erros {
+
+    @ServerExceptionMapper
+    public Response entradaInvalida(EntradaInvalida e) {
+        return problema(422, "entrada-invalida", "Entrada inválida",
+                "A entrada viola " + e.violacoes().size() + " regra(s).", e.violacoes());
+    }
+
+    @ServerExceptionMapper
+    public Response jsonInvalido(MismatchedInputException e) { /* 400 */ }
+
+    @ServerExceptionMapper
+    public Response web(WebApplicationException e) { /* 400, 404 e os demais do Jakarta REST */ }
+
+    @ServerExceptionMapper
+    public Response inesperado(RuntimeException e) { /* 500, sem detalhe interno */ }
+}
+```
+
+Nos dois, a resposta sai com o tipo `application/problem+json`. Conferido:
+
+```bash
+curl -s -i -X POST localhost:8080/tarefas -H 'Content-Type: application/json' -d '{"titulo":"   "}'
+```
+
+```
+HTTP/1.1 422 Unprocessable Entity
+Content-Type: application/problem+json
+
+{"type":"/problemas/entrada-invalida","title":"Entrada inválida","status":422,"detail":"A entrada viola 1 regra(s).","violacoes":["titulo: não pode ficar em branco"]}
+```
+
+`type` identifica a classe do erro; `detail`, esta ocorrência. `violacoes` é um membro de
+extensão, que a RFC permite.
+
+### 10.4 As respostas depois do Passo 11
+
+| Pedido | Ktor | Quarkus |
+|---|---|---|
+| `POST` com `{"titulo":"   "}` | `422` | `422` |
+| `POST` com `{}` | `400`: a kotlinx.serialization exige o campo | `422`: o Jackson cria o título nulo, e a regra recusa |
+| `POST` sem corpo | `400` | `400` |
+| `GET /tarefas/abc` | `400` | `404` |
+| `GET /tarefas/999` | `404` | `404` |
+| `POST` válido | `201` com `Location: /tarefas/{id}` | `201` com `Location` (a URL completa) |
+
+O `500` da seção 5.6 deixa de acontecer: a entrada inválida não chega ao banco.
+
+No Quarkus, a alternativa comum é o Bean Validation (`quarkus-hibernate-validator`,
+`@NotBlank` no record e `@Valid` no parâmetro). O exemplo usa uma função do domínio, igual à
+do Ktor, para o domínio não depender de anotações de framework (capítulo 11). O MUSI usa as
+duas formas: Bean Validation para a forma do corpo e regras do domínio para o conteúdo.
+
+> Erro comum (Quarkus): campo com tipo errado respondido fora do formato. Sem um método para
+> `MismatchedInputException`, o Quarkus responde `{"titulo":[1,2]}` com um JSON próprio
+> (`{"objectName":"Class","attributeName":"titulo",...}`), e não com *problem details*.
+
+📖 Ref. RFC 9457 — Problem Details for HTTP APIs: <https://www.rfc-editor.org/rfc/rfc9457>
+
+📖 Ref. Ktor — Status pages: <https://ktor.io/docs/server-status-pages.html>
+
+📖 Ref. Quarkus — REST, exception mapping: <https://quarkus.io/guides/rest#exception-mapping>
+
+---
+
+## 11. Camadas, teste de arquitetura e o CRUD completo
+
+### 11.1 Os pacotes
+
+É o Passo 12 dos exemplos. Até aqui, tudo ficava num pacote só. Agora o código se divide:
+
+```
+br.ufrn.exemplo.tarefas
+├── dominio/          Tarefa, NovaTarefa, EntradaInvalida, RepositorioDeTarefas (a porta)
+└── adaptadores/
+    ├── http/         rotas ou recurso, erros
+    ├── banco/        Exposed ou Panache
+    └── memoria/      RepositorioEmMemoria
+```
+
+A regra de dependência do capítulo 7 da leitura de 14/09 vira uma regra sobre pacotes: os
+adaptadores dependem do domínio, e o domínio não depende de ninguém. No Ktor, `Aplicacao.kt`
+fica na raiz e liga as camadas; no Quarkus, quem liga é o CDI.
+
+O projeto do grupo tem mais uma camada, a dos casos de uso (o MUSI a chama de `aplicacao`).
+O exemplo, com três operações, não precisa dela.
+
+### 11.2 O teste que verifica a regra
+
+Pacote é convenção: nada impede um `import` de framework no domínio. O ArchUnit lê as classes
+compiladas e transforma a regra num teste (dependência de teste
+`com.tngtech.archunit:archunit:1.5.0`, nos dois stacks):
+
+```kotlin
+class ArquiteturaTest {
+
+    private val classes = ClassFileImporter()
+        .withImportOption(ImportOption.DoNotIncludeTests())
+        .importPackages("br.ufrn.exemplo.tarefas")
+
+    @Test
+    fun `o dominio nao conhece framework, banco nem adaptadores`() = regraDoDominio.check(classes)
+
+    companion object {
+        val regraDoDominio: ArchRule = noClasses().that().resideInAPackage("..dominio..")
+            .should().dependOnClassesThat().resideInAnyPackage(
+                "io.ktor..", "org.koin..", "org.jetbrains.exposed..", "java.sql..", "javax.sql..",
+                "com.zaxxer..", "org.flywaydb..", "..adaptadores..",
+            )
+    }
+}
+```
+
+No Quarkus, a lista proibida é `jakarta..`, `io.quarkus..`, `org.hibernate..`,
+`com.fasterxml..`, `java.sql..` e `..adaptadores..`.
+
+A rubrica pede que o teste falhe quando a regra é violada. Conferido: com um método que
+devolve `jakarta.ws.rs.core.Response` no `dominio/Tarefa.java`, `mvn test` falha com
+
+```
+Architecture Violation [Priority: MEDIUM] - Rule 'no classes that reside in a package
+'..dominio..' should depend on classes that reside in any package ['jakarta..', ...]'
+was violated (3 times)
+```
+
+O exemplo tem também um teste que faz essa prova sozinho: `a regra do dominio pega uma
+violacao` avalia a regra contra uma classe que só existe nos testes
+(`arquitetura/violacao/dominio/Contaminado`) e confere que há violação.
+
+No Ktor, o domínio do exemplo aceita `kotlinx.serialization` (o `@Serializable` da `Tarefa`).
+No MUSI, o domínio é Kotlin puro e a serialização fica em DTOs do adaptador web.
+
+No Kotlin, o Konsist é uma alternativa ao ArchUnit: lê o código-fonte em vez das classes
+compiladas.
+
+> Erro comum (Quarkus): `GET /tarefas is declared by` duas classes, ao abrir o
+> `mvn quarkus:dev` depois de mudar classes de pacote. São arquivos `.class` antigos na
+> pasta `target/`. `mvn clean` resolve.
+
+📖 Ref. ArchUnit — User Guide: <https://www.archunit.org/userguide/html/000_Index.html>
+
+📖 Ref. Konsist: <https://docs.konsist.lemonappdev.com/>
+
+### 11.3 O que o projeto precisa além do exemplo
+
+O exemplo tem uma entidade e três operações. A rubrica pede duas entidades com
+relacionamento, todas as operações, paginação e filtros. O MUSI mostra essas peças; os
+trechos abaixo são dele.
+
+Relacionamento. Na migração, a chave estrangeira:
+
+```sql
+CREATE TABLE anotacoes (
+    id        BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    obra_id   VARCHAR(64)  NOT NULL REFERENCES obras (id) ON DELETE CASCADE,
+    -- ...
+);
+
+-- A chave estrangeira não cria índice sozinha no PostgreSQL; a rota aninhada consulta por ela.
+CREATE INDEX anotacoes_obra ON anotacoes (obra_id);
+```
+
+No Exposed, a coluna aponta para a outra tabela; no Panache, a entidade tem um `@ManyToOne`:
+
+```kotlin
+val obraId = varchar("obra_id", 64).references(Obras.id, onDelete = ReferenceOption.CASCADE)
+```
+
+```java
+@ManyToOne(fetch = FetchType.LAZY, optional = false)
+@JoinColumn(name = "obra_id")
+public ObraEntidade obra;
+```
+
+Na API, o relacionamento aparece como rota aninhada: `/obras/{id}/anotacoes`.
+
+Paginação e filtro, no SQL. O banco devolve só a fatia pedida; a aplicação não carrega a
+tabela inteira:
+
+```kotlin
+val itens = Anotacoes.selectAll().where(onde)
+    .orderBy(Anotacoes.criadoEm to SortOrder.ASC, Anotacoes.id to SortOrder.ASC)
+    .limit(pedido.tamanho).offset(pedido.deslocamento)
+    .map { it.paraAnotacao() }
+```
+
+```java
+var itens = find(onde + " order by criadoEm, id", params)
+    .page(Page.of(pedido.pagina(), pedido.tamanho()))
+    .list().stream().map(AnotacaoEntidade::paraAnotacao).toList();
+```
+
+- O tamanho da página tem um teto (100, no MUSI): sem ele, `?tamanho=1000000` traria a
+  tabela inteira.
+- A listagem tem ordem definida (`ORDER BY`): sem ela, as páginas podem repetir ou pular
+  itens.
+- A resposta traz também o total, para quem consome saber quantas páginas há.
+
+Atualizar e remover seguem os métodos e status do capítulo 6 da leitura de 14/09: `PUT` ou
+`PATCH` com `200`, `DELETE` com `204`, `404` para id inexistente.
+
+---
+
+## 12. Exercícios e dúvidas frequentes
+
+### 12.1 Perguntas de fixação
 
 1. Por que as rotas não mudaram quando o repositório passou a usar PostgreSQL?
 2. O que o Flyway guarda na tabela `flyway_schema_history`, e para que serve o checksum?
@@ -1114,9 +1448,12 @@ deixa só os que não precisam de banco. No CI, tudo roda.
 6. Qual a diferença entre `RepositorioEmMemoria` e `RepositorioPostgres` do ponto de vista
    dos testes?
 7. O que o Dev Services faz, e em quais perfis ele entra?
-8. Por que o `POST {}` no Quarkus dá `500` e não `400`? Onde isso deveria ser resolvido?
+8. Antes do Passo 11, por que o `POST {}` no Quarkus dava `500`? Onde isso foi resolvido?
+9. Qual a diferença entre responder `400` e `422`?
+10. Por que a regra de validação fica no domínio, e não na rota ou no recurso?
+11. O que o teste de arquitetura verifica, e como saber que ele falha quando deve?
 
-### 10.2 Exercícios práticos
+### 12.2 Exercícios práticos
 
 1. Adicione a coluna `prazo DATE` (opcional) numa migração `V2__adiciona_prazo.sql`.
    Atualize a tabela do Exposed ou a entidade, o domínio e as respostas. Confira no log que
@@ -1124,18 +1461,34 @@ deixa só os que não precisam de banco. No CI, tudo roda.
 2. Implemente `PATCH /tarefas/{id}/feita`, que marca a tarefa como feita, nos dois stacks.
    Escreva um teste de integração que cria, marca e confere.
 3. Edite o `V1` depois de aplicado e veja a mensagem de checksum. Desfaça a edição.
-4. No Quarkus, adicione Bean Validation (`quarkus-hibernate-validator`, `@NotBlank` no
-   `titulo` e `@Valid` no parâmetro) e confirme que `POST {}` passa a devolver `400`.
+4. No Quarkus, troque a função `violacoes()` por Bean Validation
+   (`quarkus-hibernate-validator`, `@NotBlank` no `titulo` e `@Valid` no parâmetro). Compare
+   a resposta de `POST {}` e veja o que acontece com o teste de arquitetura.
 5. No Ktor, escreva um teste que roda com o banco vazio: suba um segundo container, rode só
    o Flyway e confirme que existem exatamente duas tarefas.
 6. Remova `parameters { path("id") ... }` e compare o tipo do `{id}` no
    `documentation.yaml`.
+7. Acrescente uma segunda regra à `NovaTarefa` (por exemplo, título com pelo menos 3
+   caracteres) e um teste de rota que confira o `422` com as duas violações possíveis.
+8. Importe uma classe do framework no pacote `dominio` e rode os testes. Leia a mensagem do
+   ArchUnit e desfaça.
+9. Implemente `GET /tarefas?feita=true&pagina=0&tamanho=10`, com a paginação no SQL e um
+   teto para `tamanho`.
 
-### 10.3 Dúvidas frequentes
+### 12.3 Dúvidas frequentes
 
 - Preciso de Docker para rodar os testes? Para os de integração, sim, nos dois stacks. Os
-  testes de rota do Ktor com o repositório em memória rodam sem Docker. No Codespaces, o
-  devcontainer precisa da feature `docker-in-docker` (o do MUSI tem).
+  testes de rota do Ktor com o repositório em memória e o teste unitário do recurso no
+  Quarkus rodam sem Docker.
+- Não tenho Docker, ou meu computador não dá conta. Como rodo? Num Codespace do repositório
+  (Code → Codespaces), que é também o ambiente usado no laboratório. Ele traz Java 25, Maven,
+  Go e Docker, com as dependências e as imagens do PostgreSQL já baixadas; a criação leva
+  cerca de 5 minutos. Os comandos são os mesmos (`./gradlew run`, `mvn quarkus:dev`,
+  `docker compose up -d`, `mise run test`), e as portas 8080 e 8081 aparecem na aba Portas.
+  O uso gratuito mensal é limitado: pare o Codespace ao terminar.
+- Posso usar o Codespace no projeto do grupo? Sim. Copie a pasta `.devcontainer/` para o
+  repositório do grupo e ajuste o que for preciso; a feature `docker-in-docker` é o que
+  permite rodar o `docker compose` e o Testcontainers lá dentro.
 - Posso usar H2 em memória nos testes em vez de PostgreSQL? Funciona para coisas simples,
   mas o H2 não é o PostgreSQL: tipos, funções e mensagens de erro diferem. A rubrica pede
   Testcontainers, justamente para testar contra o banco real.
