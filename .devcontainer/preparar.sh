@@ -13,3 +13,13 @@ mise trust && mise install || echo "aviso: mise não terminou; os comandos compl
 # postgres:17-alpine: compose.yaml e Testcontainers (Ktor); postgres:17: Dev Services (Quarkus).
 docker pull -q postgres:17-alpine || echo "aviso: não baixou postgres:17-alpine"
 docker pull -q postgres:17 || echo "aviso: não baixou postgres:17"
+
+# Branch `aula`: o código começa no Passo 4. Compila também o último passo, numa cópia
+# temporária, para que as dependências dos passos seguintes já estejam baixadas.
+git fetch --quiet --tags origin || true
+ultimo="$(git tag --list 'passo-*' --sort=v:refname | tail -1)"
+if [ -n "$ultimo" ] && git worktree add --quiet --detach /tmp/ultimo-passo "$ultimo"; then
+  (cd /tmp/ultimo-passo/exemplos/ktor-tarefas && ./gradlew --quiet testClasses) || echo "aviso: Gradle (último passo) não terminou"
+  (cd /tmp/ultimo-passo/exemplos/quarkus-tarefas && mvn -q -B test-compile) || echo "aviso: Maven (último passo) não terminou"
+  git worktree remove --force /tmp/ultimo-passo
+fi

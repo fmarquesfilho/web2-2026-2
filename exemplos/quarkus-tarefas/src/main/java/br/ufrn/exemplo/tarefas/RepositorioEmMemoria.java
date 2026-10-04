@@ -1,15 +1,9 @@
-package br.ufrn.exemplo.tarefas.adaptadores.memoria;
+package br.ufrn.exemplo.tarefas;
 
-import br.ufrn.exemplo.tarefas.dominio.NovaTarefa;
-import br.ufrn.exemplo.tarefas.dominio.RepositorioDeTarefas;
-import br.ufrn.exemplo.tarefas.dominio.Tarefa;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-// Sem @ApplicationScoped desde 21/09: o bean agora é o RepositorioPanache. Com os dois
-// anotados, o CDI não saberia qual injetar (dependência ambígua). Fica para testes
-// de unidade, que o constroem com `new`.
+// Implementação em memória. No Passo 7 entra outra, com PostgreSQL (Panache).
 public class RepositorioEmMemoria implements RepositorioDeTarefas {
 
     private final List<Tarefa> tarefas = new ArrayList<>(List.of(
@@ -20,11 +14,6 @@ public class RepositorioEmMemoria implements RepositorioDeTarefas {
     @Override
     public List<Tarefa> listar() {
         return List.copyOf(tarefas);
-    }
-
-    @Override
-    public Optional<Tarefa> buscar(int id) {
-        return tarefas.stream().filter(t -> t.id() == id).findFirst();
     }
 
     @Override

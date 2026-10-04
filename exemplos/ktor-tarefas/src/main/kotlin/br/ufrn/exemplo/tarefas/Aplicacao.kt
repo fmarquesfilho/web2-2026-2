@@ -1,44 +1,33 @@
 package br.ufrn.exemplo.tarefas
 
-import br.ufrn.exemplo.tarefas.adaptadores.banco.ConfigBanco
-import br.ufrn.exemplo.tarefas.adaptadores.banco.RepositorioPostgres
-import br.ufrn.exemplo.tarefas.adaptadores.banco.criarDataSource
-import br.ufrn.exemplo.tarefas.adaptadores.banco.migrar
-import br.ufrn.exemplo.tarefas.adaptadores.http.rotas
-import br.ufrn.exemplo.tarefas.adaptadores.http.tratarErros
-import br.ufrn.exemplo.tarefas.dominio.RepositorioDeTarefas
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationStopped
 import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import org.jetbrains.exposed.v1.jdbc.Database
-import org.koin.dsl.module
-import org.koin.ktor.plugin.Koin
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.routing
 
-// A raiz de composição: o único lugar que conhece todas as camadas e as liga.
-// Ponto de entrada. Engine CIO (corrotinas puras), o mesmo do MUSI.
 fun main() {
-    embeddedServer(CIO, port = 8080, host = "0.0.0.0") { modulo() }
-        .start(wait = true)
+    embeddedServer(CIO, port = 8080, host = "0.0.0.0") { modulo() }.start(wait = true)
 }
 
-// Produção: banco de verdade, migrado na subida.
-fun Application.modulo(config: ConfigBanco = ConfigBanco.doAmbiente()) {
-    val dataSource = criarDataSource(config)
-    migrar(dataSource)
-    monitor.subscribe(ApplicationStopped) { dataSource.close() }
-    configurar(RepositorioPostgres(Database.connect(dataSource)))
-}
-
-// O resto da aplicação só conhece a porta: os testes podem passar outro repositório.
-fun Application.configurar(repositorio: RepositorioDeTarefas) {
-    install(Koin) {
-        modules(module { single<RepositorioDeTarefas> { repositorio } })
-    }
+fun Application.modulo() {
     install(ContentNegotiation) { json() }
-    tratarErros()
-    rotas()
+
+    val repositorio: RepositorioDeTarefas = RepositorioEmMemoria()
+
+    routing {
+        get("/tarefas") { call.respond(repositorio.listar()) }
+
+        post("/tarefas") {
+            val nova = call.receive<NovaTarefa>()
+            call.respond(HttpStatusCode.Created, repositorio.adicionar(nova))
+        }
+    }
 }

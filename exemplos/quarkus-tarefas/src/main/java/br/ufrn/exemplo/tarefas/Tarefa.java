@@ -1,4 +1,4 @@
-package br.ufrn.exemplo.tarefas.dominio;
+package br.ufrn.exemplo.tarefas;
 
 // O domínio: uma tarefa. `record` é o equivalente Java à data class do Kotlin.
 // O Jackson serializa records em JSON sem configuração.
