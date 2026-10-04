@@ -22,6 +22,14 @@ dependencies {
     implementation("io.insert-koin:koin-ktor:4.2.2")
 
     implementation("ch.qos.logback:logback-classic:1.6.3")
+
+    // Persistência (Passo 6): Exposed (SQL em Kotlin), driver JDBC, pool e migrações.
+    implementation("org.jetbrains.exposed:exposed-core:1.5.0")
+    implementation("org.jetbrains.exposed:exposed-jdbc:1.5.0")
+    implementation("org.postgresql:postgresql:42.7.13")
+    implementation("com.zaxxer:HikariCP:7.1.0")
+    implementation("org.flywaydb:flyway-core:13.7.0")
+    implementation("org.flywaydb:flyway-database-postgresql:13.7.0")
 }
 
 // Java 25, como no MUSI. O foojay (settings.gradle.kts) baixa o JDK se faltar.
