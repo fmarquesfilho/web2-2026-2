@@ -19,6 +19,14 @@ fun Application.rotas() {
         route("/tarefas") {
             get { call.respond(repositorio.listar()) }
 
+            get("/{id}") {
+                val id = call.parameters["id"]?.toIntOrNull()
+                    ?: return@get call.respond(HttpStatusCode.BadRequest)
+                val tarefa = repositorio.buscar(id)
+                    ?: return@get call.respond(HttpStatusCode.NotFound)
+                call.respond(tarefa)
+            }
+
             post {
                 val nova = call.receive<NovaTarefa>()
                 call.respond(HttpStatusCode.Created, repositorio.adicionar(nova))

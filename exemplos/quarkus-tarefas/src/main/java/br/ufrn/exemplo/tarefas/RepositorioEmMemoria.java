@@ -1,11 +1,12 @@
 package br.ufrn.exemplo.tarefas;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-// @ApplicationScoped: o contêiner CDI cria uma instância e injeta onde for pedida.
-@ApplicationScoped
+// Sem @ApplicationScoped desde 21/09: o bean agora é o RepositorioPanache. Com os dois
+// anotados, o CDI não saberia qual injetar (dependência ambígua). Fica para testes
+// de unidade, que o constroem com `new`.
 public class RepositorioEmMemoria implements RepositorioDeTarefas {
 
     private final List<Tarefa> tarefas = new ArrayList<>(List.of(
@@ -16,6 +17,11 @@ public class RepositorioEmMemoria implements RepositorioDeTarefas {
     @Override
     public List<Tarefa> listar() {
         return List.copyOf(tarefas);
+    }
+
+    @Override
+    public Optional<Tarefa> buscar(int id) {
+        return tarefas.stream().filter(t -> t.id() == id).findFirst();
     }
 
     @Override

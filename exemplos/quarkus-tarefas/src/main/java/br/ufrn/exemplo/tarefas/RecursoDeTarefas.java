@@ -2,8 +2,10 @@ package br.ufrn.exemplo.tarefas;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
 
@@ -11,11 +13,17 @@ import java.util.List;
 public class RecursoDeTarefas {
 
     @Inject
-    RepositorioDeTarefas repositorio;   // o CDI resolve a implementação
+    RepositorioDeTarefas repositorio;
 
     @GET
     public List<Tarefa> listar() {
         return repositorio.listar();
+    }
+
+    @GET
+    @Path("/{id}")
+    public Tarefa buscar(@PathParam("id") int id) {
+        return repositorio.buscar(id).orElseThrow(NotFoundException::new);
     }
 
     @POST
