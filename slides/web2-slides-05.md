@@ -118,7 +118,7 @@ Quem decide é a **assinatura** do método (conferido pelo nome da thread):
 
 - `@Blocking` e `@NonBlocking` trocam a escolha; `@Transactional` conta como bloqueante
 - O exemplo, imperativo, roda no modelo de **uma thread por requisição**, com um pool grande
-- O erro grave é o contrário: **bloquear dentro de um método reativo** prende o event loop
+- **Bloquear dentro de um método reativo** prende o event loop
 
 📖 **Ref.** `leituras/web2-s1-pte1.md`, seção 9.4 · [Quarkus — REST: execution model](https://quarkus.io/guides/rest#execution-model-blocking-non-blocking)
 
@@ -226,7 +226,7 @@ RepositorioDeTarefas repositorio;
                (testes de rota)                             RepositorioPanache (Quarkus)
 ```
 
-- A separação do Passo 4 mostra seu valor agora: **uma classe nova**, a mesma interface
+- Uma classe nova implementa a mesma interface do Passo 4
 - A implementação em memória **fica**: é a dos testes sem Docker
 
 ---
@@ -389,7 +389,7 @@ public class RepositorioPanache
 | Banco nos testes | Testcontainers | Dev Services |
 | Esquema | nunca `SchemaUtils.create` | `strategy=none` |
 
-> Exposed: cada SQL visível. Panache: CRUD quase pronto — mas conheçam o que o Hibernate faz por baixo (N+1, carregamento preguiçoso).
+> Exposed: cada SQL visível. Panache: CRUD pronto, com atenção ao que o Hibernate faz por baixo (N+1, carregamento preguiçoso).
 
 ---
 
@@ -817,8 +817,6 @@ Guia e tarefas: `docs/SPRINT-1.md` e `docs/SPRINT-1-TAREFAS.md`. Exemplos: passo
 | 16 e 18/11 | 🔵 online: acompanhamento | 🟢 em sala: oficina de projeto |
 | 23 e 25/11 | 🔵 online: *daily meetings* | 🔵 online: *daily meetings* |
 | 30/11 e 02/12 | a definir · 🚀 **entrega final** | 🟢 em sala: **prova de reposição** |
-
-> O conteúdo da Sprint 2 cabe em duas aulas porque vai ser liberado **antes, em vídeo** (aula invertida): assistam antes de 19/10.
 
 ---
 
