@@ -30,6 +30,12 @@ dependencies {
     implementation("com.zaxxer:HikariCP:7.1.0")
     implementation("org.flywaydb:flyway-core:13.7.0")
     implementation("org.flywaydb:flyway-database-postgresql:13.7.0")
+
+    testImplementation(kotlin("test"))
+    testImplementation("io.ktor:ktor-server-test-host:3.5.2")
+    testImplementation("io.ktor:ktor-client-content-negotiation:3.5.2")
+    // PostgreSQL descartável, num container, para os testes de integração (Passo 8).
+    testImplementation("org.testcontainers:testcontainers-postgresql:2.0.5")
 }
 
 // Java 25, como no MUSI. O foojay (settings.gradle.kts) baixa o JDK se faltar.
