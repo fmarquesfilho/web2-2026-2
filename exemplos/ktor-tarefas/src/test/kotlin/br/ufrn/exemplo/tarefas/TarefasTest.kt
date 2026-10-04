@@ -7,6 +7,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
@@ -46,6 +47,7 @@ class TarefasTest {
         }
         assertEquals(HttpStatusCode.Created, resposta.status)
         val criada = resposta.body<Tarefa>()
+        assertEquals("/tarefas/${criada.id}", resposta.headers[HttpHeaders.Location])
         assertEquals(criada, cliente.get("/tarefas/${criada.id}").body<Tarefa>())
     }
 

@@ -35,6 +35,9 @@ dependencies {
     implementation("io.ktor:ktor-server-routing-openapi:3.5.2")
     implementation("io.ktor:ktor-server-swagger:3.5.2")
 
+    // Erros num lugar só, em problem details (Passo 11).
+    implementation("io.ktor:ktor-server-status-pages:3.5.2")
+
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-server-test-host:3.5.2")
     testImplementation("io.ktor:ktor-client-content-negotiation:3.5.2")

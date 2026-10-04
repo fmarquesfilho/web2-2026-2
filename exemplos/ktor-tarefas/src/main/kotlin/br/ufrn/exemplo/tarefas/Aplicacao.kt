@@ -31,5 +31,6 @@ fun Application.configurar(repositorio: RepositorioDeTarefas) {
         modules(module { single<RepositorioDeTarefas> { repositorio } })
     }
     install(ContentNegotiation) { json() }
+    tratarErros()
     rotas()
 }
