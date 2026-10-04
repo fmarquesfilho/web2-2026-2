@@ -1,5 +1,8 @@
 package br.ufrn.exemplo.tarefas
 
+import br.ufrn.exemplo.tarefas.adaptadores.banco.ConfigBanco
+import br.ufrn.exemplo.tarefas.dominio.NovaTarefa
+import br.ufrn.exemplo.tarefas.dominio.Tarefa
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get

@@ -1,5 +1,9 @@
-package br.ufrn.exemplo.tarefas
+package br.ufrn.exemplo.tarefas.adaptadores.http
 
+import br.ufrn.exemplo.tarefas.dominio.EntradaInvalida
+import br.ufrn.exemplo.tarefas.dominio.NovaTarefa
+import br.ufrn.exemplo.tarefas.dominio.RepositorioDeTarefas
+import br.ufrn.exemplo.tarefas.dominio.Tarefa
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.openapi.OpenApiInfo

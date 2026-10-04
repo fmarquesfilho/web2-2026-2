@@ -81,6 +81,13 @@
       <artifactId>rest-assured</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- Teste de arquitetura: a regra de dependência verificada no bytecode (Passo 12) -->
+    <dependency>
+      <groupId>com.tngtech.archunit</groupId>
+      <artifactId>archunit</artifactId>
+      <version>1.5.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

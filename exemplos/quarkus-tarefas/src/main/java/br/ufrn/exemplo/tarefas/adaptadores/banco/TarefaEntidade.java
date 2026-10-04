@@ -1,5 +1,6 @@
-package br.ufrn.exemplo.tarefas;
+package br.ufrn.exemplo.tarefas.adaptadores.banco;
 
+import br.ufrn.exemplo.tarefas.dominio.Tarefa;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

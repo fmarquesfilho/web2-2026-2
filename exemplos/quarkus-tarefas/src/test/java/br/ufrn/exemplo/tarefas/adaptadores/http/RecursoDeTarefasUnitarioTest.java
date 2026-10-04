@@ -1,8 +1,11 @@
-package br.ufrn.exemplo.tarefas;
+package br.ufrn.exemplo.tarefas.adaptadores.http;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import br.ufrn.exemplo.tarefas.adaptadores.memoria.RepositorioEmMemoria;
+import br.ufrn.exemplo.tarefas.dominio.NovaTarefa;
+import br.ufrn.exemplo.tarefas.dominio.Tarefa;
 import jakarta.ws.rs.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

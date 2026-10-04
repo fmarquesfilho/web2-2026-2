@@ -1,5 +1,6 @@
-package br.ufrn.exemplo.tarefas
+package br.ufrn.exemplo.tarefas.adaptadores.http
 
+import br.ufrn.exemplo.tarefas.dominio.EntradaInvalida
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application

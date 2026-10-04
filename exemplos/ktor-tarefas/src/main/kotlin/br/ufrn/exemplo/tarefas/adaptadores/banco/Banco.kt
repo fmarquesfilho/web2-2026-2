@@ -1,5 +1,8 @@
-package br.ufrn.exemplo.tarefas
+package br.ufrn.exemplo.tarefas.adaptadores.banco
 
+import br.ufrn.exemplo.tarefas.dominio.NovaTarefa
+import br.ufrn.exemplo.tarefas.dominio.RepositorioDeTarefas
+import br.ufrn.exemplo.tarefas.dominio.Tarefa
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.flywaydb.core.Flyway

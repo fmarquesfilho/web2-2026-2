@@ -1,5 +1,9 @@
-package br.ufrn.exemplo.tarefas;
+package br.ufrn.exemplo.tarefas.adaptadores.http;
 
+import br.ufrn.exemplo.tarefas.dominio.EntradaInvalida;
+import br.ufrn.exemplo.tarefas.dominio.NovaTarefa;
+import br.ufrn.exemplo.tarefas.dominio.RepositorioDeTarefas;
+import br.ufrn.exemplo.tarefas.dominio.Tarefa;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.GET;

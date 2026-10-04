@@ -1,5 +1,8 @@
-package br.ufrn.exemplo.tarefas;
+package br.ufrn.exemplo.tarefas.adaptadores.banco;
 
+import br.ufrn.exemplo.tarefas.dominio.NovaTarefa;
+import br.ufrn.exemplo.tarefas.dominio.RepositorioDeTarefas;
+import br.ufrn.exemplo.tarefas.dominio.Tarefa;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;

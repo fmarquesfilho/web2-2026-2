@@ -1,5 +1,6 @@
-package br.ufrn.exemplo.tarefas;
+package br.ufrn.exemplo.tarefas.adaptadores.http;
 
+import br.ufrn.exemplo.tarefas.dominio.EntradaInvalida;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;

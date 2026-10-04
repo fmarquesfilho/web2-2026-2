@@ -1,5 +1,12 @@
 package br.ufrn.exemplo.tarefas
 
+import br.ufrn.exemplo.tarefas.adaptadores.banco.ConfigBanco
+import br.ufrn.exemplo.tarefas.adaptadores.banco.RepositorioPostgres
+import br.ufrn.exemplo.tarefas.adaptadores.banco.criarDataSource
+import br.ufrn.exemplo.tarefas.adaptadores.banco.migrar
+import br.ufrn.exemplo.tarefas.adaptadores.http.rotas
+import br.ufrn.exemplo.tarefas.adaptadores.http.tratarErros
+import br.ufrn.exemplo.tarefas.dominio.RepositorioDeTarefas
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationStopped
@@ -11,6 +18,7 @@ import org.jetbrains.exposed.v1.jdbc.Database
 import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
 
+// A raiz de composição: o único lugar que conhece todas as camadas e as liga.
 // Ponto de entrada. Engine CIO (corrotinas puras), o mesmo do MUSI.
 fun main() {
     embeddedServer(CIO, port = 8080, host = "0.0.0.0") { modulo() }

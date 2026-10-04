@@ -1,5 +1,8 @@
-package br.ufrn.exemplo.tarefas;
+package br.ufrn.exemplo.tarefas.adaptadores.memoria;
 
+import br.ufrn.exemplo.tarefas.dominio.NovaTarefa;
+import br.ufrn.exemplo.tarefas.dominio.RepositorioDeTarefas;
+import br.ufrn.exemplo.tarefas.dominio.Tarefa;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

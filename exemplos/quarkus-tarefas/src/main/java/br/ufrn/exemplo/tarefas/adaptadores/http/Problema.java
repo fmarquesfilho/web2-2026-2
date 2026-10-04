@@ -1,4 +1,4 @@
-package br.ufrn.exemplo.tarefas;
+package br.ufrn.exemplo.tarefas.adaptadores.http;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;

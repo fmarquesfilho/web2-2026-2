@@ -1,5 +1,6 @@
 package br.ufrn.exemplo.tarefas
 
+import br.ufrn.exemplo.tarefas.adaptadores.memoria.RepositorioEmMemoria
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody

@@ -43,6 +43,8 @@ dependencies {
     testImplementation("io.ktor:ktor-client-content-negotiation:3.5.2")
     // PostgreSQL descartável, num container, para os testes de integração (Passo 8).
     testImplementation("org.testcontainers:testcontainers-postgresql:2.0.5")
+    // Teste de arquitetura: a regra de dependência verificada no bytecode (Passo 12).
+    testImplementation("com.tngtech.archunit:archunit:1.5.0")
 }
 
 // Java 25, como no MUSI. O foojay (settings.gradle.kts) baixa o JDK se faltar.

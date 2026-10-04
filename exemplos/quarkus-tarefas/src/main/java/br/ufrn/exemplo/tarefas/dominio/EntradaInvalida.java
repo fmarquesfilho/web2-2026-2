@@ -1,4 +1,4 @@
-package br.ufrn.exemplo.tarefas;
+package br.ufrn.exemplo.tarefas.dominio;
 
 import java.util.List;
 
