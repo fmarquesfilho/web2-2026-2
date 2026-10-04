@@ -1,5 +1,6 @@
 package br.ufrn.exemplo.tarefas;
 
+import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -9,8 +10,8 @@ import java.util.List;
 @Path("/tarefas")
 public class RecursoDeTarefas {
 
-    // O recurso fala com a interface. Por enquanto, quem constrói a implementação é ele mesmo.
-    private final RepositorioDeTarefas repositorio = new RepositorioEmMemoria();
+    @Inject
+    RepositorioDeTarefas repositorio;   // o CDI resolve a implementação
 
     @GET
     public List<Tarefa> listar() {

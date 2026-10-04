@@ -1,9 +1,11 @@
 package br.ufrn.exemplo.tarefas;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
 
-// Implementação em memória. No Passo 7 entra outra, com PostgreSQL (Panache).
+// @ApplicationScoped: o contêiner CDI cria uma instância e injeta onde for pedida.
+@ApplicationScoped
 public class RepositorioEmMemoria implements RepositorioDeTarefas {
 
     private final List<Tarefa> tarefas = new ArrayList<>(List.of(
