@@ -1,0 +1,91 @@
+# DIM0547 - ferramentas e tasks dos exemplos.
+#
+# O `mise` fixa a versao de cada ferramenta e da um nome curto para cada comando. Nada
+# aqui e obrigatorio: o comentario de cada task traz o comando completo, que continua
+# funcionando sem o mise. Instalacao: https://mise.jdx.dev/getting-started.html
+#
+#   mise install            # baixa o JDK e o Maven desta lista
+#   mise tasks              # lista tudo o que da para rodar
+#
+# No Codespace deste repositorio, `mise install` ja roda na criacao.
+
+[tools]
+java  = "temurin-25"   # a mesma versao do MUSI e do Codespace
+maven = "3.9"
+# O Gradle nao entra aqui: a versao vem do wrapper (./gradlew).
+
+# ---------------------------------------------------------------------------
+# Ktor (exemplos/ktor-tarefas) - porta 8080
+# ---------------------------------------------------------------------------
+
+# Do Passo 6 em diante a API precisa do banco no ar.
+[tasks."ktor:banco"]
+description = "Sobe o PostgreSQL 17 do exemplo Ktor (porta 5432)"
+dir = "exemplos/ktor-tarefas"
+run = "docker compose up -d"          # == docker compose up -d
+
+[tasks."ktor:banco:parar"]
+description = "Para o banco do exemplo Ktor; com -v, apaga os dados"
+dir = "exemplos/ktor-tarefas"
+run = "docker compose down"
+
+[tasks."ktor:run"]
+description = "Sobe a API Ktor na 8080 (precisa do banco, do Passo 6 em diante)"
+dir = "exemplos/ktor-tarefas"
+run = "./gradlew run"
+
+[tasks."ktor:test"]
+description = "Testes do exemplo Ktor (o de integracao precisa de Docker)"
+dir = "exemplos/ktor-tarefas"
+run = "./gradlew test"
+
+[tasks."ktor:demo"]
+description = "Cria e lista uma tarefa na API Ktor, para ver o CRUD respondendo"
+dir = "exemplos/ktor-tarefas"
+run = """
+curl -s -i -X POST localhost:8080/tarefas -H 'Content-Type: application/json' \
+  -d '{"titulo":"Gravada pelo mise"}' | head -3
+echo
+curl -s localhost:8080/tarefas | python3 -m json.tool
+"""
+
+# ---------------------------------------------------------------------------
+# Quarkus (exemplos/quarkus-tarefas) - porta 8081
+# ---------------------------------------------------------------------------
+
+# Em modo dev, sem URL de banco, o Dev Services sobe um PostgreSQL sozinho.
+[tasks."quarkus:dev"]
+description = "Sobe a API Quarkus na 8081, em modo dev (banco pelo Dev Services)"
+dir = "exemplos/quarkus-tarefas"
+run = "mvn -B quarkus:dev"
+
+[tasks."quarkus:test"]
+description = "Testes do exemplo Quarkus (precisa de Docker)"
+dir = "exemplos/quarkus-tarefas"
+run = "mvn -B -ntp test"
+
+[tasks."quarkus:pacote"]
+description = "Empacota a API Quarkus e a roda como em producao (java -jar)"
+dir = "exemplos/quarkus-tarefas"
+run = [
+  "mvn -B -ntp package -DskipTests",
+  "java -jar target/quarkus-app/quarkus-run.jar",
+]
+
+[tasks."quarkus:demo"]
+description = "Cria e lista uma tarefa na API Quarkus"
+dir = "exemplos/quarkus-tarefas"
+run = """
+curl -s -i -X POST localhost:8081/tarefas -H 'Content-Type: application/json' \
+  -d '{"titulo":"Gravada pelo mise"}' | head -3
+echo
+curl -s localhost:8081/tarefas | python3 -m json.tool
+"""
+
+# ---------------------------------------------------------------------------
+# Os dois
+# ---------------------------------------------------------------------------
+
+[tasks.test]
+description = "Testes dos dois exemplos, como no CI"
+depends = ["ktor:test", "quarkus:test"]
