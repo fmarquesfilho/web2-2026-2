@@ -12,14 +12,14 @@ em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **16/10, 23:59** (adiada; era 02
 | # | Tarefa | Critério da rubrica |
 |---|---|---|
 | T1 | Quebrar as histórias P1 em cartões da sprint | Atividade no repositório |
-| T2 | Modelar as entidades e escrever as migrações | Persistência e migrações (20%) |
-| T3 | Subir o banco com `docker compose` | Persistência e migrações (20%) |
-| T4 | Implementar os repositórios com banco | CRUD completo (25%) |
-| T5 | Completar o CRUD com paginação e filtros | CRUD completo (25%) |
-| T6 | Separar as camadas e escrever o teste de arquitetura | Clean Architecture + verificação (25%) |
-| T7 | Validar as entradas e responder erros em *problem details* | Validação, erros e OpenAPI (10%) |
-| T8 | Gerar e publicar o OpenAPI | Validação, erros e OpenAPI (10%) |
-| T9 | Escrever os testes e rodá-los no CI | Testes local e remoto (20%) |
+| T2 | Modelar as entidades e escrever as migrações | Persistência e migrações (25%) |
+| T3 | Subir o banco com `docker compose` | Persistência e migrações (25%) |
+| T4 | Implementar os repositórios com banco | CRUD completo (30%) |
+| T5 | Completar o CRUD com paginação e filtros | CRUD completo (30%) |
+| T6 | Separar as camadas | Clean Architecture (30%) |
+| T7 | Validar as entradas e responder erros em *problem details* | Validação, erros e OpenAPI (15%) |
+| T8 | Gerar e publicar o OpenAPI | Validação, erros e OpenAPI (15%) |
+| T9 | Movida para a Sprint 2: testes | — |
 | T10 | Gravar o vídeo de 5 minutos | Comunicação |
 
 > Exemplos de referência: `exemplos/ktor-tarefas/` e `exemplos/quarkus-tarefas/` deste
@@ -34,7 +34,7 @@ em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **16/10, 23:59** (adiada; era 02
 
 **O que fazer.**
 - [ ] Mover para a coluna da sprint as histórias P1 que dependem do serviço de CRUD
-- [ ] Criar os cartões das tarefas T2 a T10
+- [ ] Criar os cartões das tarefas T2 a T8 e T10
 - [ ] Atribuir um responsável a cada cartão e ligá-lo ao PR que o resolve
 
 **Pronto quando.** O quadro mostra o que está na sprint, com dono, e cada cartão fechado aponta para um PR integrado.
@@ -82,7 +82,7 @@ em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **16/10, 23:59** (adiada; era 02
 - [ ] Implementar as portas de repositório com Exposed (Ktor) ou Panache (Quarkus)
 - [ ] Converter entre linhas/entidades JPA e objetos de domínio num lugar só
 - [ ] Ktor: `suspendTransaction` em toda operação; Quarkus: `@Transactional` nas escritas
-- [ ] Manter a implementação em memória para os testes sem banco
+- [ ] Manter a implementação em memória: ela servirá aos testes sem banco, na Sprint 2
 
 **Pronto quando.** A API grava e lê do PostgreSQL, os dados sobrevivem a um reinício, e as rotas só conhecem as interfaces.
 
@@ -107,19 +107,18 @@ em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **16/10, 23:59** (adiada; era 02
 
 ---
 
-## T6 — Separar as camadas e escrever o teste de arquitetura
+## T6 — Separar as camadas
 
-**Objetivo.** Garantir, por teste, que o domínio não depende de framework nem de infraestrutura.
+**Objetivo.** Deixar o domínio sem dependência de framework nem de infraestrutura.
 
 **O que fazer.**
 - [ ] Organizar os pacotes em domínio, casos de uso e adaptadores
-- [ ] Escrever o teste de arquitetura (ArchUnit no Java; ArchUnit ou Konsist no Kotlin)
-- [ ] Confirmar que ele falha ao importar, de propósito, uma classe de framework no domínio
-- [ ] Rodar o teste no CI
+- [ ] Declarar as interfaces de repositório no domínio e implementá-las nos adaptadores
+- [ ] Conferir os `import` do pacote de domínio: nada de Ktor, Quarkus, Exposed, Hibernate ou JDBC
 
-**Pronto quando.** As camadas estão separadas, e o teste de arquitetura falha quando a regra é violada e passa no CI.
+**Pronto quando.** As camadas estão separadas em pacotes, e nenhum arquivo do domínio importa framework ou infraestrutura. O teste de arquitetura, que verifica isso automaticamente, fica para a Sprint 2.
 
-**Referência.** [SPRINT-1.md](SPRINT-1.md) *Clean Architecture + verificação* · `web2-s1-pte1.md`, capítulo 7 · `web2-s1-pte2.md`, capítulo 11 · [STACK.md](STACK.md#clean-architecture-com-verificação-automática) · exemplos, Passo 12.
+**Referência.** [SPRINT-1.md](SPRINT-1.md) *Clean Architecture* · `web2-s1-pte1.md`, capítulo 7 · `web2-s1-pte2.md`, capítulo 11 · [STACK.md](STACK.md#clean-architecture-com-verificação-automática) · exemplos, Passo 12.
 
 ---
 
@@ -154,19 +153,9 @@ em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **16/10, 23:59** (adiada; era 02
 
 ---
 
-## T9 — Escrever os testes e rodá-los no CI
+## T9 — Testes (movida para a Sprint 2)
 
-**Objetivo.** Uma suíte que roda igual no Docker Desktop e no GitHub Actions.
-
-**O que fazer.**
-- [ ] Unitários do domínio e dos casos de uso, sem banco
-- [ ] Testes de rota sem banco, com o repositório em memória
-- [ ] Integração com PostgreSQL: Testcontainers (Ktor) ou `@QuarkusTest` com Dev Services (Quarkus), cobrindo CRUD, relacionamento e paginação
-- [ ] Rodar a suíte em `mise run test` e no workflow, em push e PR
-
-**Pronto quando.** Unitários e integração passam localmente e no CI, sem mudança de configuração, e o CI está verde na branch principal.
-
-**Referência.** [SPRINT-1.md](SPRINT-1.md) *Testes local e remoto* · `web2-s1-pte2.md`, capítulo 7.
+Esta tarefa saiu da Sprint 1 em 13/10, por decisão tomada com a turma, e será avaliada na Sprint 2, junto com o teste de arquitetura que fazia parte da T6. Quem já criou o cartão pode movê-lo de volta para o backlog. A numeração das outras tarefas não mudou.
 
 ---
 
@@ -175,7 +164,7 @@ em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **16/10, 23:59** (adiada; era 02
 **Objetivo.** Mostrar o incremento funcionando e explicar as escolhas.
 
 **O que fazer.**
-- [ ] Seguir o roteiro do guia (entidades e CRUD · migrações e compose · arquitetura · testes e CI)
+- [ ] Seguir o roteiro do guia (entidades e CRUD · migrações e compose · arquitetura · validação e erros · CI e o que ficou para a Sprint 2)
 - [ ] Garantir que **todos os integrantes falam**
 - [ ] Publicar o vídeo e linkar no `README.md`
 - [ ] Mostrar o andamento na reunião online do grupo (28 ou 30/09)

@@ -2,7 +2,7 @@
 
 Prazo em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): entrega em **16/10 (sexta), 23:59** (adiada; era 02/10). As *daily meetings* da sprint foram as reuniões online de 28 e 30/09. O que entregar e como é avaliado: [RUBRICAS.md](RUBRICAS.md#sprint-1). Os enunciados, prontos para virar cartões no quadro, estão em [SPRINT-1-TAREFAS.md](SPRINT-1-TAREFAS.md).
 
-A Sprint 1 é a sprint do **serviço de CRUD**: o serviço principal, em Kotlin/Ktor ou Java/Quarkus conforme a decisão da Sprint 0, passa a ter entidades persistidas em PostgreSQL, esquema versionado por migrações, arquitetura verificada por teste, testes de integração com banco real e documentação OpenAPI gerada do código.
+A Sprint 1 é a sprint do **serviço de CRUD**: o serviço principal, em Kotlin/Ktor ou Java/Quarkus conforme a decisão da Sprint 0, passa a ter entidades persistidas em PostgreSQL, esquema versionado por migrações, arquitetura em camadas e documentação OpenAPI gerada do código.
 
 ---
 
@@ -10,11 +10,10 @@ A Sprint 1 é a sprint do **serviço de CRUD**: o serviço principal, em Kotlin/
 
 | Critério da rubrica | Peso | Em uma frase |
 |---|---|---|
-| CRUD completo | 25% | ≥ 2 entidades com relacionamento, todas as operações, paginação e filtros, com verbos e status HTTP coerentes |
-| Clean Architecture + verificação | 25% | Camadas separadas e um teste de arquitetura, rodando no CI, que falha se o domínio importar framework ou infraestrutura |
-| Persistência e migrações | 20% | Flyway com migrações versionadas; banco sobe via `docker compose`; esquema só por migração |
-| Testes local e remoto | 20% | Unitários do domínio e integração com Testcontainers, passando no Docker Desktop e no CI sem mudar configuração |
-| Validação, erros e OpenAPI | 10% | Validação em todas as entradas, erros em *problem details* (RFC 9457), OpenAPI gerado e acessível |
+| CRUD completo | 30% | ≥ 2 entidades com relacionamento, todas as operações, paginação e filtros, com verbos e status HTTP coerentes |
+| Clean Architecture | 30% | Camadas separadas em pacotes; o domínio não importa framework nem infraestrutura |
+| Persistência e migrações | 25% | Flyway com migrações versionadas; banco sobe via `docker compose`; esquema só por migração |
+| Validação, erros e OpenAPI | 15% | Validação em todas as entradas, erros em *problem details* (RFC 9457), OpenAPI gerado e acessível |
 
 Além da entrega técnica, a nota da sprint tem a atividade no repositório (30%) e a comunicação (20%): ver [AVALIACAO.md](AVALIACAO.md#2-nota-de-cada-sprint).
 
@@ -22,7 +21,7 @@ Além da entrega técnica, a nota da sprint tem a atividade no repositório (30%
 
 ## Material de apoio
 
-- Leituras da sprint: [`leituras/web2-s1-pte1.md`](../leituras/web2-s1-pte1.md) (serviço de CRUD em Ktor × Quarkus, 14/09) e [`leituras/web2-s1-pte2.md`](../leituras/web2-s1-pte2.md) (persistência, migrações, testes, OpenAPI, validação com *problem details* e teste de arquitetura; segunda parte da sprint).
+- Leituras da sprint: [`leituras/web2-s1-pte1.md`](../leituras/web2-s1-pte1.md) (serviço de CRUD em Ktor × Quarkus, 14/09) e [`leituras/web2-s1-pte2.md`](../leituras/web2-s1-pte2.md) (persistência, migrações, testes, OpenAPI, validação com *problem details* e teste de arquitetura; segunda parte da sprint). Os capítulos de testes dessa leitura servem à Sprint 2.
 - Exemplos: `exemplos/ktor-tarefas/` e `exemplos/quarkus-tarefas/`, passos 1 a 12 de cada `PASSOS.md`. A mesma API nos dois stacks, com PostgreSQL, Flyway, testes com Testcontainers (Ktor) e Dev Services (Quarkus), OpenAPI, validação com *problem details* (Passo 11) e teste de arquitetura com ArchUnit (Passo 12). O exemplo tem uma entidade só: duas entidades com relacionamento, `PUT`/`DELETE`, paginação e filtros estão no MUSI.
 - Projeto de referência: `github.com/fmarquesfilho/musi` (`api-ktor/`, `api-quarkus/`).
 - Ambiente sem instalação: o `.devcontainer/` deste repositório abre um Codespace com Java 25, Maven, Go e Docker, onde os exemplos, o `docker compose`, o Testcontainers e o Dev Services funcionam. É também um modelo para o `.devcontainer/` do projeto do grupo.
@@ -38,11 +37,12 @@ Além da entrega técnica, a nota da sprint tem a atividade no repositório (30%
 
 ---
 
-## Clean Architecture + verificação
+## Clean Architecture
 
 - O domínio (entidades e regras) não importa Ktor, Quarkus, Exposed, Hibernate nem JDBC. Os adaptadores (rotas ou recursos, repositórios com banco) dependem do domínio, nunca o contrário.
-- Um teste de arquitetura verifica a regra de dependência: ArchUnit no Java; ArchUnit ou Konsist no Kotlin. Ele deve **falhar** se alguém importar framework no domínio — confiram isso uma vez, de propósito.
-- O teste roda no CI junto com os demais.
+- Os pacotes mostram as camadas: por exemplo, `dominio` e `adaptadores` (`http`, `banco`), como no Passo 12 do exemplo.
+- As rotas ou recursos conhecem só as interfaces de repositório, declaradas no domínio.
+- O teste de arquitetura (ArchUnit ou Konsist), que verifica essa regra automaticamente, passou para a Sprint 2. Nesta sprint, a regra é conferida pela leitura dos `import` do pacote de domínio.
 
 ---
 
@@ -54,12 +54,15 @@ Além da entrega técnica, a nota da sprint tem a atividade no repositório (30%
 
 ---
 
-## Testes local e remoto
+## Testes: na Sprint 2
 
-- Unitários do domínio e dos casos de uso, sem banco, com repositórios falsos ou em memória: rápidos, muitos.
-- Integração com banco real: Testcontainers (Ktor) ou `@QuarkusTest` com Dev Services (Quarkus). Verificam migração, SQL, relacionamento e restrições.
-- A mesma suíte roda no Docker Desktop e no GitHub Actions sem mudar configuração: os runners Linux do Actions têm Docker. Nada de URL de banco fixa nos testes.
-- `mise run test` e o workflow executam a suíte inteira. Com Quarkus 3.28 e Docker Engine 29, importem o BOM do Testcontainers 1.21.4 (ver o `pom.xml` do exemplo).
+Os testes saíram desta sprint (ajuste de 13/10, combinado com a turma) e passam a ser avaliados na Sprint 2: os unitários do domínio, os de integração com banco real e o teste de arquitetura. Nesta sprint:
+
+- O workflow da Sprint 0 (build dos dois stacks) continua rodando e deve estar verde na branch principal no prazo.
+- Manter a implementação em memória dos repositórios e o domínio sem dependência de framework já deixa o código pronto para ser testado.
+- Quem já escreveu testes pode mantê-los no repositório: eles contam na Sprint 2.
+
+O conteúdo sobre testes continua disponível: capítulo 7 (testes) e capítulo 11 (teste de arquitetura) da leitura `web2-s1-pte2.md`, e passos 8 e 12 dos exemplos.
 
 ---
 
@@ -78,8 +81,8 @@ Além da entrega técnica, a nota da sprint tem a atividade no repositório (30%
 | 30 s | O que a sprint entregou |
 | 1 min 30 s | As entidades e o relacionamento; o CRUD funcionando pela Swagger UI, com paginação e filtro |
 | 1 min | As migrações e o banco subindo com `docker compose` |
-| 1 min | A arquitetura: camadas e o teste de arquitetura falhando e passando |
-| 1 min | Os testes (unitários e com Testcontainers) e o CI verde; o que ficou para a Sprint 2 |
+| 1 min | A arquitetura: os pacotes de cada camada e os `import` do domínio |
+| 1 min | Validação e erros em *problem details*; o CI verde; o que ficou para a Sprint 2 |
 
 Todos os integrantes devem falar. Link no `README.md`.
 

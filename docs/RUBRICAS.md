@@ -44,11 +44,12 @@ Templates, exemplos e estrutura do vídeo e da proposta: [SPRINT-0.md](SPRINT-0.
 
 | Critério | Peso | Excelente (10) | Suficiente (6) | Insuficiente (0–4) |
 |----------|------|----------------|----------------|--------------------|
-| **CRUD completo** | 25% | ≥ 2 entidades com relacionamento, todas as operações, paginação e filtros; respostas coerentes com os verbos e status HTTP | CRUD de 1 entidade, semântica HTTP imprecisa | Incompleto ou não roda |
-| ⚙️ **Clean Architecture + verificação** | 25% | Camadas separadas; **teste de arquitetura** falha se o domínio importar framework/infra; roda no CI | Camadas separadas, sem teste de arquitetura | Camadas misturadas |
-| ⚙️ **Persistência e migrações** | 20% | Flyway com migrações versionadas e idempotentes; banco sobe via `docker compose`; schema gerado apenas por migrações (sem `ddl-auto` ou equivalente) | Migrações presentes, com ajustes manuais | Esquema gerado automaticamente ou ausente |
-| ⚙️ **Testes local e remoto** | 20% | Unitários do domínio + integração com Testcontainers; **passam no Docker Desktop e no CI** sem alteração de configuração | Testes existem, só rodam em um dos ambientes | Sem testes ou falhando |
-| **Validação, erros e OpenAPI** | 10% | Validação em todas as entradas, erros no formato *problem details* (RFC 9457) ou similar, OpenAPI gerado e acessível | Validação parcial, erros inconsistentes | Ausente |
+| **CRUD completo** | 30% | ≥ 2 entidades com relacionamento, todas as operações, paginação e filtros; respostas coerentes com os verbos e status HTTP | CRUD de 1 entidade, semântica HTTP imprecisa | Incompleto ou não roda |
+| **Clean Architecture** | 30% | Camadas separadas em pacotes; o domínio não importa framework nem infraestrutura; os adaptadores (rotas ou recursos, repositórios com banco) dependem do domínio, por interfaces | Camadas separadas, com dependências pontuais do domínio para framework ou infraestrutura | Camadas misturadas |
+| ⚙️ **Persistência e migrações** | 25% | Flyway com migrações versionadas e idempotentes; banco sobe via `docker compose`; schema gerado apenas por migrações (sem `ddl-auto` ou equivalente) | Migrações presentes, com ajustes manuais | Esquema gerado automaticamente ou ausente |
+| **Validação, erros e OpenAPI** | 15% | Validação em todas as entradas, erros no formato *problem details* (RFC 9457) ou similar, OpenAPI gerado e acessível | Validação parcial, erros inconsistentes | Ausente |
+
+Os testes saíram desta sprint (ajuste de 13/10, combinado com a turma): o critério *Testes local e remoto*, de 20%, e o teste de arquitetura, que fazia parte de *Clean Architecture*, passam a ser avaliados na Sprint 2. O peso foi distribuído entre os quatro critérios restantes. O CI da Sprint 0 (build dos dois stacks) continua valendo na atividade no repositório.
 
 ---
 
@@ -59,9 +60,9 @@ Templates, exemplos e estrutura do vídeo e da proposta: [SPRINT-0.md](SPRINT-0.
 | Critério | Peso | Excelente (10) | Suficiente (6) | Insuficiente (0–4) |
 |----------|------|----------------|----------------|--------------------|
 | **Microsserviço Go** | 25% | Serviço com responsabilidade única e **justificada** (I/O intensivo, concorrência, processamento); Go idiomático, uso correto de `context` e erros | Serviço funciona, responsabilidade arbitrária | Ausente ou não roda |
-| ⚙️ **Contrato Protobuf e integração gRPC** | 30% | `.proto` comentado, com `buf lint` verde no CI e stubs **gerados**; o serviço principal (Ktor/Quarkus) chama o Go por gRPC com deadline e tratamento de erro, e um teste de integração automatizado cobre o fluxo | Chamada funciona com stubs gerados, sem teste automatizado ou sem `buf lint` | Não integra, ou stubs escritos à mão |
+| ⚙️ **Contrato Protobuf e integração gRPC** | 25% | `.proto` comentado, com `buf lint` verde no CI e stubs **gerados**; o serviço principal (Ktor/Quarkus) chama o Go por gRPC com deadline e tratamento de erro, e um teste de integração automatizado cobre o fluxo | Chamada funciona com stubs gerados, sem teste automatizado ou sem `buf lint` | Não integra, ou stubs escritos à mão |
 | ⚙️ **Sistema no ar** | 25% | API, serviço Go e banco gerenciado no ar numa plataforma de container, com URL pública no README; migrações aplicadas por task ou CI; connection string em segredo, nunca no repositório; health check em cada serviço | No ar, com deploy ou migração manual | Não está no ar |
-| ⚙️ **Ambiente e testes** | 10% | `docker compose up` sobe API, serviço Go e banco do zero, sem passos manuais; a suíte inteira, inclusive a da Sprint 1, verde local e no CI | Sobe com ajustes manuais documentados, ou suíte verde em um ambiente só | Não sobe, ou suíte quebrada |
+| ⚙️ **Ambiente e testes** | 15% | `docker compose up` sobe API, serviço Go e banco do zero, sem passos manuais; suíte do serviço principal com testes unitários do domínio, integração com banco real (Testcontainers ou Dev Services) e **teste de arquitetura** que falha se o domínio importar framework ou infraestrutura; tudo verde local e no CI, sem alteração de configuração | Sobe com ajustes manuais documentados; ou testes só de um tipo; ou suíte verde em um ambiente só | Não sobe, ou sem testes, ou suíte quebrada |
 | **Prontidão do repositório** | 10% | README permite a terceiros rodar em menos de 10 min; OpenAPI acessível por URL; ao menos 2 ADRs novas (o serviço Go e a implantação); licença definida | README funcional com lacunas | Não é possível rodar |
 
 ---
@@ -94,9 +95,8 @@ Pode ser copiado para o `README.md` do repositório.
 
 ### Sprint 1
 - [ ] CRUD de ≥2 entidades com relacionamento
-- [ ] Teste de arquitetura da regra de dependência rodando no CI
+- [ ] Camadas separadas: o domínio não importa framework nem infraestrutura
 - [ ] Migrações Flyway (sem geração automática de schema)
-- [ ] Testes com Testcontainers verdes local E no CI
 - [ ] Validação + problem details + OpenAPI
 - [ ] Vídeo 5 min
 
@@ -107,7 +107,7 @@ Pode ser copiado para o `README.md` do repositório.
 - [ ] docker compose up sobe tudo do zero
 - [ ] Sistema no ar, com URL pública no README e banco gerenciado
 - [ ] Migrações por task ou CI; nenhum segredo no repositório
-- [ ] Suíte verde local E no CI
+- [ ] Testes unitários, de integração (Testcontainers ou Dev Services) e de arquitetura, verdes local E no CI
 - [ ] README roda em menos de 10 min; OpenAPI acessível; 2 ADRs novas
 - [ ] Vídeo 5 min
 ```
