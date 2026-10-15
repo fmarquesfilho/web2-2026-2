@@ -8,6 +8,11 @@ cd "$(dirname "$0")/.."
 mise trust && mise install || echo "aviso: mise não terminou; os comandos completos continuam valendo"
 
 (cd exemplos/ktor-tarefas && ./gradlew --quiet testClasses) || echo "aviso: Gradle não terminou"
+
+# Sprint 2: Buf (contrato .proto) e grpcurl (chamar o serviço gRPC pelo terminal).
+go install github.com/bufbuild/buf/cmd/buf@v1.71.0 || echo "aviso: buf não instalou"
+go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest || echo "aviso: grpcurl não instalou"
+(cd exemplos/avisos-go && go mod download) || echo "aviso: dependências do Go não baixaram"
 (cd exemplos/quarkus-tarefas && mvn -q -B test-compile) || echo "aviso: Maven não terminou"
 
 # postgres:17-alpine: compose.yaml e Testcontainers (Ktor); postgres:17: Dev Services (Quarkus).
