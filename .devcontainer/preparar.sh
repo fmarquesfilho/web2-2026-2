@@ -7,6 +7,10 @@ cd "$(dirname "$0")/.."
 # Tasks do mise.toml (`mise tasks`). `trust` porque o arquivo vem do repositório.
 mise trust && mise install || echo "aviso: mise não terminou; os comandos completos continuam valendo"
 
+# Sprint 2: Buf (contrato .proto) e grpcurl (chamar o serviço gRPC pelo terminal).
+go install github.com/bufbuild/buf/cmd/buf@v1.71.0 || echo "aviso: buf não instalou"
+go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest || echo "aviso: grpcurl não instalou"
+
 (cd exemplos/ktor-tarefas && ./gradlew --quiet testClasses) || echo "aviso: Gradle não terminou"
 (cd exemplos/quarkus-tarefas && mvn -q -B test-compile) || echo "aviso: Maven não terminou"
 
@@ -19,6 +23,7 @@ docker pull -q postgres:17 || echo "aviso: não baixou postgres:17"
 git fetch --quiet --tags origin || true
 ultimo="$(git tag --list 'passo-*' --sort=v:refname | tail -1)"
 if [ -n "$ultimo" ] && git worktree add --quiet --detach /tmp/ultimo-passo "$ultimo"; then
+  (cd /tmp/ultimo-passo/exemplos/avisos-go && go mod download) || echo "aviso: Go (último passo) não terminou"
   (cd /tmp/ultimo-passo/exemplos/ktor-tarefas && ./gradlew --quiet testClasses) || echo "aviso: Gradle (último passo) não terminou"
   (cd /tmp/ultimo-passo/exemplos/quarkus-tarefas && mvn -q -B test-compile) || echo "aviso: Maven (último passo) não terminou"
   git worktree remove --force /tmp/ultimo-passo

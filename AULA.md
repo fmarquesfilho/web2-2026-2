@@ -46,6 +46,12 @@ Ao voltar para um passo anterior no Quarkus, rode `mvn clean` antes de subir de 
 | 10 | O ambiente em tasks do mise | [passo-09...passo-10](../../compare/passo-09...passo-10) |
 | 11 | Validação e erros em *problem details* | [passo-10...passo-11](../../compare/passo-10...passo-11) |
 | 12 | Camadas em pacotes e teste de arquitetura | [passo-11...passo-12](../../compare/passo-11...passo-12) |
+| 13 | O serviço Go: pacotes, interfaces, erros e `context` | [passo-12...passo-13](../../compare/passo-12...passo-13) |
+| 14 | O contrato: Protocol Buffers e Buf | [passo-13...passo-14](../../compare/passo-13...passo-14) |
+| 15 | O servidor gRPC em Go | [passo-14...passo-15](../../compare/passo-14...passo-15) |
+| 16 | A API chama o Go por gRPC (Ktor e Quarkus) | [passo-15...passo-16](../../compare/passo-15...passo-16) |
+| 17 | Tudo em containers: Dockerfiles e `docker compose` | [passo-16...passo-17](../../compare/passo-16...passo-17) |
+| 18 | Implantação: GHCR, migração por comando, Render | [passo-17...passo-18](../../compare/passo-17...passo-18) |
 
-A explicação de cada passo está em `exemplos/ktor-tarefas/PASSOS.md` e
-`exemplos/quarkus-tarefas/PASSOS.md`.
+A explicação de cada passo está em `exemplos/ktor-tarefas/PASSOS.md`,
+`exemplos/quarkus-tarefas/PASSOS.md` e, a partir do Passo 13, `exemplos/avisos-go/PASSOS.md`.

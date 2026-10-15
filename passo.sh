@@ -12,7 +12,7 @@ cd "$(dirname "$0")"
 [ -n "$(git tag --list 'passo-*')" ] || git fetch --quiet --tags origin
 
 if [ $# -eq 0 ]; then
-  aqui="$(git describe --tags --match 'passo-*' 2>/dev/null || true)"
+  aqui="$(git describe --tags --abbrev=0 --match 'passo-*' 2>/dev/null || true)"
   for t in $(git tag --list 'passo-*' --sort=v:refname); do
     [ "$t" = "$aqui" ] && marca="->" || marca="  "
     echo "$marca $(git log -1 --format=%s "$t")"
