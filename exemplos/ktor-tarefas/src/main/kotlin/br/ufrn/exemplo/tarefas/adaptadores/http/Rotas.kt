@@ -16,6 +16,7 @@ import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.request.receive
 import io.ktor.server.response.header
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.openapi.describe
 import io.ktor.server.routing.post
@@ -33,6 +34,9 @@ fun Application.rotas() {
     val avisador by inject<Avisador>()
 
     routing {
+        // Health check (Passo 17): o docker compose e a plataforma perguntam se a API está de pé.
+        get("/health") { call.respondText("ok") }
+
         route("/tarefas") {
             get { call.respond(repositorio.listar()) }.describe {
                 summary = "Lista as tarefas"

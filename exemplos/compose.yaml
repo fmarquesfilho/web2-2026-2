@@ -1,0 +1,63 @@
+# Tudo junto (Passo 17): banco, serviço de avisos em Go e a API.
+#   docker compose up --build             # banco, avisos e a API Ktor (8080)
+#   docker compose --profile quarkus up   # inclui a API Quarkus (8081)
+# Cada serviço só sobe depois que aqueles de que depende respondem ao healthcheck.
+services:
+  banco:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: tarefas
+      POSTGRES_USER: tarefas
+      POSTGRES_PASSWORD: tarefas
+    volumes: [dados:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tarefas -d tarefas"]
+      interval: 3s
+      retries: 20
+
+  avisos:
+    build: ./avisos-go
+    healthcheck:
+      test: ["CMD", "/avisos", "saude"]
+      interval: 3s
+      retries: 20
+
+  api-ktor:
+    build:
+      context: .
+      dockerfile: ktor-tarefas/Dockerfile
+    ports: ["8080:8080"]
+    environment:
+      DB_URL: jdbc:postgresql://banco:5432/tarefas
+      DB_USER: tarefas
+      DB_PASSWORD: tarefas
+      AVISOS_ENDERECO: avisos:50051      # o nome do serviço é o nome na rede do compose
+    depends_on:
+      banco: { condition: service_healthy }
+      avisos: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8080/health"]
+      interval: 5s
+      retries: 30
+
+  api-quarkus:
+    profiles: [quarkus]
+    build:
+      context: .
+      dockerfile: quarkus-tarefas/Dockerfile
+    ports: ["8081:8081"]
+    environment:
+      DB_URL: jdbc:postgresql://banco:5432/tarefas
+      DB_USER: tarefas
+      DB_PASSWORD: tarefas
+      AVISOS_HOST: avisos
+    depends_on:
+      banco: { condition: service_healthy }
+      avisos: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8081/q/health"]
+      interval: 5s
+      retries: 30
+
+volumes:
+  dados:

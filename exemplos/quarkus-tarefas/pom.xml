@@ -74,6 +74,11 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-grpc</artifactId>
     </dependency>
+    <!-- Health checks em /q/health (Passo 17), com a verificação do banco incluída -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-smallrye-health</artifactId>
+    </dependency>
     <!-- OpenAPI gerado dos recursos + Swagger UI (Passo 9) -->
     <dependency>
       <groupId>io.quarkus</groupId>

@@ -2,16 +2,20 @@
 //
 //	go run ./cmd/avisos                # escuta na porta 50051
 //	AVISOS_PORTA=6000 go run ./cmd/avisos
+//	avisos saude                       # pergunta ao serviço local se está de pé (healthcheck)
 package main
 
 import (
+	"context"
 	"log/slog"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
@@ -25,6 +29,9 @@ func main() {
 	porta := os.Getenv("AVISOS_PORTA")
 	if porta == "" {
 		porta = "50051"
+	}
+	if len(os.Args) > 1 && os.Args[1] == "saude" {
+		os.Exit(verificarSaude(porta))
 	}
 	lis, err := net.Listen("tcp", ":"+porta)
 	if err != nil {
@@ -59,4 +66,21 @@ func main() {
 		slog.Error("servidor parou", "erro", err)
 		os.Exit(1)
 	}
+}
+
+// verificarSaude chama o health check gRPC do próprio serviço. A imagem final não tem
+// shell nem curl; o docker compose usa este subcomando como healthcheck.
+func verificarSaude(porta string) int {
+	conn, err := grpc.NewClient("localhost:"+porta, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return 1
+	}
+	defer conn.Close()
+	ctx, cancelar := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancelar()
+	resp, err := healthpb.NewHealthClient(conn).Check(ctx, &healthpb.HealthCheckRequest{})
+	if err != nil || resp.GetStatus() != healthpb.HealthCheckResponse_SERVING {
+		return 1
+	}
+	return 0
 }
