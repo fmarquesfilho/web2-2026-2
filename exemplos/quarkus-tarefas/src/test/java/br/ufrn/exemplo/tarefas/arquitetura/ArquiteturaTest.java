@@ -20,8 +20,8 @@ class ArquiteturaTest {
     static final ArchRule REGRA_DO_DOMINIO = noClasses().that().resideInAPackage("..dominio..")
             .should().dependOnClassesThat().resideInAnyPackage(
                     "jakarta..", "io.quarkus..", "org.hibernate..", "com.fasterxml..", "java.sql..",
-                    "..adaptadores..")
-            .because("o domínio é Java puro: não sabe de HTTP, banco nem injeção de dependência");
+                    "..adaptadores..", "io.grpc..", "com.google.protobuf..", "br.ufrn.exemplo.tarefas.avisos..")
+            .because("o domínio é Java puro: não sabe de HTTP, banco, gRPC nem injeção de dependência");
 
     private final JavaClasses classes = new ClassFileImporter()
             .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)

@@ -1,11 +1,14 @@
 package br.ufrn.exemplo.tarefas
 
+import br.ufrn.exemplo.tarefas.adaptadores.avisos.AvisadorGrpc
 import br.ufrn.exemplo.tarefas.adaptadores.banco.ConfigBanco
 import br.ufrn.exemplo.tarefas.adaptadores.banco.RepositorioPostgres
 import br.ufrn.exemplo.tarefas.adaptadores.banco.criarDataSource
 import br.ufrn.exemplo.tarefas.adaptadores.banco.migrar
 import br.ufrn.exemplo.tarefas.adaptadores.http.rotas
 import br.ufrn.exemplo.tarefas.adaptadores.http.tratarErros
+import br.ufrn.exemplo.tarefas.adaptadores.memoria.AvisadorEmMemoria
+import br.ufrn.exemplo.tarefas.dominio.Avisador
 import br.ufrn.exemplo.tarefas.dominio.RepositorioDeTarefas
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
@@ -30,13 +33,26 @@ fun Application.modulo(config: ConfigBanco = ConfigBanco.doAmbiente()) {
     val dataSource = criarDataSource(config)
     migrar(dataSource)
     monitor.subscribe(ApplicationStopped) { dataSource.close() }
-    configurar(RepositorioPostgres(Database.connect(dataSource)))
+
+    // Serviço de avisos em Go (Passo 16). O endereço vem do ambiente.
+    val avisador = AvisadorGrpc.para(System.getenv("AVISOS_ENDERECO") ?: "localhost:50051")
+    monitor.subscribe(ApplicationStopped) { avisador.fechar() }
+
+    configurar(RepositorioPostgres(Database.connect(dataSource)), avisador)
 }
 
 // O resto da aplicação só conhece a porta: os testes podem passar outro repositório.
-fun Application.configurar(repositorio: RepositorioDeTarefas) {
+fun Application.configurar(
+    repositorio: RepositorioDeTarefas,
+    avisador: Avisador = AvisadorEmMemoria(),
+) {
     install(Koin) {
-        modules(module { single<RepositorioDeTarefas> { repositorio } })
+        modules(
+            module {
+                single<RepositorioDeTarefas> { repositorio }
+                single<Avisador> { avisador }
+            },
+        )
     }
     install(ContentNegotiation) { json() }
     tratarErros()

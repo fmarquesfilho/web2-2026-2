@@ -3,6 +3,7 @@ package br.ufrn.exemplo.tarefas.adaptadores.http;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import br.ufrn.exemplo.tarefas.adaptadores.memoria.AvisadorEmMemoria;
 import br.ufrn.exemplo.tarefas.adaptadores.memoria.RepositorioEmMemoria;
 import br.ufrn.exemplo.tarefas.dominio.NovaTarefa;
 import br.ufrn.exemplo.tarefas.dominio.Tarefa;
@@ -15,11 +16,14 @@ import org.junit.jupiter.api.Test;
 class RecursoDeTarefasUnitarioTest {
 
     private RecursoDeTarefas recurso;
+    private AvisadorEmMemoria avisador;
 
     @BeforeEach
     void montar() {
         recurso = new RecursoDeTarefas();
         recurso.repositorio = new RepositorioEmMemoria(); // o que o CDI faria
+        avisador = new AvisadorEmMemoria();
+        recurso.avisador = avisador;
     }
 
     @Test
@@ -32,6 +36,18 @@ class RecursoDeTarefasUnitarioTest {
         var resposta = recurso.criar(new NovaTarefa("Escrever testes"));
         assertEquals(201, resposta.getStatus());
         assertEquals("Escrever testes", ((Tarefa) resposta.getEntity()).titulo());
+    }
+
+    @Test
+    void criarAvisaOServicoDeAvisos() {
+        recurso.criar(new NovaTarefa("Estudar gRPC"));
+        assertEquals("Estudar gRPC", avisador.avisadas.get(0).titulo());
+    }
+
+    @Test
+    void avisoQueFalhaNaoImpedeACriacao() {
+        recurso.avisador = tarefa -> false; // Avisador que sempre falha
+        assertEquals(201, recurso.criar(new NovaTarefa("Estudar gRPC")).getStatus());
     }
 
     @Test
