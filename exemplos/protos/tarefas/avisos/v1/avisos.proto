@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+// Contrato do serviço de avisos: o serviço principal (Ktor ou Quarkus) pede, e o serviço
+// Go avisa por vários canais que uma tarefa foi criada.
+package tarefas.avisos.v1;
+
+option go_package = "avisos/gen/tarefas/avisos/v1;avisosv1";
+option java_multiple_files = true;
+option java_package = "br.ufrn.exemplo.tarefas.avisos.v1";
+
+// Envia avisos sobre tarefas.
+service AvisosService {
+  // Avisa, em todos os canais ao mesmo tempo, que uma tarefa foi criada. Responde
+  // INVALID_ARGUMENT se faltar a tarefa ou o título. Respeita o prazo (deadline) de
+  // quem chama: canais que não terminarem a tempo voltam como não entregues.
+  rpc Avisar(AvisarRequest) returns (AvisarResponse);
+}
+
+// O pedido de aviso.
+message AvisarRequest {
+  // Identificador da tarefa criada. Precisa ser maior que zero.
+  int64 tarefa_id = 1;
+  // Título da tarefa. Não pode ficar em branco.
+  string titulo = 2;
+}
+
+// O resultado do aviso, um item por canal.
+message AvisarResponse {
+  // As entregas, na ordem dos canais configurados no serviço.
+  repeated Entrega entregas = 1;
+}
+
+// O resultado de um canal.
+message Entrega {
+  // Nome do canal: email, push, chat.
+  string canal = 1;
+  // Verdadeiro se o canal entregou o aviso.
+  bool entregue = 2;
+  // Motivo da falha, quando não entregue; vazio quando entregue.
+  string erro = 3;
+}
