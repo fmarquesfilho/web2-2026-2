@@ -23,8 +23,15 @@ import org.koin.ktor.plugin.Koin
 
 // A raiz de composição: o único lugar que conhece todas as camadas e as liga.
 // Ponto de entrada. Engine CIO (corrotinas puras), o mesmo do MUSI.
-fun main() {
-    embeddedServer(CIO, port = 8080, host = "0.0.0.0") { modulo() }
+//   ktor-tarefas           sobe a API
+//   ktor-tarefas migrar    só aplica as migrações e termina (Passo 18): é o comando que a
+//                          plataforma roda antes de trocar a versão no ar
+fun main(args: Array<String>) {
+    if (args.firstOrNull() == "migrar") {
+        criarDataSource(ConfigBanco.doAmbiente()).use { migrar(it) }
+        return
+    }
+    embeddedServer(CIO, port = (System.getenv("PORT") ?: "8080").toInt(), host = "0.0.0.0") { modulo() }
         .start(wait = true)
 }
 
