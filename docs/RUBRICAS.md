@@ -61,9 +61,11 @@ Os testes saíram desta sprint (ajuste de 13/10, combinado com a turma): o crit�
 |----------|------|----------------|----------------|--------------------|
 | **Microsserviço Go** | 25% | Serviço com responsabilidade única e **justificada** (I/O intensivo, concorrência, processamento); Go idiomático, uso correto de `context` e erros | Serviço funciona, responsabilidade arbitrária | Ausente ou não roda |
 | ⚙️ **Contrato Protobuf e integração gRPC** | 25% | `.proto` comentado, com `buf lint` verde no CI e stubs **gerados**; o serviço principal (Ktor/Quarkus) chama o Go por gRPC com deadline e tratamento de erro, e um teste de integração automatizado cobre o fluxo | Chamada funciona com stubs gerados, sem teste automatizado ou sem `buf lint` | Não integra, ou stubs escritos à mão |
-| ⚙️ **Sistema no ar** | 25% | API, serviço Go e banco gerenciado no ar numa plataforma de container, com URL pública no README; migrações aplicadas por task ou CI; connection string em segredo, nunca no repositório; health check em cada serviço | No ar, com deploy ou migração manual | Não está no ar |
+| ⚙️ **Sistema no ar** | 25% | API e banco gerenciado no ar numa plataforma de container, com URL pública no README; migrações aplicadas por task ou CI; connection string em segredo, nunca no repositório; health check; a API continua respondendo quando o serviço Go não está acessível (prazo e degradação). O serviço Go no ar é opcional (ver a nota abaixo) | No ar, com deploy ou migração manual | Não está no ar |
 | ⚙️ **Ambiente e testes** | 15% | `docker compose up` sobe API, serviço Go e banco do zero, sem passos manuais; suíte do serviço principal com testes unitários do domínio, integração com banco real (Testcontainers ou Dev Services) e **teste de arquitetura** que falha se o domínio importar framework ou infraestrutura; tudo verde local e no CI, sem alteração de configuração | Sobe com ajustes manuais documentados; ou testes só de um tipo; ou suíte verde em um ambiente só | Não sobe, ou sem testes, ou suíte quebrada |
 | **Prontidão do repositório** | 10% | README permite a terceiros rodar em menos de 10 min; OpenAPI acessível por URL; ao menos 2 ADRs novas (o serviço Go e a implantação); licença definida | README funcional com lacunas | Não é possível rodar |
+
+Nota sobre o serviço Go no ar (ajuste de 15/10): nas plataformas gratuitas consultadas, a comunicação gRPC entre dois serviços não está disponível (no Render, serviço privado é pago, e um web service gratuito não recebe tráfego pela rede privada nem gRPC pelo endereço público). Por isso, o critério *Sistema no ar* exige a API e o banco no ar, e o serviço Go é avaliado rodando junto da API no `docker compose` (critérios *Contrato Protobuf e integração gRPC* e *Ambiente e testes*). O grupo que puser o serviço Go no ar, em qualquer plataforma, registra como fez numa ADR.
 
 ---
 
@@ -105,7 +107,7 @@ Pode ser copiado para o `README.md` do repositório.
 - [ ] protos/ com buf lint no CI e stubs gerados
 - [ ] Teste de integração gRPC ponta a ponta
 - [ ] docker compose up sobe tudo do zero
-- [ ] Sistema no ar, com URL pública no README e banco gerenciado
+- [ ] API no ar, com URL pública no README e banco gerenciado; a API funciona mesmo sem o serviço Go
 - [ ] Migrações por task ou CI; nenhum segredo no repositório
 - [ ] Testes unitários, de integração (Testcontainers ou Dev Services) e de arquitetura, verdes local E no CI
 - [ ] README roda em menos de 10 min; OpenAPI acessível; 2 ADRs novas
