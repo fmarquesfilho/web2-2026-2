@@ -16,6 +16,9 @@
     <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.version>3.28.2</quarkus.platform.version>
+    <!-- O contrato .proto fica fora do projeto, em ../protos, compartilhado com o Go e o Ktor
+         (Passo 16). É configuração de build, por isso está aqui e não no application.properties. -->
+    <quarkus.grpc.codegen.proto-directory>${project.basedir}/../protos</quarkus.grpc.codegen.proto-directory>
     <surefire-plugin.version>3.5.2</surefire-plugin.version>
   </properties>
 
@@ -64,6 +67,17 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-flyway</artifactId>
+    </dependency>
+    <!-- Cliente gRPC do serviço de avisos em Go (Passo 16). A extensão gera as classes
+         do contrato a partir de src/main/proto. -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-grpc</artifactId>
+    </dependency>
+    <!-- Health checks em /q/health (Passo 17), com a verificação do banco incluída -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-smallrye-health</artifactId>
     </dependency>
     <!-- OpenAPI gerado dos recursos + Swagger UI (Passo 9) -->
     <dependency>

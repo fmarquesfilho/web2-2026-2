@@ -89,3 +89,41 @@ curl -s localhost:8081/tarefas | python3 -m json.tool
 [tasks.test]
 description = "Testes dos dois exemplos, como no CI"
 depends = ["ktor:test", "quarkus:test"]
+
+# ---------------------------------------------------------------------------
+# Sprint 2: serviço Go, contrato e tudo junto (passos 13 a 18)
+# ---------------------------------------------------------------------------
+
+[tasks."avisos:run"]
+description = "Sobe o serviço de avisos em Go, gRPC na porta 50051"
+dir = "exemplos/avisos-go"
+run = "go run ./cmd/avisos"
+
+[tasks."avisos:test"]
+description = "Testes do serviço Go (domínio e servidor gRPC)"
+dir = "exemplos/avisos-go"
+run = "go test ./..."
+
+[tasks."avisos:chamar"]
+description = "Chama o serviço de avisos com o grpcurl, como um cliente qualquer"
+run = """grpcurl -plaintext -d '{"tarefa_id": 1, "titulo": "Pelo grpcurl"}' localhost:50051 tarefas.avisos.v1.AvisosService/Avisar"""
+
+[tasks."buf:lint"]
+description = "Confere o estilo do contrato .proto"
+dir = "exemplos/protos"
+run = "buf lint"
+
+[tasks."buf:gerar"]
+description = "Gera os stubs Go a partir do contrato (Kotlin e Java são gerados no build)"
+dir = "exemplos/protos"
+run = "buf generate"
+
+[tasks.tudo]
+description = "Sobe banco, serviço Go e API Ktor em containers (docker compose)"
+dir = "exemplos"
+run = "docker compose up --build"
+
+[tasks."tudo:parar"]
+description = "Para os containers; com -v, apaga os dados"
+dir = "exemplos"
+run = "docker compose down"

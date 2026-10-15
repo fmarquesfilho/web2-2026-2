@@ -1,0 +1,6 @@
+**/build
+**/.gradle
+**/.kotlin
+**/target
+**/.idea
+kotlin-playground

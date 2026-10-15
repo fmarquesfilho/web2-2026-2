@@ -1,5 +1,6 @@
 package br.ufrn.exemplo.tarefas
 
+import br.ufrn.exemplo.tarefas.adaptadores.memoria.AvisadorEmMemoria
 import br.ufrn.exemplo.tarefas.adaptadores.memoria.RepositorioEmMemoria
 import io.ktor.client.request.get
 import io.ktor.client.request.post
@@ -49,5 +50,27 @@ class RotasTest {
         }
         assertEquals(HttpStatusCode.BadRequest, resposta.status)
         assertEquals(ContentType.Application.ProblemJson, resposta.contentType()?.withoutParameters())
+    }
+
+    @Test
+    fun `criar tarefa avisa o servico de avisos`() = testApplication {
+        val avisador = AvisadorEmMemoria()
+        application { configurar(RepositorioEmMemoria(), avisador) }
+        val resposta = client.post("/tarefas") {
+            contentType(ContentType.Application.Json)
+            setBody("""{"titulo":"Estudar gRPC"}""")
+        }
+        assertEquals(HttpStatusCode.Created, resposta.status)
+        assertEquals(listOf("Estudar gRPC"), avisador.avisadas.map { it.titulo })
+    }
+
+    @Test
+    fun `aviso que falha nao impede a criacao`() = testApplication {
+        application { configurar(RepositorioEmMemoria()) { false } }   // Avisador que sempre falha
+        val resposta = client.post("/tarefas") {
+            contentType(ContentType.Application.Json)
+            setBody("""{"titulo":"Estudar gRPC"}""")
+        }
+        assertEquals(HttpStatusCode.Created, resposta.status)
     }
 }

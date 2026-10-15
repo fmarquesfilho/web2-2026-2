@@ -1,0 +1,43 @@
+# Modelo de Blueprint do Render para o projeto do grupo (Passo 18). No repositório do
+# grupo, fica na raiz com o nome render.yaml. O banco é gerenciado fora, no Neon.
+#
+# Limites do plano gratuito do Render (consultados em 15/10/2026):
+# - serviço privado (pserv) não tem instância gratuita; o plano starter é pago;
+# - um web service gratuito envia, mas não recebe, tráfego pela rede privada;
+# - o endereço público dos web services não encaminha gRPC.
+# Por isso, com gRPC entre a API e o Go, o serviço Go precisa do plano starter (ou de outra
+# plataforma com HTTP/2 de ponta a ponta). O preDeployCommand também só existe em plano pago;
+# no gratuito, a API continua migrando na subida.
+services:
+  # O serviço Go: privado, sem endereço público. A API o encontra pelo nome, na rede
+  # interna do Render (avisos:50051).
+  - type: pserv
+    name: avisos
+    runtime: image
+    image:
+      url: ghcr.io/USUARIO/REPOSITORIO/avisos:latest
+    plan: starter
+    envVars:
+      - key: AVISOS_PORTA
+        value: "50051"
+
+  # A API: pública, com health check e migração antes de cada versão nova entrar no ar.
+  - type: web
+    name: api-ktor
+    runtime: image
+    image:
+      url: ghcr.io/USUARIO/REPOSITORIO/api-ktor:latest
+    plan: free
+    healthCheckPath: /health
+    preDeployCommand: /app/bin/ktor-tarefas migrar
+    envVars:
+      - key: AVISOS_ENDERECO
+        value: avisos:50051
+      # A connection string do Neon é segredo: preenchida no painel do Render
+      # (sync: false), nunca escrita no repositório.
+      - key: DB_URL
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false

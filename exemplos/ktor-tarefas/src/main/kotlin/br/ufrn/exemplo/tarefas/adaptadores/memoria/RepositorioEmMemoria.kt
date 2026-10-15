@@ -1,5 +1,6 @@
 package br.ufrn.exemplo.tarefas.adaptadores.memoria
 
+import br.ufrn.exemplo.tarefas.dominio.Avisador
 import br.ufrn.exemplo.tarefas.dominio.NovaTarefa
 import br.ufrn.exemplo.tarefas.dominio.RepositorioDeTarefas
 import br.ufrn.exemplo.tarefas.dominio.Tarefa
@@ -13,4 +14,13 @@ class RepositorioEmMemoria : RepositorioDeTarefas {
     override suspend fun buscar(id: Int): Tarefa? = tarefas.find { it.id == id }
     override suspend fun adicionar(nova: NovaTarefa): Tarefa =
         Tarefa(proximoId++, nova.titulo).also { tarefas.add(it) }
+}
+
+// Avisador que só anota o que recebeu: para testes e para rodar a API sem o serviço Go.
+class AvisadorEmMemoria : Avisador {
+    val avisadas = mutableListOf<Tarefa>()
+    override suspend fun avisar(tarefa: Tarefa): Boolean {
+        avisadas += tarefa
+        return true
+    }
 }

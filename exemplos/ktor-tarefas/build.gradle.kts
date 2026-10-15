@@ -5,6 +5,8 @@ plugins {
     kotlin("jvm") version "2.4.10"
     kotlin("plugin.serialization") version "2.4.10"
     application
+    // Gera as classes do contrato .proto (Passo 16): mensagens, stub Java e stub Kotlin.
+    id("com.google.protobuf") version "0.10.0"
 }
 
 repositories { mavenCentral() }
@@ -38,6 +40,15 @@ dependencies {
     // Erros num lugar só, em problem details (Passo 11).
     implementation("io.ktor:ktor-server-status-pages:3.5.2")
 
+    // Cliente gRPC do serviço de avisos em Go (Passo 16): stubs com corrotinas.
+    // O BOM alinha a versão de todos os módulos io.grpc, inclusive os que o grpc-kotlin traz.
+    implementation(platform("io.grpc:grpc-bom:1.85.0"))
+    implementation("io.grpc:grpc-netty-shaded")
+    implementation("io.grpc:grpc-protobuf")
+    implementation("io.grpc:grpc-stub")
+    implementation("io.grpc:grpc-kotlin-stub:1.5.0")
+    implementation("com.google.protobuf:protobuf-kotlin:4.36.2")
+
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-server-test-host:3.5.2")
     testImplementation("io.ktor:ktor-client-content-negotiation:3.5.2")
@@ -45,6 +56,25 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-postgresql:2.0.5")
     // Teste de arquitetura: a regra de dependência verificada no bytecode (Passo 12).
     testImplementation("com.tngtech.archunit:archunit:1.5.0")
+    // Servidor gRPC em memória, para testar o cliente sem o serviço Go (Passo 16).
+    testImplementation("io.grpc:grpc-inprocess")
+}
+
+// O contrato fica fora do projeto, em ../protos, compartilhado com o Go e o Quarkus.
+sourceSets { main { proto { srcDir("../protos") } } }
+
+protobuf {
+    protoc { artifact = "com.google.protobuf:protoc:4.36.2" }
+    plugins {
+        create("grpc") { artifact = "io.grpc:protoc-gen-grpc-java:1.85.0" }
+        create("grpckt") { artifact = "io.grpc:protoc-gen-grpc-kotlin:1.5.0:jdk8@jar" }
+    }
+    generateProtoTasks {
+        all().forEach {
+            it.plugins { create("grpc"); create("grpckt") }
+            it.builtins { create("kotlin") }      // DSL Kotlin para montar as mensagens
+        }
+    }
 }
 
 // Java 25, como no MUSI. O foojay (settings.gradle.kts) baixa o JDK se faltar.

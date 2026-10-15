@@ -1,0 +1,10 @@
+# Módulo Buf com os contratos dos serviços. `buf lint` confere o estilo;
+# `buf breaking` (opcional) compara com a versão anterior.
+version: v2
+lint:
+  use:
+    - STANDARD
+    - COMMENTS        # todo elemento do contrato precisa de comentário
+breaking:
+  use:
+    - FILE

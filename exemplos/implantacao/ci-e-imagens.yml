@@ -1,0 +1,69 @@
+# Modelo de workflow para o projeto do grupo (Passo 18). No repositório do grupo, ele fica
+# em .github/workflows/; aqui está fora de lá para não rodar no repositório da disciplina.
+#
+# Em todo push e pull request: confere o contrato (buf lint), roda os testes do serviço Go
+# e do serviço principal. Na branch principal, depois dos testes, publica as imagens no
+# GitHub Container Registry (ghcr.io), que a plataforma de implantação puxa.
+name: ci-e-imagens
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: bufbuild/buf-action@v1
+        with:
+          input: protos
+          lint: true
+          format: false
+          breaking: false
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: avisos-go/go.mod
+      - run: go test ./...
+        working-directory: avisos-go
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+      # Os runners Linux têm Docker: os testes com Testcontainers rodam aqui sem mudança.
+      - run: ./gradlew test
+        working-directory: ktor-tarefas
+
+  imagens:
+    needs: testes
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write          # o GITHUB_TOKEN pode publicar no ghcr.io do repositório
+    strategy:
+      matrix:
+        include:
+          - nome: avisos
+            contexto: avisos-go
+            dockerfile: avisos-go/Dockerfile
+          - nome: api-ktor
+            contexto: .
+            dockerfile: ktor-tarefas/Dockerfile
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.contexto }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          # Duas etiquetas: o commit (para voltar a uma versão exata) e latest.
+          tags: |
+            ghcr.io/${{ github.repository }}/${{ matrix.nome }}:${{ github.sha }}
+            ghcr.io/${{ github.repository }}/${{ matrix.nome }}:latest

@@ -361,3 +361,11 @@ essa prova automaticamente, com uma classe-fixture só dos testes (`violacao/dom
 > O MUSI vai além, com DTOs no adaptador web e o domínio em Kotlin puro.
 
 📖 [ArchUnit — User Guide](https://www.archunit.org/userguide/html/000_Index.html)
+
+---
+
+## Passos 13 a 18 — Sprint 2: o serviço Go, gRPC e implantação
+
+A partir do Passo 13, a API passa a conversar com um segundo serviço, escrito em Go, por
+gRPC. Os passos estão em [`../avisos-go/PASSOS.md`](../avisos-go/PASSOS.md): o serviço Go
+(13 a 15), o cliente gRPC nesta API (16), tudo em containers (17) e a implantação (18).

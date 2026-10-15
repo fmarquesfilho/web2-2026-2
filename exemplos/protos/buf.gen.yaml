@@ -1,0 +1,10 @@
+# Geração dos stubs Go do serviço de avisos (plugins remotos do Buf: nada para instalar).
+# Os stubs do Kotlin e do Java são gerados pelo Gradle e pelo Quarkus, no build de cada um.
+version: v2
+plugins:
+  - remote: buf.build/protocolbuffers/go:v1.36.12
+    out: ../avisos-go/gen
+    opt: paths=source_relative
+  - remote: buf.build/grpc/go:v1.6.0
+    out: ../avisos-go/gen
+    opt: paths=source_relative

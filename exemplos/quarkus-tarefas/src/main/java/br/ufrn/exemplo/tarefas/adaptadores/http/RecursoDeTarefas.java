@@ -1,5 +1,6 @@
 package br.ufrn.exemplo.tarefas.adaptadores.http;
 
+import br.ufrn.exemplo.tarefas.dominio.Avisador;
 import br.ufrn.exemplo.tarefas.dominio.EntradaInvalida;
 import br.ufrn.exemplo.tarefas.dominio.NovaTarefa;
 import br.ufrn.exemplo.tarefas.dominio.RepositorioDeTarefas;
@@ -25,6 +26,9 @@ public class RecursoDeTarefas {
 
     @Inject
     RepositorioDeTarefas repositorio;
+
+    @Inject
+    Avisador avisador;
 
     @GET
     @Operation(summary = "Lista as tarefas")
@@ -56,6 +60,7 @@ public class RecursoDeTarefas {
             throw new EntradaInvalida(violacoes);
         }
         Tarefa criada = repositorio.adicionar(nova);
+        avisador.avisar(criada); // até 1 s; se falhar, a tarefa continua criada
         return Response.created(URI.create("/tarefas/" + criada.id())).entity(criada).build();
     }
 }

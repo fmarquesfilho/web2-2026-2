@@ -1,5 +1,6 @@
 package br.ufrn.exemplo.tarefas.adaptadores.http
 
+import br.ufrn.exemplo.tarefas.dominio.Avisador
 import br.ufrn.exemplo.tarefas.dominio.EntradaInvalida
 import br.ufrn.exemplo.tarefas.dominio.NovaTarefa
 import br.ufrn.exemplo.tarefas.dominio.RepositorioDeTarefas
@@ -15,6 +16,7 @@ import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.request.receive
 import io.ktor.server.response.header
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.openapi.describe
 import io.ktor.server.routing.post
@@ -29,8 +31,12 @@ import org.koin.ktor.ext.inject
 @OptIn(ExperimentalKtorApi::class)
 fun Application.rotas() {
     val repositorio by inject<RepositorioDeTarefas>()
+    val avisador by inject<Avisador>()
 
     routing {
+        // Health check (Passo 17): o docker compose e a plataforma perguntam se a API está de pé.
+        get("/health") { call.respondText("ok") }
+
         route("/tarefas") {
             get { call.respond(repositorio.listar()) }.describe {
                 summary = "Lista as tarefas"
@@ -58,6 +64,7 @@ fun Application.rotas() {
                 val violacoes = nova.violacoes()
                 if (violacoes.isNotEmpty()) throw EntradaInvalida(violacoes)
                 val criada = repositorio.adicionar(nova)
+                avisador.avisar(criada)            // até 1 s; se falhar, a tarefa continua criada
                 call.response.header(HttpHeaders.Location, "/tarefas/${criada.id}")
                 call.respond(HttpStatusCode.Created, criada)
             }.describe {

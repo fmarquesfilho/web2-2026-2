@@ -41,7 +41,8 @@ class ArquiteturaTest {
             .should().dependOnClassesThat().resideInAnyPackage(
                 "io.ktor..", "org.koin..", "org.jetbrains.exposed..", "java.sql..", "javax.sql..",
                 "com.zaxxer..", "org.flywaydb..", "..adaptadores..",
+                "io.grpc..", "com.google.protobuf..", "br.ufrn.exemplo.tarefas.avisos..",
             )
-            .because("o domínio é Kotlin puro: não sabe de HTTP, banco nem injeção de dependência")
+            .because("o domínio é Kotlin puro: não sabe de HTTP, banco, gRPC nem injeção de dependência")
     }
 }
