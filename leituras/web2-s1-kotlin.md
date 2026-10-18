@@ -1,23 +1,12 @@
 # Leitura — Kotlin para quem vem do Java (Sprint 1, apoio)
 
-Guia de apoio para ler e escrever o Kotlin que aparece no exemplo de Tarefas, tanto na API
-em Ktor (Web II) quanto no aplicativo em Compose Multiplatform (Dispositivos Móveis). O
-ponto de partida é o Java que a turma já conhece: cada recurso é apresentado ao lado do
-equivalente em Java, quando existe um, e depois localizado no código do exemplo.
+Guia de apoio para ler e escrever o Kotlin que aparece no exemplo de Tarefas, tanto na API em Ktor (Web II) quanto no aplicativo em Compose Multiplatform (Dispositivos Móveis). O ponto de partida é o Java que a turma já conhece: cada recurso é apresentado ao lado do equivalente em Java, quando existe um, e depois localizado no código do exemplo.
 
-A leitura dá mais espaço ao que não tem equivalente direto em Java e que mais aparece no
-curso: lambdas, lambda no fim da chamada, funções de extensão, lambdas com receptor e
-delegação com `by`. Variáveis, funções e classes entram de forma resumida, como revisão.
+A leitura dá mais espaço ao que não tem equivalente direto em Java e que mais aparece no curso: lambdas, lambda no fim da chamada, funções de extensão, lambdas com receptor e delegação com `by`. Variáveis, funções e classes entram de forma resumida, como revisão.
 
-Como usar. Cada capítulo aponta uma demonstração: um arquivo curto, com `main`, que roda no
-[Kotlin Playground](https://play.kotlinlang.org/) sem instalar nada. O link abre o código
-já carregado; o botão **Run** executa. Cada demonstração termina com três experimentos, que
-são os exercícios desta leitura. Os mesmos arquivos estão em `exemplos/kotlin-playground/`
-do repositório.
+Como usar. Cada capítulo aponta uma demonstração: um arquivo curto, com `main`, que roda no [Kotlin Playground](https://play.kotlinlang.org/) sem instalar nada. O link abre o código já carregado; o botão **Run** executa. Cada demonstração termina com três experimentos, que são os exercícios desta leitura. Os mesmos arquivos estão em `exemplos/kotlin-playground/` do repositório.
 
-As demonstrações foram compiladas e executadas com Kotlin 2.4.10, a versão do exemplo de
-Tarefas. Os trechos identificados com o nome de um arquivo (`Rotas.kt`, `Telas.kt`) foram
-copiados do exemplo.
+As demonstrações foram compiladas e executadas com Kotlin 2.4.10, a versão do exemplo de Tarefas. Os trechos identificados com o nome de um arquivo (`Rotas.kt`, `Telas.kt`) foram copiados do exemplo.
 
 ## 1. Mapa: do que se vê no código ao nome do recurso
 
@@ -80,17 +69,13 @@ O que muda:
 
 ## 3. `if`, `when` e `try` devolvem valor
 
-Em Java, `if` é um comando: para guardar o resultado, declara-se a variável antes e
-atribui-se em cada ramo, ou usa-se o operador ternário. Em Kotlin, `if` é uma expressão:
-tem um valor, que pode ir direto para um `val`. Por isso a linguagem não tem o operador
-`? :`.
+Em Java, `if` é um comando: para guardar o resultado, declara-se a variável antes e atribui-se em cada ramo, ou usa-se o operador ternário. Em Kotlin, `if` é uma expressão: tem um valor, que pode ir direto para um `val`. Por isso a linguagem não tem o operador `? :`.
 
 ```kotlin
 val situacao = if (tarefa.feita) "feita" else "pendente"
 ```
 
-O `when` substitui o `switch` e também é uma expressão. Sem argumento, ele funciona como
-uma sequência de `if`/`else if`: o primeiro ramo cuja condição é verdadeira dá o valor.
+O `when` substitui o `switch` e também é uma expressão. Sem argumento, ele funciona como uma sequência de `if`/`else if`: o primeiro ramo cuja condição é verdadeira dá o valor.
 
 ```kotlin
 // Tarefa.kt (Web II)
@@ -101,9 +86,7 @@ fun violacoes(): List<String> = when {
 }
 ```
 
-O `try` segue a mesma regra: `val numero = try { texto.toInt() } catch (e: NumberFormatException) { 0 }`.
-Kotlin não tem exceções verificadas: nenhuma função é obrigada a declarar `throws`, e
-nenhuma chamada é obrigada a ter `try`.
+O `try` segue a mesma regra: `val numero = try { texto.toInt() } catch (e: NumberFormatException) { 0 }`. Kotlin não tem exceções verificadas: nenhuma função é obrigada a declarar `throws`, e nenhuma chamada é obrigada a ter `try`.
 
 📖 Ref. Kotlin — Conditions and loops: <https://kotlinlang.org/docs/control-flow.html>
 
@@ -111,9 +94,7 @@ nenhuma chamada é obrigada a ter `try`.
 
 ## 4. Nulidade faz parte do tipo
 
-Em Java, toda referência pode ser `null`, e o erro aparece em execução, como
-`NullPointerException`. Em Kotlin, o tipo diz se o valor pode faltar, e o compilador cobra
-o tratamento.
+Em Java, toda referência pode ser `null`, e o erro aparece em execução, como `NullPointerException`. Em Kotlin, o tipo diz se o valor pode faltar, e o compilador cobra o tratamento.
 
 | Escrita | Significado | Em Java |
 |---|---|---|
@@ -123,8 +104,7 @@ o tratamento.
 | `a ?: c` | operador Elvis: `a` se não for `null`; senão, `c` | `a != null ? a : c` |
 | `a!!` | afirma que não é `null`; se for, lança `NullPointerException` | o uso direto de uma referência |
 
-O lado direito do `?:` pode ser um `return` ou um `throw`. É assim que a rota de busca
-trata os dois casos de erro antes de chegar à resposta:
+O lado direito do `?:` pode ser um `return` ou um `throw`. É assim que a rota de busca trata os dois casos de erro antes de chegar à resposta:
 
 ```kotlin
 // Rotas.kt (Web II)
@@ -135,13 +115,9 @@ val tarefa = repositorio.buscar(id)
 call.respond(tarefa)
 ```
 
-Lendo a primeira instrução da esquerda para a direita: `call.parameters["id"]` devolve um
-`String?` (o parâmetro pode não existir); `?.toIntOrNull()` só converte se houver texto, e
-devolve `Int?` (o texto pode não ser um número); `?: throw ...` encerra a rota quando o
-resultado é `null`. Depois dessa linha, `id` é um `Int`, sem interrogação.
+Lendo a primeira instrução da esquerda para a direita: `call.parameters["id"]` devolve um `String?` (o parâmetro pode não existir); `?.toIntOrNull()` só converte se houver texto, e devolve `Int?` (o texto pode não ser um número); `?: throw ...` encerra a rota quando o resultado é `null`. Depois dessa linha, `id` é um `Int`, sem interrogação.
 
-Esse ajuste de tipo se chama *smart cast*: depois de um teste que elimina o `null`, o
-compilador passa a tratar a variável como não nula.
+Esse ajuste de tipo se chama *smart cast*: depois de um teste que elimina o `null`, o compilador passa a tratar a variável como não nula.
 
 ```kotlin
 // Telas.kt (Móveis)
@@ -150,10 +126,10 @@ if (onVoltar != null) {
 }
 ```
 
-O `!!` troca um erro de compilação por um possível erro em execução. Quando ele aparecer,
-vale procurar uma forma com `?.`, `?:` ou um teste de `null`.
+O `!!` troca um erro de compilação por um possível erro em execução. Quando ele aparecer, vale procurar uma forma com `?.`, `?:` ou um teste de `null`.
 
 📖 Ref. Kotlin — Null safety: <https://kotlinlang.org/docs/null-safety.html>
+
 📖 Ref. Kotlin — Nullability in Java and Kotlin: <https://kotlinlang.org/docs/java-to-kotlin-nullability-guide.html>
 
 ▶ [Demonstração 1 — expressões e nulidade][demo1]
@@ -176,12 +152,9 @@ public record Tarefa(int id, String titulo, boolean feita) {
 data class Tarefa(val id: Int, val titulo: String, val feita: Boolean = false)
 ```
 
-Os parênteses depois do nome da classe são o construtor primário. Um parâmetro com `val` ou
-`var` é, ao mesmo tempo, parâmetro do construtor e propriedade da classe.
+Os parênteses depois do nome da classe são o construtor primário. Um parâmetro com `val` ou `var` é, ao mesmo tempo, parâmetro do construtor e propriedade da classe.
 
-`data class` é o parente mais próximo do `record` do Java: o compilador gera `equals`,
-`hashCode` e `toString` a partir das propriedades do construtor. Gera também `copy`, que
-cria uma cópia com parte dos valores trocada:
+`data class` é o parente mais próximo do `record` do Java: o compilador gera `equals`, `hashCode` e `toString` a partir das propriedades do construtor. Gera também `copy`, que cria uma cópia com parte dos valores trocada:
 
 ```kotlin
 val a = Tarefa(1, "Estudar")
@@ -190,24 +163,20 @@ val b = a.copy(feita = true)        // a continua igual; b é outra tarefa
 
 ### 5.2 Valores padrão e argumentos nomeados
 
-`val feita: Boolean = false` define um valor padrão: quem chama pode omitir o argumento. É
-o que em Java se resolve com construtores ou métodos sobrecarregados.
+`val feita: Boolean = false` define um valor padrão: quem chama pode omitir o argumento. É o que em Java se resolve com construtores ou métodos sobrecarregados.
 
-Na chamada, um argumento pode ser passado pelo nome. A ordem deixa de importar, e a leitura
-fica clara quando há vários parâmetros do mesmo tipo:
+Na chamada, um argumento pode ser passado pelo nome. A ordem deixa de importar, e a leitura fica clara quando há vários parâmetros do mesmo tipo:
 
 ```kotlin
 // Telas.kt (Móveis)
 CartaoTarefa(Tarefa(1, "Estudar Compose", feita = true), onAlternar = {}, onAbrir = {})
 ```
 
-No Compose, quase toda função tem muitos parâmetros com valor padrão. Por isso as chamadas
-costumam nomear os argumentos: `Button(onClick = onAdicionar, enabled = valido)`.
+No Compose, quase toda função tem muitos parâmetros com valor padrão. Por isso as chamadas costumam nomear os argumentos: `Button(onClick = onAdicionar, enabled = valido)`.
 
 ### 5.3 `object` e `companion object`
 
-`object` declara uma classe e a sua única instância, de uma vez. É o padrão *singleton*,
-feito pela linguagem.
+`object` declara uma classe e a sua única instância, de uma vez. É o padrão *singleton*, feito pela linguagem.
 
 ```kotlin
 // Banco.kt (Web II): a descrição da tabela existe uma vez só
@@ -218,8 +187,7 @@ object Tarefas : Table("tarefas") { ... }
 object Lista
 ```
 
-Kotlin não tem `static`. O que pertence à classe, e não a cada instância, vai num
-`companion object`, e é chamado pelo nome da classe:
+Kotlin não tem `static`. O que pertence à classe, e não a cada instância, vai num `companion object`, e é chamado pelo nome da classe:
 
 ```kotlin
 // Banco.kt (Web II)
@@ -232,10 +200,10 @@ data class ConfigBanco(val url: String, val usuario: String, val senha: String) 
 ConfigBanco.doAmbiente()
 ```
 
-Funções que não dependem de nenhuma classe podem ficar soltas no arquivo, como
-`fun main()` e `fun tituloValido(texto: String)`. São as funções de nível superior.
+Funções que não dependem de nenhuma classe podem ficar soltas no arquivo, como `fun main()` e `fun tituloValido(texto: String)`. São as funções de nível superior.
 
 📖 Ref. Kotlin — Data classes: <https://kotlinlang.org/docs/data-classes.html>
+
 📖 Ref. Kotlin — Object declarations and expressions: <https://kotlinlang.org/docs/object-declarations.html>
 
 ▶ [Demonstração 2 — classes][demo2]
@@ -244,13 +212,9 @@ Funções que não dependem de nenhuma classe podem ficar soltas no arquivo, com
 
 ### 6.1 O que é
 
-Uma lambda é um bloco de código guardado num valor: pode ser atribuída a uma variável,
-passada como argumento e executada depois. Java tem lambdas desde a versão 8; a diferença
-está no tipo e na escrita.
+Uma lambda é um bloco de código guardado num valor: pode ser atribuída a uma variável, passada como argumento e executada depois. Java tem lambdas desde a versão 8; a diferença está no tipo e na escrita.
 
-Em Java, o tipo de uma lambda é uma interface com um único método (`Runnable`,
-`Predicate<T>`, `Function<T, R>`). Em Kotlin, existe um tipo próprio para funções, escrito
-`(Entrada) -> Saída`:
+Em Java, o tipo de uma lambda é uma interface com um único método (`Runnable`, `Predicate<T>`, `Function<T, R>`). Em Kotlin, existe um tipo próprio para funções, escrito `(Entrada) -> Saída`:
 
 | Tipo em Kotlin | Interface em Java | Onde aparece no curso |
 |---|---|---|
@@ -291,9 +255,7 @@ val dobro: (Int) -> Int = { numero ->
 
 ### 6.4 Lambda no fim da chamada
 
-Esta regra explica a forma de quase todo o código do curso. Quando o último parâmetro de
-uma função é uma função, a lambda pode ser escrita depois dos parênteses. Se ela for o
-único argumento, os parênteses vazios somem. A mesma chamada, em quatro formas:
+Esta regra explica a forma de quase todo o código do curso. Quando o último parâmetro de uma função é uma função, a lambda pode ser escrita depois dos parênteses. Se ela for o único argumento, os parênteses vazios somem. A mesma chamada, em quatro formas:
 
 ```kotlin
 tarefas.filter({ tarefa -> !tarefa.feita })    // 1. lambda como argumento comum
@@ -304,8 +266,7 @@ tarefas.filter { !it.feita }                   // 4. com `it`
 
 As quatro compilam para o mesmo programa. A forma 4 é a que se escreve no dia a dia.
 
-Consequência para a leitura: `nome { ... }` e `nome(argumentos) { ... }` são chamadas de
-função, e o bloco é o último argumento. Não são comandos da linguagem.
+Consequência para a leitura: `nome { ... }` e `nome(argumentos) { ... }` são chamadas de função, e o bloco é o último argumento. Não são comandos da linguagem.
 
 ```kotlin
 install(ContentNegotiation) { json() }                  // Ktor: chamada a install, com 2 argumentos
@@ -313,8 +274,7 @@ Button(onClick = onAdicionar) { Text("Adicionar") }     // Compose: chamada a Bu
 routing { ... }                                         // Ktor: chamada a routing, com 1 argumento
 ```
 
-Uma função pode receber mais de uma lambda. Só a última sai dos parênteses; as outras
-costumam ser passadas pelo nome:
+Uma função pode receber mais de uma lambda. Só a última sai dos parênteses; as outras costumam ser passadas pelo nome:
 
 ```kotlin
 // Telas.kt (Móveis): `key` é uma lambda nomeada; o conteúdo de cada item é a lambda no fim
@@ -325,8 +285,7 @@ items(tarefas, key = { it.id }) { tarefa ->
 
 ### 6.5 Uma lambda enxerga as variáveis ao redor
 
-Uma lambda pode ler e alterar as variáveis do lugar onde foi criada. Em Java, a lambda só
-pode ler variáveis que não mudam (`final` ou efetivamente finais).
+Uma lambda pode ler e alterar as variáveis do lugar onde foi criada. Em Java, a lambda só pode ler variáveis que não mudam (`final` ou efetivamente finais).
 
 ```kotlin
 // App.kt (Móveis): as duas lambdas alteram o estado declarado acima delas
@@ -338,13 +297,11 @@ val adicionar = {
 val alternar = { id: Int -> tarefas = tarefas.alternando(id) }
 ```
 
-`adicionar` tem o tipo `() -> Unit`, e `alternar`, o tipo `(Int) -> Unit`. É por isso que
-podem ser passadas às telas nos parâmetros `onAdicionar` e `onAlternar`.
+`adicionar` tem o tipo `() -> Unit`, e `alternar`, o tipo `(Int) -> Unit`. É por isso que podem ser passadas às telas nos parâmetros `onAdicionar` e `onAlternar`.
 
 ### 6.6 Passar uma função que já existe
 
-Uma função declarada com `fun` pode ser usada como valor com `::`. Uma variável que já
-guarda uma função é passada diretamente, entre parênteses:
+Uma função declarada com `fun` pode ser usada como valor com `::`. Uma variável que já guarda uma função é passada diretamente, entre parênteses:
 
 ```kotlin
 tarefas.filter(::estaFeita)          // referência a uma função declarada com fun
@@ -352,14 +309,14 @@ selecionada?.let(alternar)           // App.kt (Móveis): `alternar` já é um v
 ```
 
 📖 Ref. Kotlin — Higher-order functions and lambdas: <https://kotlinlang.org/docs/lambdas.html>
+
 📖 Ref. Kotlin — Passing trailing lambdas: <https://kotlinlang.org/docs/lambdas.html#passing-trailing-lambdas>
 
 ▶ [Demonstração 3 — lambdas][demo3]
 
 ## 7. Coleções
 
-As operações que em Java pedem `stream()` e um coletor são funções diretas da lista, e
-recebem uma lambda no fim da chamada.
+As operações que em Java pedem `stream()` e um coletor são funções diretas da lista, e recebem uma lambda no fim da chamada.
 
 ```java
 // Java
@@ -384,9 +341,7 @@ val pendentes = tarefas.filter { !it.feita }.map { it.titulo }
 | `sortedBy { chave }` | uma lista ordenada pela chave |
 | `lista + elemento` | uma lista com o elemento a mais |
 
-`List` é somente leitura: não tem `add` nem `remove`. Para alterar no lugar, o tipo é
-`MutableList`, criado com `mutableListOf(...)`. O curso usa listas somente leitura, e
-"alterar" significa criar uma lista nova:
+`List` é somente leitura: não tem `add` nem `remove`. Para alterar no lugar, o tipo é `MutableList`, criado com `mutableListOf(...)`. O curso usa listas somente leitura, e "alterar" significa criar uma lista nova:
 
 ```kotlin
 // Tarefa.kt (Móveis): devolve outra lista, com uma tarefa trocada por uma cópia
@@ -394,11 +349,10 @@ fun List<Tarefa>.alternando(id: Int): List<Tarefa> =
     map { if (it.id == id) it.copy(feita = !it.feita) else it }
 ```
 
-No Compose isso tem uma consequência prática: a tela se redesenha quando o estado recebe
-um valor novo (`tarefas = tarefas.alternando(id)`). Alterar um objeto por dentro não avisa
-ninguém.
+No Compose isso tem uma consequência prática: a tela se redesenha quando o estado recebe um valor novo (`tarefas = tarefas.alternando(id)`). Alterar um objeto por dentro não avisa ninguém.
 
 📖 Ref. Kotlin — Collections overview: <https://kotlinlang.org/docs/collections-overview.html>
+
 📖 Ref. Kotlin — Collections in Java and Kotlin: <https://kotlinlang.org/docs/java-to-kotlin-collections-guide.html>
 
 ▶ [Demonstração 4 — coleções][demo4]
@@ -407,9 +361,7 @@ ninguém.
 
 ### 8.1 O que é
 
-Uma função de extensão acrescenta uma função a um tipo que já existe, sem herança e sem
-alterar a classe. O tipo é escrito antes do nome da função, separado por um ponto, e se
-chama receptor.
+Uma função de extensão acrescenta uma função a um tipo que já existe, sem herança e sem alterar a classe. O tipo é escrito antes do nome da função, separado por um ponto, e se chama receptor.
 
 ```java
 // Java: método estático numa classe utilitária
@@ -428,8 +380,7 @@ fun List<Tarefa>.alternando(id: Int): List<Tarefa> =
 lista.alternando(2)
 ```
 
-Dentro da função, `this` é o receptor: a lista sobre a qual a função foi chamada. O `this`
-pode ser omitido; `map { ... }` ali quer dizer `this.map { ... }`.
+Dentro da função, `this` é o receptor: a lista sobre a qual a função foi chamada. O `this` pode ser omitido; `map { ... }` ali quer dizer `this.map { ... }`.
 
 A chamada fica com a forma de um método (`lista.alternando(2)`), o que permite encadear:
 
@@ -439,13 +390,10 @@ val depois = tarefas.comNova(3, "Gravar o vídeo").alternando(1)
 
 ### 8.2 O que ela não faz
 
-- Não altera a classe. É uma função comum; o compilador a transforma numa chamada que
-  recebe o receptor como primeiro argumento.
+- Não altera a classe. É uma função comum; o compilador a transforma numa chamada que recebe o receptor como primeiro argumento.
 - Não enxerga os membros privados do tipo. Só usa o que é público.
-- Não substitui um membro: se a classe já tem uma função com o mesmo nome e os mesmos
-  parâmetros, a da classe é a escolhida.
-- Precisa ser importada quando está em outro pacote. É por isso que o `Rotas.kt` importa
-  `io.ktor.server.routing.get` e `io.ktor.server.response.respond`: são extensões.
+- Não substitui um membro: se a classe já tem uma função com o mesmo nome e os mesmos parâmetros, a da classe é a escolhida.
+- Precisa ser importada quando está em outro pacote. É por isso que o `Rotas.kt` importa `io.ktor.server.routing.get` e `io.ktor.server.response.respond`: são extensões.
 
 ### 8.3 No exemplo de Tarefas
 
@@ -462,12 +410,9 @@ fun Application.configurar(repositorio: RepositorioDeTarefas) {
 private fun ResultRow.paraTarefa() = Tarefa(this[Tarefas.id], this[Tarefas.titulo], this[Tarefas.feita])
 ```
 
-Em `embeddedServer(CIO, port = 8080) { modulo() }`, o bloco é executado com a aplicação
-como `this` (capítulo 9), e por isso `modulo()` pode ser chamado sem nada antes.
+Em `embeddedServer(CIO, port = 8080) { modulo() }`, o bloco é executado com a aplicação como `this` (capítulo 9), e por isso `modulo()` pode ser chamado sem nada antes.
 
-Grande parte da biblioteca padrão é feita de extensões: `filter` e `map` são extensões de
-coleções; `isBlank` e `toIntOrNull`, de `String`. No Compose, `Modifier.padding(16.dp)` é
-uma extensão de `Modifier`, e `16.dp` é uma propriedade de extensão de `Int`.
+Grande parte da biblioteca padrão é feita de extensões: `filter` e `map` são extensões de coleções; `isBlank` e `toIntOrNull`, de `String`. No Compose, `Modifier.padding(16.dp)` é uma extensão de `Modifier`, e `16.dp` é uma propriedade de extensão de `Int`.
 
 📖 Ref. Kotlin — Extensions: <https://kotlinlang.org/docs/extensions.html>
 
@@ -477,8 +422,7 @@ uma extensão de `Modifier`, e `16.dp` é uma propriedade de extensão de `Int`.
 
 ### 9.1 O que é
 
-Este recurso junta os capítulos 6 e 8: é uma lambda que, por dentro, tem um `this`. O tipo
-se escreve com o receptor antes dos parênteses: `Conexao.() -> Unit`.
+Este recurso junta os capítulos 6 e 8: é uma lambda que, por dentro, tem um `this`. O tipo se escreve com o receptor antes dos parênteses: `Conexao.() -> Unit`.
 
 ```kotlin
 // Lambda comum: (Conexao) -> Unit. O objeto chega como parâmetro e precisa ser citado.
@@ -504,29 +448,19 @@ fun configurar(bloco: Conexao.() -> Unit): Conexao {
 }
 ```
 
-Java não tem esse recurso. O parente mais próximo é o padrão *builder* com chamadas
-encadeadas (`config.setUrl(...).setUsuario(...)`).
+Java não tem esse recurso. O parente mais próximo é o padrão *builder* com chamadas encadeadas (`config.setUrl(...).setUsuario(...)`).
 
-Ao ler um bloco, a pergunta útil é: quem é o `this` aqui? A resposta está na assinatura da
-função chamada. Na IDE, basta apontar para o nome da função, ou ativar as dicas que mostram
-`this: Tipo` no início de cada bloco.
+Ao ler um bloco, a pergunta útil é: quem é o `this` aqui? A resposta está na assinatura da função chamada. Na IDE, basta apontar para o nome da função, ou ativar as dicas que mostram `this: Tipo` no início de cada bloco.
 
 ### 9.2 Blocos dentro de blocos
 
-Uma biblioteca que oferece várias funções desse tipo permite escrever uma estrutura
-inteira com blocos aninhados. É o que a documentação chama de *type-safe builder* ou DSL
-(linguagem específica de domínio). O Ktor usa essa técnica para rotas, e o Compose, para
-telas; os capítulos 12 e 13 leem os dois casos linha a linha.
+Uma biblioteca que oferece várias funções desse tipo permite escrever uma estrutura inteira com blocos aninhados. É o que a documentação chama de *type-safe builder* ou DSL (linguagem específica de domínio). O Ktor usa essa técnica para rotas, e o Compose, para telas; os capítulos 12 e 13 leem os dois casos linha a linha.
 
-Dentro de um bloco aninhado, continuam visíveis os `this` dos blocos de fora. É por isso
-que, dentro de `get("/{id}") { ... }`, o código consegue usar `repositorio`, declarado em
-`Application.rotas()`.
+Dentro de um bloco aninhado, continuam visíveis os `this` dos blocos de fora. É por isso que, dentro de `get("/{id}") { ... }`, o código consegue usar `repositorio`, declarado em `Application.rotas()`.
 
 ### 9.3 Funções de escopo
 
-A biblioteca padrão tem cinco funções que executam um bloco sobre um objeto. Diferem em
-duas coisas: como o objeto aparece dentro do bloco (`it` ou `this`) e o que a chamada
-devolve.
+A biblioteca padrão tem cinco funções que executam um bloco sobre um objeto. Diferem em duas coisas: como o objeto aparece dentro do bloco (`it` ou `this`) e o que a chamada devolve.
 
 | Função | O objeto é | Devolve | Uso típico |
 |---|---|---|---|
@@ -553,23 +487,21 @@ HikariDataSource(
 onAlternar = { selecionada?.let(alternar) }
 ```
 
-Para começar, `let` e `apply` cobrem a maior parte dos casos. Blocos de escopo aninhados
-ficam difíceis de ler; quando isso acontecer, uma variável com nome resolve melhor.
+Para começar, `let` e `apply` cobrem a maior parte dos casos. Blocos de escopo aninhados ficam difíceis de ler; quando isso acontecer, uma variável com nome resolve melhor.
 
 📖 Ref. Kotlin — Function literals with receiver: <https://kotlinlang.org/docs/lambdas.html#function-literals-with-receiver>
+
 📖 Ref. Kotlin — Scope functions: <https://kotlinlang.org/docs/scope-functions.html>
+
 📖 Ref. Kotlin — Type-safe builders: <https://kotlinlang.org/docs/type-safe-builders.html>
 
 ▶ [Demonstração 6 — lambda com receptor e funções de escopo][demo6]
 
 ## 10. Delegação com `by`
 
-`by` entrega a outro objeto, o delegado, o trabalho de ler e gravar uma propriedade. O
-compilador troca cada leitura por uma chamada a `getValue()` do delegado e cada gravação
-por uma chamada a `setValue()`. Java não tem equivalente.
+`by` entrega a outro objeto, o delegado, o trabalho de ler e gravar uma propriedade. O compilador troca cada leitura por uma chamada a `getValue()` do delegado e cada gravação por uma chamada a `setValue()`. Java não tem equivalente.
 
-O caso mais simples é o `by lazy`, da biblioteca padrão: o valor é calculado no primeiro
-uso e guardado.
+O caso mais simples é o `by lazy`, da biblioteca padrão: o valor é calculado no primeiro uso e guardado.
 
 ```kotlin
 val repositorio: Repositorio by lazy { Repositorio() }     // ainda não criou nada
@@ -583,9 +515,7 @@ No Ktor com Koin, a dependência é buscada no primeiro uso:
 val repositorio by inject<RepositorioDeTarefas>()
 ```
 
-`inject` devolve um `Lazy<RepositorioDeTarefas>`. Sem o `by`, cada uso seria
-`repositorio.value.listar()`. Com o `by`, a variável se comporta como um
-`RepositorioDeTarefas`.
+`inject` devolve um `Lazy<RepositorioDeTarefas>`. Sem o `by`, cada uso seria `repositorio.value.listar()`. Com o `by`, a variável se comporta como um `RepositorioDeTarefas`.
 
 No Compose, o delegado é o estado observável:
 
@@ -599,12 +529,10 @@ var texto by remember { mutableStateOf("") }
 texto = "Estudar"
 ```
 
-É nas chamadas a `getValue()` e `setValue()` que o Compose registra quem leu o estado e
-avisa quando ele mudou. Dois detalhes práticos: com `by`, a variável precisa ser `var`,
-porque há gravação; e o arquivo precisa dos imports `androidx.compose.runtime.getValue` e
-`androidx.compose.runtime.setValue` (a IDE sugere os dois).
+É nas chamadas a `getValue()` e `setValue()` que o Compose registra quem leu o estado e avisa quando ele mudou. Dois detalhes práticos: com `by`, a variável precisa ser `var`, porque há gravação; e o arquivo precisa dos imports `androidx.compose.runtime.getValue` e `androidx.compose.runtime.setValue` (a IDE sugere os dois).
 
 📖 Ref. Kotlin — Delegated properties: <https://kotlinlang.org/docs/delegated-properties.html>
+
 📖 Ref. Android — State and Jetpack Compose: <https://developer.android.com/develop/ui/compose/state>
 
 ▶ [Demonstração 9 — delegação][demo9]
@@ -637,7 +565,9 @@ Column(modifier.padding(16.dp)) {
 ```
 
 📖 Ref. Kotlin — Returns and jumps: <https://kotlinlang.org/docs/returns.html#return-to-labels>
+
 📖 Ref. Kotlin — Reified type parameters: <https://kotlinlang.org/docs/inline-functions.html#reified-type-parameters>
+
 📖 Ref. Kotlin — Infix notation: <https://kotlinlang.org/docs/functions.html#infix-notation>
 
 ## 12. No Ktor: lendo o `Rotas.kt`
@@ -668,12 +598,9 @@ fun Application.rotas() {                                   // (a)
 
 - (a) Função de extensão de `Application`. Dentro dela, `this` é a aplicação.
 - (b) Delegação: o repositório vem do Koin, no primeiro uso.
-- (c) `routing` é uma função, e o bloco é o seu único argumento (lambda no fim da chamada).
-  O bloco é uma lambda com receptor: dentro dele, `this` é o objeto que registra rotas.
+- (c) `routing` é uma função, e o bloco é o seu único argumento (lambda no fim da chamada). O bloco é uma lambda com receptor: dentro dele, `this` é o objeto que registra rotas.
 - (d) `route("/tarefas") { ... }` é outra chamada, com dois argumentos: o caminho e o bloco.
-- (e) `get { ... }` registra uma rota. O bloco não é executado agora: fica guardado e roda a
-  cada requisição. Dentro dele, o `this` é um `RoutingContext`, que tem a propriedade
-  `call`. É por isso que `call` pode ser usado sem ter sido declarado.
+- (e) `get { ... }` registra uma rota. O bloco não é executado agora: fica guardado e roda a cada requisição. Dentro dele, o `this` é um `RoutingContext`, que tem a propriedade `call`. É por isso que `call` pode ser usado sem ter sido declarado.
 - (f) O tipo entre `< >` diz em que classe o JSON deve ser convertido.
 
 O mesmo começo, sem as abreviações da linguagem:
@@ -686,11 +613,9 @@ this.routing({
 })
 ```
 
-Como as rotas são chamadas de função comuns, cabem entre elas `if`, laços e funções
-auxiliares. No Quarkus, as mesmas rotas são declaradas por anotações (`@GET`, `@Path`).
+Como as rotas são chamadas de função comuns, cabem entre elas `if`, laços e funções auxiliares. No Quarkus, as mesmas rotas são declaradas por anotações (`@GET`, `@Path`).
 
-A demonstração 7 escreve um Ktor em miniatura, com `routing`, `get` e `call`, em cerca de
-trinta linhas. Ela mostra que essa sintaxe é feita com recursos comuns da linguagem.
+A demonstração 7 escreve um Ktor em miniatura, com `routing`, `get` e `call`, em cerca de trinta linhas. Ela mostra que essa sintaxe é feita com recursos comuns da linguagem.
 
 ### 12.2 `suspend`
 
@@ -703,19 +628,14 @@ interface RepositorioDeTarefas {
 }
 ```
 
-`suspend` marca uma função que pode pausar e continuar depois. Enquanto ela espera a
-resposta do banco, a thread fica livre para atender outras requisições. A unidade que
-executa esse código se chama corrotina; muitas corrotinas se revezam em poucas threads.
+`suspend` marca uma função que pode pausar e continuar depois. Enquanto ela espera a resposta do banco, a thread fica livre para atender outras requisições. A unidade que executa esse código se chama corrotina; muitas corrotinas se revezam em poucas threads.
 
-A regra que o compilador cobra: uma função `suspend` só pode ser chamada de outra função
-`suspend` ou de dentro de uma corrotina. No Ktor, o bloco de cada rota já é `suspend`, e
-cada requisição já roda numa corrotina. Por isso `repositorio.buscar(id)` é chamado
-diretamente, com a aparência de código sequencial.
+A regra que o compilador cobra: uma função `suspend` só pode ser chamada de outra função `suspend` ou de dentro de uma corrotina. No Ktor, o bloco de cada rota já é `suspend`, e cada requisição já roda numa corrotina. Por isso `repositorio.buscar(id)` é chamado diretamente, com a aparência de código sequencial.
 
-Em Java, os caminhos para o mesmo resultado são `CompletableFuture` ou threads virtuais.
-O Quarkus do exemplo segue outra estratégia: executa o método numa thread de trabalho.
+Em Java, os caminhos para o mesmo resultado são `CompletableFuture` ou threads virtuais. O Quarkus do exemplo segue outra estratégia: executa o método numa thread de trabalho.
 
 📖 Ref. Ktor — Routing: <https://ktor.io/docs/server-routing.html>
+
 📖 Ref. Kotlin — Coroutines basics: <https://kotlinlang.org/docs/coroutines-basics.html>
 
 ▶ [Demonstração 7 — um Ktor em miniatura][demo7] · ▶ [Demonstração 10 — corrotinas][demo10]
@@ -736,17 +656,11 @@ fun TelaDetalhe(
 ```
 
 - (a) Tipo anulável: pode não haver tarefa selecionada.
-- (b) Tipo de função sem parâmetros e sem resultado. A tela avisa que o usuário tocou; quem
-  chamou decide o que fazer. Dados entram por parâmetros comuns, e eventos saem por
-  parâmetros de tipo função.
-- (c) Função opcional. Os parênteses externos são necessários: `(() -> Unit)?` é "uma
-  função, ou `null`"; `() -> Unit?` seria "uma função que devolve `Unit` ou `null`".
-- (d) Valor padrão: quem chama pode omitir. O valor `Modifier` é um `companion object` da
-  interface `Modifier`, que representa "nenhum ajuste".
+- (b) Tipo de função sem parâmetros e sem resultado. A tela avisa que o usuário tocou; quem chamou decide o que fazer. Dados entram por parâmetros comuns, e eventos saem por parâmetros de tipo função.
+- (c) Função opcional. Os parênteses externos são necessários: `(() -> Unit)?` é "uma função, ou `null`"; `() -> Unit?` seria "uma função que devolve `Unit` ou `null`".
+- (d) Valor padrão: quem chama pode omitir. O valor `Modifier` é um `companion object` da interface `Modifier`, que representa "nenhum ajuste".
 
-Na lista, `onAlternar` é `(Int) -> Unit`, porque a lista precisa dizer qual tarefa foi
-tocada. No cartão, é `() -> Unit`, porque o cartão já é de uma tarefa. A ligação entre os
-dois é uma lambda:
+Na lista, `onAlternar` é `(Int) -> Unit`, porque a lista precisa dizer qual tarefa foi tocada. No cartão, é `() -> Unit`, porque o cartão já é de uma tarefa. A ligação entre os dois é uma lambda:
 
 ```kotlin
 CartaoTarefa(tarefa, onAlternar = { onAlternar(tarefa.id) }, onAbrir = { onAbrir(tarefa.id) })
@@ -767,16 +681,11 @@ Column(modifier.padding(16.dp)) {                                      // (a)
 }
 ```
 
-- (a) `Column` é uma função, não uma classe. Recebe dois argumentos: o `modifier` e o
-  bloco de conteúdo (lambda no fim da chamada). Dentro do bloco, `this` é um `ColumnScope`.
-- (b) `LazyColumn` recebe um argumento nomeado e o bloco. Dentro dele, `this` é um
-  `LazyListScope`.
-- (c) `items` é uma função do `LazyListScope`: só existe dentro do bloco de uma lista.
-  Recebe a lista, uma lambda nomeada (`key`) e, no fim, a lambda que desenha cada item.
+- (a) `Column` é uma função, não uma classe. Recebe dois argumentos: o `modifier` e o bloco de conteúdo (lambda no fim da chamada). Dentro do bloco, `this` é um `ColumnScope`.
+- (b) `LazyColumn` recebe um argumento nomeado e o bloco. Dentro dele, `this` é um `LazyListScope`.
+- (c) `items` é uma função do `LazyListScope`: só existe dentro do bloco de uma lista. Recebe a lista, uma lambda nomeada (`key`) e, no fim, a lambda que desenha cada item.
 
-O receptor também limita o que pode ser chamado em cada lugar. `Modifier.weight(1f)`, usado
-em `Row` e `Column` para dividir o espaço, é uma função do `RowScope` e do `ColumnScope`:
-fora desses blocos, não compila.
+O receptor também limita o que pode ser chamado em cada lugar. `Modifier.weight(1f)`, usado em `Row` e `Column` para dividir o espaço, é uma função do `RowScope` e do `ColumnScope`: fora desses blocos, não compila.
 
 Como a tela é feita de chamadas de função, cabem nela `if` e `for`:
 
@@ -786,10 +695,7 @@ if (onVoltar != null) {
 }
 ```
 
-A demonstração 8 escreve um Compose em miniatura, que monta uma árvore de componentes com
-essa mesma escrita. O Compose de verdade funciona de outro jeito por dentro: a anotação
-`@Composable` ativa um plugin do compilador, que acompanha o estado e redesenha só o que
-mudou.
+A demonstração 8 escreve um Compose em miniatura, que monta uma árvore de componentes com essa mesma escrita. O Compose de verdade funciona de outro jeito por dentro: a anotação `@Composable` ativa um plugin do compilador, que acompanha o estado e redesenha só o que mudou.
 
 ### 13.3 O estado
 
@@ -799,9 +705,7 @@ var tarefas by remember { mutableStateOf(tarefasIniciais) }     // delegação (
 val alternar = { id: Int -> tarefas = tarefas.alternando(id) }  // lambda que reatribui o estado
 ```
 
-Três recursos numa linha cada: `by` faz `tarefas` se comportar como uma lista; a lambda
-enxerga e altera essa variável (seção 6.5); e `alternando` é uma extensão que devolve uma
-lista nova (capítulo 8). A reatribuição é o que faz a tela se redesenhar.
+Três recursos numa linha cada: `by` faz `tarefas` se comportar como uma lista; a lambda enxerga e altera essa variável (seção 6.5); e `alternando` é uma extensão que devolve uma lista nova (capítulo 8). A reatribuição é o que faz a tela se redesenhar.
 
 📖 Ref. Android — Kotlin for Jetpack Compose: <https://developer.android.com/develop/ui/compose/kotlin>
 
@@ -809,8 +713,7 @@ lista nova (capítulo 8). A reatribuição é o que faz a tela se redesenhar.
 
 ## 14. Escrever de modo idiomático
 
-Código traduzido do Java linha a linha compila em Kotlin, mas fica mais longo do que
-precisa. A tabela reúne as trocas mais comuns:
+Código traduzido do Java linha a linha compila em Kotlin, mas fica mais longo do que precisa. A tabela reúne as trocas mais comuns:
 
 | Hábito trazido do Java | Em Kotlin |
 |---|---|
@@ -829,19 +732,19 @@ precisa. A tabela reúne as trocas mais comuns:
 
 A demonstração 11 traz o mesmo programa nas duas versões, lado a lado.
 
-O Android Studio e o IntelliJ IDEA sugerem boa parte dessas trocas: um trecho sublinhado
-com uma lâmpada ao lado costuma ter uma forma mais curta, aplicada com `Alt+Enter`.
+O Android Studio e o IntelliJ IDEA sugerem boa parte dessas trocas: um trecho sublinhado com uma lâmpada ao lado costuma ter uma forma mais curta, aplicada com `Alt+Enter`.
 
 📖 Ref. Kotlin — Idioms: <https://kotlinlang.org/docs/idioms.html>
+
 📖 Ref. Kotlin — Coding conventions: <https://kotlinlang.org/docs/coding-conventions.html>
+
 📖 Ref. Kotlin — Comparison to Java: <https://kotlinlang.org/docs/comparison-to-java.html>
 
 ▶ [Demonstração 11 — idiomático][demo11]
 
 ## 15. Exercícios
 
-Cada demonstração termina com três experimentos, escritos como comentários no fim do
-`main`. A sugestão é fazer na ordem:
+Cada demonstração termina com três experimentos, escritos como comentários no fim do `main`. A sugestão é fazer na ordem:
 
 | | Demonstração | Recursos |
 |---|---|---|
@@ -859,47 +762,30 @@ Cada demonstração termina com três experimentos, escritos como comentários n
 
 Para praticar no código do grupo:
 
-1. Abra um arquivo do projeto e, para cada bloco `{ ... }`, responda: de qual função ele é
-   argumento? Dentro dele, o objeto é `it` ou `this`? De que tipo?
-2. Reescreva uma chamada com lambda no fim na forma sem abreviações (como nos capítulos 12
-   e 13) e confira que compila.
-3. Encontre uma função do projeto que receba uma lista e devolva outra, e transforme-a numa
-   função de extensão.
+1. Abra um arquivo do projeto e, para cada bloco `{ ... }`, responda: de qual função ele é argumento? Dentro dele, o objeto é `it` ou `this`? De que tipo?
+2. Reescreva uma chamada com lambda no fim na forma sem abreviações (como nos capítulos 12 e 13) e confira que compila.
+3. Encontre uma função do projeto que receba uma lista e devolva outra, e transforme-a numa função de extensão.
 4. Procure todos os `!!` do projeto e substitua cada um por `?.`, `?:` ou um teste de `null`.
 
 ## 16. Perguntas frequentes
 
-**Preciso dominar tudo isto para entregar a Sprint 1?** Não. Para ler e adaptar o exemplo de
-Tarefas, os capítulos 4, 6, 8 e 9 são os que mais ajudam. Os demais servem de consulta.
+**Preciso dominar tudo isto para entregar a Sprint 1?** Não. Para ler e adaptar o exemplo de Tarefas, os capítulos 4, 6, 8 e 9 são os que mais ajudam. Os demais servem de consulta.
 
-**Quando uso `it` e quando dou nome ao parâmetro?** `it` funciona bem em blocos de uma
-linha. Em blocos maiores, ou quando há um bloco dentro de outro, um nome
-(`{ tarefa -> ... }`) evita dúvida sobre a quem o `it` se refere.
+**Quando uso `it` e quando dou nome ao parâmetro?** `it` funciona bem em blocos de uma linha. Em blocos maiores, ou quando há um bloco dentro de outro, um nome (`{ tarefa -> ... }`) evita dúvida sobre a quem o `it` se refere.
 
-**Como descubro quem é o `this` de um bloco?** Pela assinatura da função chamada: o tipo do
-último parâmetro tem a forma `Tipo.() -> ...`. No Android Studio e no IntelliJ IDEA, aponte
-o cursor para o nome da função, ou use `Ctrl+P` dentro dos parênteses.
+**Como descubro quem é o `this` de um bloco?** Pela assinatura da função chamada: o tipo do último parâmetro tem a forma `Tipo.() -> ...`. No Android Studio e no IntelliJ IDEA, aponte o cursor para o nome da função, ou use `Ctrl+P` dentro dos parênteses.
 
-**Por que `routing`, `get`, `Column` e `Button` não aparecem na lista de palavras da
-linguagem?** Porque são funções de biblioteca. O que a linguagem oferece é a regra que
-permite escrever o último argumento fora dos parênteses.
+**Por que `routing`, `get`, `Column` e `Button` não aparecem na lista de palavras da linguagem?** Porque são funções de biblioteca. O que a linguagem oferece é a regra que permite escrever o último argumento fora dos parênteses.
 
-**Função de extensão ou função comum?** Extensão quando a função é, na leitura, uma
-operação sobre um tipo (`lista.alternando(id)`). Função comum quando não há um objeto
-principal (`tituloValido(texto)`).
+**Função de extensão ou função comum?** Extensão quando a função é, na leitura, uma operação sobre um tipo (`lista.alternando(id)`). Função comum quando não há um objeto principal (`tituloValido(texto)`).
 
-**Posso misturar Java e Kotlin no mesmo projeto?** Pode: os dois compilam para a JVM, e um
-chama o outro. As bibliotecas Java usadas no exemplo (HikariCP, Flyway) são chamadas do
-Kotlin sem adaptação.
+**Posso misturar Java e Kotlin no mesmo projeto?** Pode: os dois compilam para a JVM, e um chama o outro. As bibliotecas Java usadas no exemplo (HikariCP, Flyway) são chamadas do Kotlin sem adaptação.
 
-**O Playground roda o código do exemplo de Tarefas?** Não: ele não tem Ktor nem Compose.
-Por isso as demonstrações 7 e 8 usam versões em miniatura, escritas só com a linguagem.
-A biblioteca `kotlinx.coroutines`, usada na demonstração 10, está disponível lá.
+**O Playground roda o código do exemplo de Tarefas?** Não: ele não tem Ktor nem Compose. Por isso as demonstrações 7 e 8 usam versões em miniatura, escritas só com a linguagem. A biblioteca `kotlinx.coroutines`, usada na demonstração 10, está disponível lá.
 
 ## Referências
 
-Todas as páginas foram consultadas em outubro de 2026. A documentação do Kotlin e a do
-Android são publicadas sob a licença Apache 2.0.
+Todas as páginas foram consultadas em outubro de 2026. A documentação do Kotlin e a do Android são publicadas sob a licença Apache 2.0.
 
 Para estudar em sequência
 - Kotlin — Tour of Kotlin (com código executável e exercícios): <https://kotlinlang.org/docs/kotlin-tour-welcome.html>

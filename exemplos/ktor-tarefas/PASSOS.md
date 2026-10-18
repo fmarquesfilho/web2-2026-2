@@ -1,16 +1,10 @@
 # Passos — API de Tarefas em Ktor
 
-Esta pasta contém o estado final (depois de concluído o Passo 12); use os passos para reconstruir
-ao vivo a partir de um projeto limpo. Passos 1 a 5: aula de 14/09. Passos 6 a 12: segunda parte
-da Sprint 1, em vídeo. Até o Passo 11, todo o código fica no pacote `br.ufrn.exemplo.tarefas`;
-no Passo 12 ele se divide em `dominio` e `adaptadores`.
+Esta pasta contém o estado final (depois de concluído o Passo 12); use os passos para reconstruir ao vivo a partir de um projeto limpo. Passos 1 a 5: aula de 14/09. Passos 6 a 12: segunda parte da Sprint 1, em vídeo. Até o Passo 11, todo o código fica no pacote `br.ufrn.exemplo.tarefas`; no Passo 12 ele se divide em `dominio` e `adaptadores`.
 
-Para partir de um repositório limpo, gere em [start.ktor.io](https://start.ktor.io) com os
-plugins *Content Negotiation*, *kotlinx.serialization* e o engine *CIO* — ou comece
-copiando só `build.gradle.kts`, `settings.gradle.kts` e o `gradlew` desta pasta.
+Para partir de um repositório limpo, gere em [start.ktor.io](https://start.ktor.io) com os plugins *Content Negotiation*, *kotlinx.serialization* e o engine *CIO* — ou comece copiando só `build.gradle.kts`, `settings.gradle.kts` e o `gradlew` desta pasta.
 
-Para rodar a qualquer momento: `./gradlew run` (sobe em `http://localhost:8080`). Do Passo 6
-em diante, suba antes o banco: `docker compose up -d`.
+Para rodar a qualquer momento: `./gradlew run` (sobe em `http://localhost:8080`). Do Passo 6 em diante, suba antes o banco: `docker compose up -d`.
 
 ---
 
@@ -36,8 +30,7 @@ fun main() {
 
 Testar: `curl localhost:8080` → `no ar`.
 
-> O servidor é código: `embeddedServer` + engine (CIO). Não é necessário instanciar
-> contêiner de aplicação nem configurar XML nenhum.
+> O servidor é código: `embeddedServer` + engine (CIO). Não é necessário instanciar contêiner de aplicação nem configurar XML nenhum.
 
 📖 [Ktor — configuration in code](https://ktor.io/docs/server-configuration-code.html)
 
@@ -62,8 +55,7 @@ fun Application.modulo() {
 
 Testar: `curl localhost:8080/tarefas` → lista em JSON.
 
-> `@Serializable` + `ContentNegotiation` permite serialização sem
-> escrever `toJson`. `respond(objeto)` negocia o formato pelo `Accept`.
+> `@Serializable` + `ContentNegotiation` permite serialização sem escrever `toJson`. `respond(objeto)` negocia o formato pelo `Accept`.
 
 📖 [kotlinx.serialization](https://kotlinlang.org/docs/serialization.html) · [Ktor — content negotiation](https://ktor.io/docs/server-serialization.html)
 
@@ -111,8 +103,7 @@ class RepositorioEmMemoria : RepositorioDeTarefas { /* ...lista + proximoId... *
 
 As rotas passam a falar com a **interface**, não com a lista.
 
-> A rota não sabe se os dados vêm de memória ou banco. Na Sprint 1
-> troca-se a implementação por Postgres **sem precisar mexer nas rotas**.
+> A rota não sabe se os dados vêm de memória ou banco. Na Sprint 1 troca-se a implementação por Postgres **sem precisar mexer nas rotas**.
 
 ---
 
@@ -126,8 +117,7 @@ install(Koin) {
 val repositorio by inject<RepositorioDeTarefas>()
 ```
 
-> O grafo de dependências fica num lugar só. No caso do Quarkus (via CDI)
-> o mesmo papel vem de anotações (`@ApplicationScoped` / `@Inject`).
+> O grafo de dependências fica num lugar só. No caso do Quarkus (via CDI) o mesmo papel vem de anotações (`@ApplicationScoped` / `@Inject`).
 
 📖 [Koin com Ktor](https://insert-koin.io/docs/quickstart/ktor) · [Kotlin — delegated properties](https://kotlinlang.org/docs/delegated-properties.html)
 
@@ -136,8 +126,7 @@ val repositorio by inject<RepositorioDeTarefas>()
 
 ## Passo 6 — Banco, pool e migração
 
-`compose.yaml` com um PostgreSQL 17 e a primeira migração em
-`src/main/resources/db/migration/V1__cria_tarefas.sql`:
+`compose.yaml` com um PostgreSQL 17 e a primeira migração em `src/main/resources/db/migration/V1__cria_tarefas.sql`:
 
 ```sql
 CREATE TABLE tarefas (
@@ -152,9 +141,7 @@ val dataSource = HikariDataSource(HikariConfig().apply { jdbcUrl = config.url; /
 Flyway.configure().dataSource(dataSource).load().migrate()
 ```
 
-> O esquema vem **só da migração**. O Flyway guarda o que já aplicou em
-> `flyway_schema_history`; subir de novo não reaplica. Precisa de
-> `flyway-database-postgresql`, além de `flyway-core`.
+> O esquema vem **só da migração**. O Flyway guarda o que já aplicou em `flyway_schema_history`; subir de novo não reaplica. Precisa de `flyway-database-postgresql`, além de `flyway-core`.
 
 📖 [Flyway — Versioned migrations](https://documentation.red-gate.com/flyway/flyway-concepts/migrations/versioned-migrations)
 
@@ -178,8 +165,7 @@ class RepositorioPostgres(private val db: Database) : RepositorioDeTarefas {
 }
 ```
 
-> A interface ganhou `suspend`: JDBC bloqueia, e `suspendTransaction` evita travar a
-> thread do servidor. **As rotas não mudaram** — trocou só a implementação no Koin.
+> A interface ganhou `suspend`: JDBC bloqueia, e `suspendTransaction` evita travar a thread do servidor. **As rotas não mudaram** — trocou só a implementação no Koin.
 
 📖 [Exposed — CRUD (DSL)](https://www.jetbrains.com/help/exposed/dsl-crud-operations.html)
 
@@ -198,8 +184,7 @@ testApplication { application { modulo(ConfigBanco(postgres.jdbcUrl, postgres.us
 
 Rodar: `./gradlew test` (precisa de Docker para o `TarefasTest`).
 
-> `modulo` monta com banco; `configurar(repositorio)` recebe a porta — é o que deixa o
-> teste de rota trocar o banco pela memória.
+> `modulo` monta com banco; `configurar(repositorio)` recebe a porta — é o que deixa o teste de rota trocar o banco pela memória.
 
 📖 [Testcontainers — Postgres](https://java.testcontainers.org/modules/databases/postgres/) · [Ktor — Testing](https://ktor.io/docs/server-testing.html)
 
@@ -227,8 +212,7 @@ Abra `http://localhost:8080/docs`; a especificação fica em `/docs/documentatio
 
 ## Passo 10 — o ambiente em tasks
 
-Os comandos dos nove passos viram nomes curtos no [`mise.toml`](../../mise.toml) da raiz do
-repositório, que também fixa as versões do JDK e do Maven:
+Os comandos dos nove passos viram nomes curtos no [`mise.toml`](../../mise.toml) da raiz do repositório, que também fixa as versões do JDK e do Maven:
 
 ```toml
 [tools]
@@ -254,10 +238,7 @@ mise run ktor:test    # == ./gradlew test
 mise run ktor:demo    # cria e lista uma tarefa, com curl
 ```
 
-> Isto não muda o projeto: cada task é o mesmo comando dos passos anteriores, com nome. O
-> ganho é o `mise install`, que dá a mesma versão de JDK para todo mundo, e o
-> `mise tasks`, que documenta o projeto sozinho. No Codespace, o `.devcontainer` já instala
-> tudo isso.
+> Isto não muda o projeto: cada task é o mesmo comando dos passos anteriores, com nome. O ganho é o `mise install`, que dá a mesma versão de JDK para todo mundo, e o `mise tasks`, que documenta o projeto sozinho. No Codespace, o `.devcontainer` já instala tudo isso.
 
 📖 [mise — tasks](https://mise.jdx.dev/tasks/)
 
@@ -319,10 +300,7 @@ Content-Type: application/problem+json
 | `GET /tarefas/9999` | `404` |
 | `POST` válido | `201`, com `Location: /tarefas/{id}` |
 
-> **400 × 422.** `400`: a requisição não tem a forma esperada (JSON quebrado, campo
-> faltando, id que não é número). `422`: a forma está certa, mas viola uma regra. Todos
-> os erros saem em `application/problem+json` (RFC 9457), com `type`, `title`, `status`
-> e `detail`; `violacoes` é um membro de extensão.
+> **400 × 422.** `400`: a requisição não tem a forma esperada (JSON quebrado, campo faltando, id que não é número). `422`: a forma está certa, mas viola uma regra. Todos os erros saem em `application/problem+json` (RFC 9457), com `type`, `title`, `status` e `detail`; `violacoes` é um membro de extensão.
 
 📖 [RFC 9457 — Problem Details](https://www.rfc-editor.org/rfc/rfc9457) · [Ktor — Status pages](https://ktor.io/docs/server-status-pages.html)
 
@@ -351,14 +329,9 @@ val regraDoDominio = noClasses().that().resideInAPackage("..dominio..")
 
 Dependência nova: `testImplementation("com.tngtech.archunit:archunit:1.5.0")`.
 
-Confira que a regra **falha** quando deve: acrescente ao `dominio/Tarefa.kt`
-`fun Tarefa.status() = io.ktor.http.HttpStatusCode.OK` e rode `./gradlew test` — o
-`ArquiteturaTest` acusa a dependência. O teste `a regra do dominio pega uma violacao` faz
-essa prova automaticamente, com uma classe-fixture só dos testes (`violacao/dominio/Contaminado.kt`).
+Confira que a regra **falha** quando deve: acrescente ao `dominio/Tarefa.kt` `fun Tarefa.status() = io.ktor.http.HttpStatusCode.OK` e rode `./gradlew test` — o `ArquiteturaTest` acusa a dependência. O teste `a regra do dominio pega uma violacao` faz essa prova automaticamente, com uma classe-fixture só dos testes (`violacao/dominio/Contaminado.kt`).
 
-> O domínio aceita `kotlinx.serialization` (o `@Serializable` da `Tarefa`), por
-> simplicidade: a regra da Sprint 1 proíbe framework web, banco e injeção de dependência.
-> O MUSI vai além, com DTOs no adaptador web e o domínio em Kotlin puro.
+> O domínio aceita `kotlinx.serialization` (o `@Serializable` da `Tarefa`), por simplicidade: a regra da Sprint 1 proíbe framework web, banco e injeção de dependência. O MUSI vai além, com DTOs no adaptador web e o domínio em Kotlin puro.
 
 📖 [ArchUnit — User Guide](https://www.archunit.org/userguide/html/000_Index.html)
 
@@ -366,6 +339,4 @@ essa prova automaticamente, com uma classe-fixture só dos testes (`violacao/dom
 
 ## Passos 13 a 18 — Sprint 2: o serviço Go, gRPC e implantação
 
-A partir do Passo 13, a API passa a conversar com um segundo serviço, escrito em Go, por
-gRPC. Os passos estão em [`../avisos-go/PASSOS.md`](../avisos-go/PASSOS.md): o serviço Go
-(13 a 15), o cliente gRPC nesta API (16), tudo em containers (17) e a implantação (18).
+A partir do Passo 13, a API passa a conversar com um segundo serviço, escrito em Go, por gRPC. Os passos estão em [`../avisos-go/PASSOS.md`](../avisos-go/PASSOS.md): o serviço Go (13 a 15), o cliente gRPC nesta API (16), tudo em containers (17) e a implantação (18).

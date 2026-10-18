@@ -1,13 +1,8 @@
 # Tarefas da Sprint 1 — DIM0547
 
-Estes são os enunciados das tarefas da Sprint 1, prontos para virar cartões no GitHub
-Projects. Cada um tem um objetivo, o que fazer, e o *pronto quando* alinhado à rubrica.
+Estes são os enunciados das tarefas da Sprint 1, prontos para virar cartões no GitHub Projects. Cada um tem um objetivo, o que fazer, e o *pronto quando* alinhado à rubrica.
 
-O **como** está em [SPRINT-1.md](SPRINT-1.md) e nas leituras da sprint
-([`leituras/web2-s1-pte1.md`](../leituras/web2-s1-pte1.md) e
-[`leituras/web2-s1-pte2.md`](../leituras/web2-s1-pte2.md)) — as tarefas apontam para a
-seção certa em vez de repeti-la. Os pesos vêm de [RUBRICAS.md](RUBRICAS.md#sprint-1). Prazo
-em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **16/10, 23:59** (adiada; era 02/10).
+O **como** está em [SPRINT-1.md](SPRINT-1.md) e nas leituras da sprint ([`leituras/web2-s1-pte1.md`](../leituras/web2-s1-pte1.md) e [`leituras/web2-s1-pte2.md`](../leituras/web2-s1-pte2.md)) — as tarefas apontam para a seção certa em vez de repeti-la. Os pesos vêm de [RUBRICAS.md](RUBRICAS.md#sprint-1). Prazo em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **16/10, 23:59** (adiada; era 02/10).
 
 | # | Tarefa | Critério da rubrica |
 |---|---|---|
@@ -22,9 +17,7 @@ em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **16/10, 23:59** (adiada; era 02
 | T9 | Movida para a Sprint 2: testes | — |
 | T10 | Gravar o vídeo de 5 minutos | Comunicação |
 
-> Exemplos de referência: `exemplos/ktor-tarefas/` e `exemplos/quarkus-tarefas/` deste
-> repositório, passos 6 a 12 de cada `PASSOS.md`. Projeto de referência:
-> `github.com/fmarquesfilho/musi`.
+> Exemplos de referência: `exemplos/ktor-tarefas/` e `exemplos/quarkus-tarefas/` deste repositório, passos 6 a 12 de cada `PASSOS.md`. Projeto de referência: `github.com/fmarquesfilho/musi`.
 
 ---
 

@@ -1,12 +1,8 @@
 # Tarefas da Sprint 2 — DIM0547
 
-Estes são os enunciados das tarefas da Sprint 2, prontos para virar cartões no GitHub
-Projects. Cada um tem um objetivo, o que fazer, e o *pronto quando* alinhado à rubrica.
+Estes são os enunciados das tarefas da Sprint 2, prontos para virar cartões no GitHub Projects. Cada um tem um objetivo, o que fazer, e o *pronto quando* alinhado à rubrica.
 
-O **como** está em [SPRINT-2.md](SPRINT-2.md) e na leitura da sprint
-([`leituras/web2-s2.md`](../leituras/web2-s2.md)): as tarefas apontam para a seção certa em
-vez de repeti-la. Os pesos vêm de [RUBRICAS.md](RUBRICAS.md#sprint-2). Prazo em
-[CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **30/11, 23:59**.
+O **como** está em [SPRINT-2.md](SPRINT-2.md) e na leitura da sprint ([`leituras/web2-s2.md`](../leituras/web2-s2.md)): as tarefas apontam para a seção certa em vez de repeti-la. Os pesos vêm de [RUBRICAS.md](RUBRICAS.md#sprint-2). Prazo em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): **30/11, 23:59**.
 
 | # | Tarefa | Critério da rubrica |
 |---|---|---|
@@ -23,9 +19,7 @@ vez de repeti-la. Os pesos vêm de [RUBRICAS.md](RUBRICAS.md#sprint-2). Prazo em
 | T11 | Documentar o sistema | Documentação (10%) |
 | T12 | Gravar o vídeo de 5 minutos | Comunicação |
 
-> Exemplo de referência: `exemplos/avisos-go/` deste repositório, passos 13 a 18 do
-> [`PASSOS.md`](../exemplos/avisos-go/PASSOS.md). Projeto de referência:
-> `github.com/fmarquesfilho/musi`, pastas `services/` e `contratos/`.
+> Exemplo de referência: `exemplos/avisos-go/` deste repositório, passos 13 a 18 do [`PASSOS.md`](../exemplos/avisos-go/PASSOS.md). Projeto de referência: `github.com/fmarquesfilho/musi`, pastas `services/` e `contratos/`.
 
 ---
 

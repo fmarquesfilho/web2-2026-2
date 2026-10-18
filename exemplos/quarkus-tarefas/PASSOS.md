@@ -1,18 +1,10 @@
 # Passos — API de Tarefas em Quarkus
 
-Esta pasta contém o estado final (depois de concluído o Passo 12); use os passos para reconstruir
-ao vivo a partir de um projeto limpo. Passos 1 a 5: aula de 14/09. Passos 6 a 12: segunda parte
-da Sprint 1, em vídeo. Até o Passo 11, todo o código fica no pacote `br.ufrn.exemplo.tarefas`;
-no Passo 12 ele se divide em `dominio` e `adaptadores`. Os passos são numerados igual aos do Ktor, para a
-comparação ficar lado a lado.
+Esta pasta contém o estado final (depois de concluído o Passo 12); use os passos para reconstruir ao vivo a partir de um projeto limpo. Passos 1 a 5: aula de 14/09. Passos 6 a 12: segunda parte da Sprint 1, em vídeo. Até o Passo 11, todo o código fica no pacote `br.ufrn.exemplo.tarefas`; no Passo 12 ele se divide em `dominio` e `adaptadores`. Os passos são numerados igual aos do Ktor, para a comparação ficar lado a lado.
 
-Para partir de um repositório limpo, gere com
-`quarkus create app br.ufrn.exemplo:quarkus-tarefas --extension='rest,rest-jackson'`
-(ou em [code.quarkus.io](https://code.quarkus.io)) — ou comece copiando só o `pom.xml` desta pasta.
+Para partir de um repositório limpo, gere com `quarkus create app br.ufrn.exemplo:quarkus-tarefas --extension='rest,rest-jackson'` (ou em [code.quarkus.io](https://code.quarkus.io)) — ou comece copiando só o `pom.xml` desta pasta.
 
-Para rodar a qualquer momento: `mvn quarkus:dev` (sobe em `http://localhost:8081`). Do Passo 6
-em diante, o modo dev e os testes sobem um PostgreSQL sozinhos (Dev Services): precisa de
-Docker aberto.
+Para rodar a qualquer momento: `mvn quarkus:dev` (sobe em `http://localhost:8081`). Do Passo 6 em diante, o modo dev e os testes sobem um PostgreSQL sozinhos (Dev Services): precisa de Docker aberto.
 
 ---
 
@@ -33,8 +25,7 @@ public class RecursoDeTarefas {
 }
 ```
 
-E a porta, em `src/main/resources/application.properties` — sem ela, o Quarkus sobe na
-8080, a mesma do exemplo Ktor:
+E a porta, em `src/main/resources/application.properties` — sem ela, o Quarkus sobe na 8080, a mesma do exemplo Ktor:
 
 ```properties
 # Porta 8081 para rodar lado a lado com o exemplo Ktor (8080).
@@ -45,8 +36,7 @@ quarkus.http.test-port=8083
 
 Testar: `curl localhost:8081/tarefas` → `no ar`.
 
-> As rotas são anotações (`@Path`, `@GET`); o framework descobre o recurso. Não há uma
-> função `main` subindo o servidor — compare com o `embeddedServer` do Ktor.
+> As rotas são anotações (`@Path`, `@GET`); o framework descobre o recurso. Não há uma função `main` subindo o servidor — compare com o `embeddedServer` do Ktor.
 
 📖 [Quarkus — Writing REST services](https://quarkus.io/guides/rest)
 
@@ -67,8 +57,7 @@ public List<Tarefa> listar() {
 
 Testar: `curl localhost:8081/tarefas` → lista em JSON.
 
-> `record` ≈ `data class`. Com `quarkus-rest-jackson`, devolver o objeto já é devolver
-> JSON — sem anotar `@Produces`.
+> `record` ≈ `data class`. Com `quarkus-rest-jackson`, devolver o objeto já é devolver JSON — sem anotar `@Produces`.
 
 📖 [Quarkus — Writing JSON REST services](https://quarkus.io/guides/rest-json)
 
@@ -94,8 +83,7 @@ curl -X POST localhost:8081/tarefas -H 'Content-Type: application/json' \
      -d '{"titulo":"Escrever teste"}'
 ```
 
-> O corpo JSON é desserializado no parâmetro do método. O `Response` monta a resposta,
-> com o status `201 Created` explícito.
+> O corpo JSON é desserializado no parâmetro do método. O `Response` monta a resposta, com o status `201 Created` explícito.
 
 📖 [Quarkus — REST](https://quarkus.io/guides/rest) · [Jakarta REST — `Response`](https://jakarta.ee/specifications/restful-ws/)
 
@@ -116,8 +104,7 @@ class RepositorioEmMemoria implements RepositorioDeTarefas { /* ...lista + proxi
 
 O recurso passa a falar com a **interface**, não com a lista.
 
-> O recurso não sabe se os dados vêm de memória ou banco. Na Sprint 1
-> troca-se a implementação por Postgres (Panache) **sem precisar mexer no recurso**.
+> O recurso não sabe se os dados vêm de memória ou banco. Na Sprint 1 troca-se a implementação por Postgres (Panache) **sem precisar mexer no recurso**.
 
 ---
 
@@ -132,8 +119,7 @@ public class RepositorioEmMemoria implements RepositorioDeTarefas { /* ... */ }
 RepositorioDeTarefas repositorio;
 ```
 
-> O contêiner CDI cria e injeta o bean. No lado Ktor (via Koin)
-> o mesmo papel vem de código (`single { }` / `by inject()`).
+> O contêiner CDI cria e injeta o bean. No lado Ktor (via Koin) o mesmo papel vem de código (`single { }` / `by inject()`).
 
 📖 [Quarkus — Contexts and Dependency Injection](https://quarkus.io/guides/cdi)
 
@@ -141,8 +127,7 @@ RepositorioDeTarefas repositorio;
 
 ## Passo 6 — Banco e migração
 
-Extensões `quarkus-hibernate-orm-panache`, `quarkus-jdbc-postgresql` e `quarkus-flyway`;
-a mesma migração do Ktor em `src/main/resources/db/migration/V1__cria_tarefas.sql`.
+Extensões `quarkus-hibernate-orm-panache`, `quarkus-jdbc-postgresql` e `quarkus-flyway`; a mesma migração do Ktor em `src/main/resources/db/migration/V1__cria_tarefas.sql`.
 
 ```properties
 quarkus.datasource.db-kind=postgresql
@@ -151,8 +136,7 @@ quarkus.hibernate-orm.schema-management.strategy=none
 quarkus.flyway.migrate-at-start=true
 ```
 
-> Em dev e test, sem URL, o **Dev Services** sobe o PostgreSQL no Docker. O Hibernate
-> **não** cria tabelas (`strategy=none`): o esquema é da migração.
+> Em dev e test, sem URL, o **Dev Services** sobe o PostgreSQL no Docker. O Hibernate **não** cria tabelas (`strategy=none`): o esquema é da migração.
 
 📖 [Quarkus — Flyway](https://quarkus.io/guides/flyway) · [Dev Services for Databases](https://quarkus.io/guides/databases-dev-services)
 
@@ -176,9 +160,7 @@ public class RepositorioPanache
 }
 ```
 
-> Escrita precisa de `@Transactional`; sem ela, `TransactionRequiredException` e `500`.
-> O `RepositorioEmMemoria` perdeu o `@ApplicationScoped`: dois beans da mesma interface
-> deixariam a injeção ambígua. **O recurso não mudou** além do `GET /tarefas/{id}`.
+> Escrita precisa de `@Transactional`; sem ela, `TransactionRequiredException` e `500`. O `RepositorioEmMemoria` perdeu o `@ApplicationScoped`: dois beans da mesma interface deixariam a injeção ambígua. **O recurso não mudou** além do `GET /tarefas/{id}`.
 
 📖 [Quarkus — Hibernate ORM with Panache](https://quarkus.io/guides/hibernate-orm-panache)
 
@@ -196,15 +178,11 @@ class RecursoDeTarefasTest {
 }
 ```
 
-Rodar: `mvn test` (precisa de Docker). A porta de teste é 8083 (`quarkus.http.test-port`),
-então dá para testar com o `quarkus:dev` aberto na 8081.
+Rodar: `mvn test` (precisa de Docker). A porta de teste é 8083 (`quarkus.http.test-port`), então dá para testar com o `quarkus:dev` aberto na 8081.
 
-`RecursoDeTarefasUnitarioTest` testa o recurso sem Quarkus nem Docker: monta
-`new RecursoDeTarefas()` com um `RepositorioEmMemoria` (o equivalente ao `RotasTest` do Ktor).
+`RecursoDeTarefasUnitarioTest` testa o recurso sem Quarkus nem Docker: monta `new RecursoDeTarefas()` com um `RepositorioEmMemoria` (o equivalente ao `RotasTest` do Ktor).
 
-> O `pom.xml` importa o BOM do Testcontainers 1.21.4 antes do BOM do Quarkus: o 1.21.3
-> que vem com o Quarkus 3.28 não reconhece o Docker Engine 29
-> (`Could not find a valid Docker environment`).
+> O `pom.xml` importa o BOM do Testcontainers 1.21.4 antes do BOM do Quarkus: o 1.21.3 que vem com o Quarkus 3.28 não reconhece o Docker Engine 29 (`Could not find a valid Docker environment`).
 
 📖 [Quarkus — Testing your application](https://quarkus.io/guides/getting-started-testing)
 
@@ -212,13 +190,11 @@ então dá para testar com o `quarkus:dev` aberto na 8081.
 
 ## Passo 9 — OpenAPI e Swagger UI
 
-Extensão `quarkus-smallrye-openapi`. A especificação sai das anotações JAX-RS; o
-`@Operation(summary = "...")` acrescenta a descrição.
+Extensão `quarkus-smallrye-openapi`. A especificação sai das anotações JAX-RS; o `@Operation(summary = "...")` acrescenta a descrição.
 
 Abra `http://localhost:8081/q/swagger-ui` (modo dev); a especificação fica em `/q/openapi`.
 
-> No `java -jar`, a Swagger UI não vem por padrão; para incluí-la,
-> `quarkus.swagger-ui.always-include=true`.
+> No `java -jar`, a Swagger UI não vem por padrão; para incluí-la, `quarkus.swagger-ui.always-include=true`.
 
 📖 [Quarkus — OpenAPI and Swagger UI](https://quarkus.io/guides/openapi-swaggerui)
 
@@ -226,8 +202,7 @@ Abra `http://localhost:8081/q/swagger-ui` (modo dev); a especificação fica em 
 
 ## Passo 10 — o ambiente em tasks
 
-Os comandos dos nove passos viram nomes curtos no [`mise.toml`](../../mise.toml) da raiz do
-repositório, que também fixa as versões do JDK e do Maven:
+Os comandos dos nove passos viram nomes curtos no [`mise.toml`](../../mise.toml) da raiz do repositório, que também fixa as versões do JDK e do Maven:
 
 ```toml
 [tools]
@@ -249,9 +224,7 @@ mise run quarkus:pacote # empacota e roda como em produção (java -jar)
 mise run quarkus:demo   # cria e lista uma tarefa, com curl
 ```
 
-> O mesmo `mise.toml` serve aos dois exemplos, com os prefixos `ktor:` e `quarkus:`. Repare
-> que a versão do Java deixa de depender do que está instalado na máquina — é a mesma ideia
-> do `maven.compiler.release` no `pom.xml`, agora para a ferramenta.
+> O mesmo `mise.toml` serve aos dois exemplos, com os prefixos `ktor:` e `quarkus:`. Repare que a versão do Java deixa de depender do que está instalado na máquina — é a mesma ideia do `maven.compiler.release` no `pom.xml`, agora para a ferramenta.
 
 📖 [mise — tasks](https://mise.jdx.dev/tasks/)
 
@@ -260,8 +233,7 @@ mise run quarkus:demo   # cria e lista uma tarefa, com curl
 
 ## Passo 11 — Validação e erros em *problem details*
 
-A regra fica no domínio, em Java puro; o recurso só lança; os `@ServerExceptionMapper`
-decidem o status.
+A regra fica no domínio, em Java puro; o recurso só lança; os `@ServerExceptionMapper` decidem o status.
 
 ```java
 // NovaTarefa.java — `null` também conta: com Jackson, `{}` chega como título nulo
@@ -288,9 +260,7 @@ public Response criar(NovaTarefa nova) {
 public Response entradaInvalida(EntradaInvalida e) { return problema(422, /* ... */); }
 ```
 
-`Erros.java` também traduz `WebApplicationException` (o `404` e o `400` do próprio Jakarta
-REST), `MismatchedInputException` (campo com tipo errado) e qualquer `RuntimeException`
-(`500`, sem detalhe interno), sempre em `application/problem+json`.
+`Erros.java` também traduz `WebApplicationException` (o `404` e o `400` do próprio Jakarta REST), `MismatchedInputException` (campo com tipo errado) e qualquer `RuntimeException` (`500`, sem detalhe interno), sempre em `application/problem+json`.
 
 | Pedido | Resposta |
 |---|---|
@@ -301,10 +271,7 @@ REST), `MismatchedInputException` (campo com tipo errado) e qualquer `RuntimeExc
 | `GET /tarefas/9999` | `404` |
 | `POST` válido | `201`, com `Location` |
 
-> Alternativa comum no Quarkus: Bean Validation (`quarkus-hibernate-validator`,
-> `@NotBlank` no record, `@Valid` no parâmetro). Aqui a regra fica numa função do domínio,
-> igual à do Ktor, para o domínio não depender de anotação de framework (Passo 12). O MUSI
-> usa as duas: Bean Validation para a forma, regras do domínio para o conteúdo.
+> Alternativa comum no Quarkus: Bean Validation (`quarkus-hibernate-validator`, `@NotBlank` no record, `@Valid` no parâmetro). Aqui a regra fica numa função do domínio, igual à do Ktor, para o domínio não depender de anotação de framework (Passo 12). O MUSI usa as duas: Bean Validation para a forma, regras do domínio para o conteúdo.
 
 📖 [RFC 9457 — Problem Details](https://www.rfc-editor.org/rfc/rfc9457) · [Quarkus REST — exception mapping](https://quarkus.io/guides/rest#exception-mapping)
 
@@ -331,11 +298,9 @@ static final ArchRule REGRA_DO_DOMINIO = noClasses().that().resideInAPackage("..
 
 Dependência nova: `com.tngtech.archunit:archunit:1.5.0`, escopo `test`.
 
-Confira que a regra **falha** quando deve: dê à `Tarefa` um método que devolva
-`jakarta.ws.rs.core.Response` e rode `mvn test` — `Architecture Violation ... was violated (3 times)`.
+Confira que a regra **falha** quando deve: dê à `Tarefa` um método que devolva `jakarta.ws.rs.core.Response` e rode `mvn test` — `Architecture Violation ... was violated (3 times)`.
 
-> Mudou de pacote e o `mvn quarkus:dev` acusou `GET /tarefas is declared by` duas classes?
-> São `.class` antigos no `target/`: `mvn clean` resolve.
+> Mudou de pacote e o `mvn quarkus:dev` acusou `GET /tarefas is declared by` duas classes? São `.class` antigos no `target/`: `mvn clean` resolve.
 
 📖 [ArchUnit — User Guide](https://www.archunit.org/userguide/html/000_Index.html)
 
@@ -343,6 +308,4 @@ Confira que a regra **falha** quando deve: dê à `Tarefa` um método que devolv
 
 ## Passos 13 a 18 — Sprint 2: o serviço Go, gRPC e implantação
 
-A partir do Passo 13, a API passa a conversar com um segundo serviço, escrito em Go, por
-gRPC. Os passos estão em [`../avisos-go/PASSOS.md`](../avisos-go/PASSOS.md): o serviço Go
-(13 a 15), o cliente gRPC nesta API (16), tudo em containers (17) e a implantação (18).
+A partir do Passo 13, a API passa a conversar com um segundo serviço, escrito em Go, por gRPC. Os passos estão em [`../avisos-go/PASSOS.md`](../avisos-go/PASSOS.md): o serviço Go (13 a 15), o cliente gRPC nesta API (16), tudo em containers (17) e a implantação (18).

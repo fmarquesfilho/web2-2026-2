@@ -1,20 +1,12 @@
 # Cronograma — DIM0547 Desenvolvimento de Sistemas Web II
 
-**Período**: 17/08/2026 a 19/12/2026
-**Horário**: Segundas e quartas, 13:00 às 14:40 (24T12)
+**Período**: 17/08/2026 a 19/12/2026 **Horário**: Segundas e quartas, 13:00 às 14:40 (24T12)
 
 As aulas de 10/08, 12/08 e 17/08 não foram realizadas. O curso inicia em 19/08.
 
 **Ajuste de 11/09.** Por remanejamento de aulas no início de setembro, a Sprint 0 foi estendida e sua entrega passou para **16/09** (quarta), 23:59. A Sprint 1 foi condensada em duas aulas de conteúdo (**14 e 21/09**), com encontros de acompanhamento de projeto em **16 e 23/09**. As seções abaixo já refletem o ajuste.
 
-**Ajuste de 03/10.** Para caber no que falta do semestre, o curso passa a ter **uma sprint a
-mais, e não três**: a Sprint 2, de novembro, é a entrega final. A Sprint 3 e o bloco final
-deixam de existir, e o conteúdo foi enxugado.
-A entrega da Sprint 1 passa para **16/10** (sexta), 23:59. A prova escrita passa para **11/11** (quarta; em 06/10 foi adiada de 09/11 para 11/11)
-e a de reposição, para **02/12**. No fim de cada sprint, no lugar das apresentações, o professor faz uma *daily meeting*
-com cada grupo, online, pelo Google Meet, como as de 28 e 30/09; quem preferir conversar em
-sala pode fazê-lo na aula presencial anterior. De 05/10 em diante são 7 aulas presenciais, 7
-online e 1 a definir (30/11). As seções abaixo já refletem o ajuste, que substitui as datas dos ajustes anteriores.
+**Ajuste de 03/10.** Para caber no que falta do semestre, o curso passa a ter **uma sprint a mais, e não três**: a Sprint 2, de novembro, é a entrega final. A Sprint 3 e o bloco final deixam de existir, e o conteúdo foi enxugado. A entrega da Sprint 1 passa para **16/10** (sexta), 23:59. A prova escrita passa para **11/11** (quarta; em 06/10 foi adiada de 09/11 para 11/11) e a de reposição, para **02/12**. No fim de cada sprint, no lugar das apresentações, o professor faz uma *daily meeting* com cada grupo, online, pelo Google Meet, como as de 28 e 30/09; quem preferir conversar em sala pode fazê-lo na aula presencial anterior. De 05/10 em diante são 7 aulas presenciais, 7 online e 1 a definir (30/11). As seções abaixo já refletem o ajuste, que substitui as datas dos ajustes anteriores.
 
 ---
 

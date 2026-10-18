@@ -1,9 +1,6 @@
 # DIM0547 — Desenvolvimento de Sistemas Web II
 
-**Bacharelado em Engenharia de Software — UFRN/DIMAp**
-**Período letivo 2026.2 — 17/08/2026 a 19/12/2026**
-**Turma 01 · Segundas e quartas, 13:00 às 14:40 (24T12)**
-**Docente**: Fernando Figueira Filho — fernando.figueira@ufrn.br
+**Bacharelado em Engenharia de Software — UFRN/DIMAp** **Período letivo 2026.2 — 17/08/2026 a 19/12/2026** **Turma 01 · Segundas e quartas, 13:00 às 14:40 (24T12)** **Docente**: Fernando Figueira Filho — fernando.figueira@ufrn.br
 
 As aulas de 10/08, 12/08 e 17/08 não foram realizadas. O curso inicia em 19/08.
 
@@ -37,22 +34,18 @@ O semestre é organizado em uma Sprint 0 e duas sprints de projeto (a Sprint 2 �
 
 ## Exemplos das aulas
 
-Construídos do zero em aula, passo a passo. Cada `PASSOS.md` reconstrói o exemplo do
-primeiro comando ao último, e a pasta contém o estado final.
+Construídos do zero em aula, passo a passo. Cada `PASSOS.md` reconstrói o exemplo do primeiro comando ao último, e a pasta contém o estado final.
 
 | Exemplo | Stack | Passos |
 |---|---|---|
 | [`exemplos/ktor-tarefas`](exemplos/ktor-tarefas) | Kotlin · Ktor · Koin · Exposed | [`PASSOS.md`](exemplos/ktor-tarefas/PASSOS.md) |
 | [`exemplos/quarkus-tarefas`](exemplos/quarkus-tarefas) | Java 25 · Quarkus · CDI · Panache | [`PASSOS.md`](exemplos/quarkus-tarefas/PASSOS.md) |
 
-Os dois têm os mesmos nove passos, numerados igual, para a leitura lado a lado. Do Passo 6
-em diante é preciso ter o **Docker** aberto: o Ktor sobe o PostgreSQL com `docker compose`,
-e o Quarkus, com o Dev Services.
+Os dois têm os mesmos nove passos, numerados igual, para a leitura lado a lado. Do Passo 6 em diante é preciso ter o **Docker** aberto: o Ktor sobe o PostgreSQL com `docker compose`, e o Quarkus, com o Dev Services.
 
 ### Como rodar
 
-O [`mise.toml`](mise.toml) da raiz fixa as versões (JDK 25, Maven 3.9) e dá um nome curto a
-cada comando dos passos:
+O [`mise.toml`](mise.toml) da raiz fixa as versões (JDK 25, Maven 3.9) e dá um nome curto a cada comando dos passos:
 
 ```bash
 mise install                 # uma vez: baixa o JDK e o Maven
@@ -66,12 +59,9 @@ mise run quarkus:dev         # API Quarkus na 8081, com banco do Dev Services
 mise run quarkus:test
 ```
 
-O `mise` é conveniência, não requisito: cada task mostra, no `mise.toml`, o comando completo
-(`./gradlew run`, `mvn quarkus:dev`) que continua valendo. Instalação:
-[mise.jdx.dev](https://mise.jdx.dev/getting-started.html).
+O `mise` é conveniência, não requisito: cada task mostra, no `mise.toml`, o comando completo (`./gradlew run`, `mvn quarkus:dev`) que continua valendo. Instalação: [mise.jdx.dev](https://mise.jdx.dev/getting-started.html).
 
-**Sem instalar nada:** crie um Codespace (Code → Codespaces). O
-[`.devcontainer/`](.devcontainer) traz Java 25, Maven, Go, Docker e o próprio `mise`.
+**Sem instalar nada:** crie um Codespace (Code → Codespaces). O [`.devcontainer/`](.devcontainer) traz Java 25, Maven, Go, Docker e o próprio `mise`.
 
 ---
 

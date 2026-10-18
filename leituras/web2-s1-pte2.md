@@ -1,29 +1,12 @@
 # Leitura — Persistência, testes, OpenAPI, validação e arquitetura: Ktor × Quarkus (Sprint 1, parte 2)
 
-Guia de apoio para a segunda parte da Sprint 1 (vídeo e aulas de 05 e 07/10). Na aula de
-14/09, a API de tarefas guardava tudo numa lista em memória. Aqui ela passa a usar
-PostgreSQL, com o esquema criado por migrações, testes que sobem um banco de verdade num
-container, a documentação OpenAPI gerada a partir do código, validação com erros em
-*problem details* e um teste que verifica a arquitetura. Os dois stacks seguem lado a lado:
-Kotlin/Ktor com Exposed e Java/Quarkus com Hibernate ORM e Panache.
+Guia de apoio para a segunda parte da Sprint 1 (vídeo e aulas de 05 e 07/10). Na aula de 14/09, a API de tarefas guardava tudo numa lista em memória. Aqui ela passa a usar PostgreSQL, com o esquema criado por migrações, testes que sobem um banco de verdade num container, a documentação OpenAPI gerada a partir do código, validação com erros em *problem details* e um teste que verifica a arquitetura. Os dois stacks seguem lado a lado: Kotlin/Ktor com Exposed e Java/Quarkus com Hibernate ORM e Panache.
 
-O código deste guia é o dos exemplos `exemplos/ktor-tarefas` e `exemplos/quarkus-tarefas` do
-repositório `web2-2026-2`, passos 6 a 12 de cada `PASSOS.md`. Os capítulos 1 a 8 mostram o
-código como ele fica até o Passo 9, num pacote só; os capítulos 10 e 11 mostram o que muda
-nos passos 11 e 12.
-Versões: Kotlin 2.4.10, Ktor 3.5.2, Exposed 1.5.0, HikariCP 7.1.0, driver PostgreSQL
-42.7.13, Flyway 13.7.0, Testcontainers 2.0.5 (Ktor) e 1.21.4 (Quarkus), Quarkus 3.28.2,
-PostgreSQL 17 e Java 25. Mensagens de erro, tempos e respostas
-citados foram conferidos rodando os exemplos nessas versões, com Docker Engine 29.
+O código deste guia é o dos exemplos `exemplos/ktor-tarefas` e `exemplos/quarkus-tarefas` do repositório `web2-2026-2`, passos 6 a 12 de cada `PASSOS.md`. Os capítulos 1 a 8 mostram o código como ele fica até o Passo 9, num pacote só; os capítulos 10 e 11 mostram o que muda nos passos 11 e 12. Versões: Kotlin 2.4.10, Ktor 3.5.2, Exposed 1.5.0, HikariCP 7.1.0, driver PostgreSQL 42.7.13, Flyway 13.7.0, Testcontainers 2.0.5 (Ktor) e 1.21.4 (Quarkus), Quarkus 3.28.2, PostgreSQL 17 e Java 25. Mensagens de erro, tempos e respostas citados foram conferidos rodando os exemplos nessas versões, com Docker Engine 29.
 
-Como ler: os capítulos seguem a ordem da aula. Quem vai usar só um stack pode pular o
-capítulo do outro (4 para Ktor, 5 para Quarkus); os capítulos 3, 7, 8, 10 e 11 valem para os
-dois.
+Como ler: os capítulos seguem a ordem da aula. Quem vai usar só um stack pode pular o capítulo do outro (4 para Ktor, 5 para Quarkus); os capítulos 3, 7, 8, 10 e 11 valem para os dois.
 
-Onde rodar: os exemplos pedem Java 25 e Docker. Quem não tiver os dois na máquina, ou estiver
-no laboratório, usa um Codespace do repositório (Code → Codespaces): ele já traz Java, Maven,
-Go, Docker e as dependências baixadas, e os comandos são os mesmos. A seção 12.3 tem os
-detalhes.
+Onde rodar: os exemplos pedem Java 25 e Docker. Quem não tiver os dois na máquina, ou estiver no laboratório, usa um Codespace do repositório (Code → Codespaces): ele já traz Java, Maven, Go, Docker e as dependências baixadas, e os comandos são os mesmos. A seção 12.3 tem os detalhes.
 
 Capítulos:
 
@@ -46,11 +29,7 @@ Capítulos:
 
 ### 1.1 O que muda e o que não muda
 
-Em 14/09, as rotas (Ktor) e o recurso (Quarkus) dependiam de uma interface,
-`RepositorioDeTarefas`, e a implementação era `RepositorioEmMemoria`. Essa separação
-mostra seu valor agora: a troca para o banco é uma classe nova que implementa a mesma interface. As
-rotas mudam só porque ganharam `GET /tarefas/{id}` e a descrição para o OpenAPI; a lógica
-de acesso a dados fica toda no adaptador.
+Em 14/09, as rotas (Ktor) e o recurso (Quarkus) dependiam de uma interface, `RepositorioDeTarefas`, e a implementação era `RepositorioEmMemoria`. Essa separação mostra seu valor agora: a troca para o banco é uma classe nova que implementa a mesma interface. As rotas mudam só porque ganharam `GET /tarefas/{id}` e a descrição para o OpenAPI; a lógica de acesso a dados fica toda no adaptador.
 
 ```
             ┌───────────────┐        ┌──────────────────────┐
@@ -65,21 +44,15 @@ de acesso a dados fica toda no adaptador.
                                                               PostgreSQL
 ```
 
-O `RepositorioEmMemoria` continua no projeto: é o que os testes de rota usam para rodar
-sem Docker (capítulo 7).
+O `RepositorioEmMemoria` continua no projeto: é o que os testes de rota usam para rodar sem Docker (capítulo 7).
 
 ### 1.2 Por que um banco relacional
 
 Três problemas da lista em memória desaparecem com o banco:
 
-- Os dados somem quando o processo termina. Com PostgreSQL, uma tarefa criada continua lá
-  depois de reiniciar a aplicação (conferido nos dois exemplos).
-- Duas instâncias da API não enxergam os dados uma da outra. Com o banco, qualquer
-  instância lê o mesmo estado.
-- A lista não era segura para concorrência. Em 14/09, 2.000 `POST` simultâneos perderam
-  tarefas e repetiram ids. Com PostgreSQL, o mesmo teste (2.000 `POST`, 64 em paralelo)
-  deu 2.000 respostas `201`, 2.000 tarefas gravadas e ids únicos, em 7 segundos. Quem
-  garante isso é o banco: `SERIAL` gera ids sem colisão e cada `INSERT` é atômico.
+- Os dados somem quando o processo termina. Com PostgreSQL, uma tarefa criada continua lá depois de reiniciar a aplicação (conferido nos dois exemplos).
+- Duas instâncias da API não enxergam os dados uma da outra. Com o banco, qualquer instância lê o mesmo estado.
+- A lista não era segura para concorrência. Em 14/09, 2.000 `POST` simultâneos perderam tarefas e repetiram ids. Com PostgreSQL, o mesmo teste (2.000 `POST`, 64 em paralelo) deu 2.000 respostas `201`, 2.000 tarefas gravadas e ids únicos, em 7 segundos. Quem garante isso é o banco: `SERIAL` gera ids sem colisão e cada `INSERT` é atômico.
 
 ### 1.3 A tabela
 
@@ -95,10 +68,8 @@ CREATE TABLE tarefas (
 INSERT INTO tarefas (titulo) VALUES ('Estudar Ktor'), ('Estudar Quarkus');
 ```
 
-- `SERIAL` é um inteiro com uma sequência associada: cada `INSERT` sem `id` recebe o
-  próximo valor.
-- `NOT NULL` e `DEFAULT` são regras do banco. Valem mesmo que a aplicação esqueça de
-  validar (seção 5.6 mostra o que acontece).
+- `SERIAL` é um inteiro com uma sequência associada: cada `INSERT` sem `id` recebe o próximo valor.
+- `NOT NULL` e `DEFAULT` são regras do banco. Valem mesmo que a aplicação esqueça de validar (seção 5.6 mostra o que acontece).
 
 📖 Ref. PostgreSQL — tipos numéricos e `SERIAL`: <https://www.postgresql.org/docs/17/datatype-numeric.html>
 
@@ -108,22 +79,18 @@ INSERT INTO tarefas (titulo) VALUES ('Estudar Ktor'), ('Estudar Quarkus');
 
 ### 2.1 JDBC em uma página
 
-JDBC é a API padrão do Java para falar com bancos relacionais. Cada banco fornece um
-driver (para PostgreSQL, `org.postgresql:postgresql`) e a aplicação se conecta por uma URL:
+JDBC é a API padrão do Java para falar com bancos relacionais. Cada banco fornece um driver (para PostgreSQL, `org.postgresql:postgresql`) e a aplicação se conecta por uma URL:
 
 ```
 jdbc:postgresql://localhost:5432/tarefas
      └── driver ─┘ └─ host ─┘ └porta┘ └ banco ┘
 ```
 
-Tanto o Exposed quanto o Hibernate usam JDBC por baixo. Eles geram o SQL e convertem
-linhas em objetos; o transporte até o banco é sempre o driver JDBC.
+Tanto o Exposed quanto o Hibernate usam JDBC por baixo. Eles geram o SQL e convertem linhas em objetos; o transporte até o banco é sempre o driver JDBC.
 
 ### 2.2 Por que um pool
 
-Abrir uma conexão com o PostgreSQL envolve TCP, autenticação e a criação de um processo
-no servidor. Fazer isso a cada requisição custa caro. Um pool abre algumas conexões e as
-empresta: a requisição pega uma, usa e devolve.
+Abrir uma conexão com o PostgreSQL envolve TCP, autenticação e a criação de um processo no servidor. Fazer isso a cada requisição custa caro. Um pool abre algumas conexões e as empresta: a requisição pega uma, usa e devolve.
 
 No Ktor, o pool é escolha sua. O exemplo usa HikariCP:
 
@@ -138,14 +105,10 @@ fun criarDataSource(config: ConfigBanco): HikariDataSource = HikariDataSource(
 )
 ```
 
-No Quarkus, o pool (Agroal) vem com a extensão do driver. Basta dizer o tipo de banco; o
-resto é configuração (seção 5.2).
+No Quarkus, o pool (Agroal) vem com a extensão do driver. Basta dizer o tipo de banco; o resto é configuração (seção 5.2).
 
-- `maximumPoolSize = 5` limita as conexões abertas. No teste de concorrência da seção 1.2,
-  5 conexões atenderam 64 requisições simultâneas: as que chegam com o pool ocupado
-  esperam a vez.
-- O pool é um recurso: feche-o quando a aplicação parar. No Ktor, o exemplo faz isso com
-  `monitor.subscribe(ApplicationStopped) { dataSource.close() }`.
+- `maximumPoolSize = 5` limita as conexões abertas. No teste de concorrência da seção 1.2, 5 conexões atenderam 64 requisições simultâneas: as que chegam com o pool ocupado esperam a vez.
+- O pool é um recurso: feche-o quando a aplicação parar. No Ktor, o exemplo faz isso com `monitor.subscribe(ApplicationStopped) { dataSource.close() }`.
 
 📖 Ref. HikariCP: <https://github.com/brettwooldridge/HikariCP>
 
@@ -153,8 +116,7 @@ resto é configuração (seção 5.2).
 
 ### 2.3 Onde fica a senha
 
-URL, usuário e senha não entram no código nem no repositório. Os dois exemplos leem de
-variáveis de ambiente, com um valor padrão para desenvolvimento:
+URL, usuário e senha não entram no código nem no repositório. Os dois exemplos leem de variáveis de ambiente, com um valor padrão para desenvolvimento:
 
 ```kotlin
 data class ConfigBanco(val url: String, val usuario: String, val senha: String) {
@@ -174,9 +136,7 @@ data class ConfigBanco(val url: String, val usuario: String, val senha: String) 
 %prod.quarkus.datasource.password=${DB_PASSWORD:tarefas}
 ```
 
-Na Sprint 2, o banco passa a ser um PostgreSQL gerenciado, e essas variáveis vêm de segredos
-do ambiente de implantação. A rubrica pede exatamente isso: connection string em segredo,
-nunca no repositório.
+Na Sprint 2, o banco passa a ser um PostgreSQL gerenciado, e essas variáveis vêm de segredos do ambiente de implantação. A rubrica pede exatamente isso: connection string em segredo, nunca no repositório.
 
 ---
 
@@ -184,18 +144,12 @@ nunca no repositório.
 
 ### 3.1 O problema
 
-O esquema do banco muda ao longo do projeto: uma coluna nova, um índice, uma tabela. Cada
-máquina (a sua, a do colega, o CI, o banco de produção) precisa chegar ao mesmo esquema, na mesma
-ordem, sem ninguém rodar SQL à mão. Migração é um script versionado que leva o banco de
-uma versão para a próxima.
+O esquema do banco muda ao longo do projeto: uma coluna nova, um índice, uma tabela. Cada máquina (a sua, a do colega, o CI, o banco de produção) precisa chegar ao mesmo esquema, na mesma ordem, sem ninguém rodar SQL à mão. Migração é um script versionado que leva o banco de uma versão para a próxima.
 
 ### 3.2 Como o Flyway funciona
 
-- Os scripts ficam em `src/main/resources/db/migration`, com o nome
-  `V<versão>__<descrição>.sql` (dois sublinhados). O exemplo tem
-  `V1__cria_tarefas.sql`.
-- Na primeira execução, o Flyway cria a tabela `flyway_schema_history` e aplica os scripts
-  em ordem de versão. Cada script aplicado vira uma linha com versão, descrição e checksum.
+- Os scripts ficam em `src/main/resources/db/migration`, com o nome `V<versão>__<descrição>.sql` (dois sublinhados). O exemplo tem `V1__cria_tarefas.sql`.
+- Na primeira execução, o Flyway cria a tabela `flyway_schema_history` e aplica os scripts em ordem de versão. Cada script aplicado vira uma linha com versão, descrição e checksum.
 - Nas execuções seguintes, compara os scripts com o histórico e aplica só os novos.
 
 O log da primeira subida do exemplo, contra um banco vazio:
@@ -236,33 +190,24 @@ Schema "public" is up to date. No migration necessary.
   quarkus.flyway.migrate-at-start=true
   ```
 
-Migrar na subida é o mais simples e serve bem para o projeto. Em sistemas com várias
-instâncias, é comum migrar num passo separado do deploy; o Flyway usa um lock no banco para
-que duas instâncias subindo juntas não apliquem o mesmo script duas vezes.
+Migrar na subida é o mais simples e serve bem para o projeto. Em sistemas com várias instâncias, é comum migrar num passo separado do deploy; o Flyway usa um lock no banco para que duas instâncias subindo juntas não apliquem o mesmo script duas vezes.
 
 📖 Ref. Quarkus — Using Flyway: <https://quarkus.io/guides/flyway>
 
 ### 3.4 O esquema é da migração, não do ORM
 
-Hibernate e Exposed sabem criar tabelas sozinhos. A rubrica proíbe: esquema gerado apenas
-por migrações, sem `ddl-auto` ou equivalente. O motivo é que a geração automática não tem
-histórico, não sabe renomear coluna sem perder dados e se comporta diferente em cada
-ambiente.
+Hibernate e Exposed sabem criar tabelas sozinhos. A rubrica proíbe: esquema gerado apenas por migrações, sem `ddl-auto` ou equivalente. O motivo é que a geração automática não tem histórico, não sabe renomear coluna sem perder dados e se comporta diferente em cada ambiente.
 
-- Quarkus: `quarkus.hibernate-orm.schema-management.strategy=none`. O Hibernate só lê e
-  escreve dados; não cria nem altera tabelas.
-- Ktor: o `object Tarefas` do Exposed descreve a tabela para montar consultas, mas o
-  exemplo nunca chama `SchemaUtils.create`. A tabela vem do `V1`.
+- Quarkus: `quarkus.hibernate-orm.schema-management.strategy=none`. O Hibernate só lê e escreve dados; não cria nem altera tabelas.
+- Ktor: o `object Tarefas` do Exposed descreve a tabela para montar consultas, mas o exemplo nunca chama `SchemaUtils.create`. A tabela vem do `V1`.
 
 ### 3.5 Regras de convivência
 
 - Nunca edite uma migração que já foi aplicada em algum banco. Crie a próxima (`V2__...`).
 - Uma migração por mudança, com nome que diga o quê: `V2__adiciona_prazo.sql`.
-- Dados iniciais que fazem parte do sistema (categorias fixas, por exemplo) podem ir numa
-  migração, como as duas tarefas do `V1`. Dados de teste não.
+- Dados iniciais que fazem parte do sistema (categorias fixas, por exemplo) podem ir numa migração, como as duas tarefas do `V1`. Dados de teste não.
 
-> Erro comum: editar o `V1` depois de aplicado. O Flyway guarda o checksum de cada script e
-> recusa subir quando o arquivo muda:
+> Erro comum: editar o `V1` depois de aplicado. O Flyway guarda o checksum de cada script e recusa subir quando o arquivo muda:
 >
 > ```
 > FlywayValidateException: Validate failed: Migrations have failed validation
@@ -272,11 +217,9 @@ ambiente.
 > Either revert the changes to the migration, or run repair to update the schema history.
 > ```
 >
-> Desfaça a edição e crie um `V2`. `repair` só atualiza o histórico, não o esquema: use
-> quando souber exatamente o que está fazendo, por exemplo num banco local descartável.
+> Desfaça a edição e crie um `V2`. `repair` só atualiza o histórico, não o esquema: use quando souber exatamente o que está fazendo, por exemplo num banco local descartável.
 
-> Erro comum: migração com SQL que falha, como criar uma tabela que já existe. O Flyway
-> para e mostra o script, o estado SQL e a mensagem do banco:
+> Erro comum: migração com SQL que falha, como criar uma tabela que já existe. O Flyway para e mostra o script, o estado SQL e a mensagem do banco:
 >
 > ```
 > FlywayMigrateException: Failed to execute script V1_1__errada.sql
@@ -284,15 +227,9 @@ ambiente.
 > Message    : ERROR: relation "t" already exists
 > ```
 >
-> No PostgreSQL, DDL roda dentro de transação: o script que falhou é desfeito inteiro.
-> Conferido com um `V2` que criava uma tabela nova e depois repetia uma existente: a tabela
-> nova não ficou no banco, o `V2` não entrou no histórico, e depois de corrigido o arquivo
-> o Flyway aplicou o `V2` normalmente.
+> No PostgreSQL, DDL roda dentro de transação: o script que falhou é desfeito inteiro. Conferido com um `V2` que criava uma tabela nova e depois repetia uma existente: a tabela nova não ficou no banco, o `V2` não entrou no histórico, e depois de corrigido o arquivo o Flyway aplicou o `V2` normalmente.
 
-> Erro comum (Ktor): esquecer `flyway-database-postgresql`. Desde o Flyway 10, o suporte a
-> cada banco é um módulo separado. Só com `flyway-core`, a subida falha com
-> `FlywayException: Unsupported Database: PostgreSQL 17.10`. No Quarkus, a extensão já
-> traz o módulo.
+> Erro comum (Ktor): esquecer `flyway-database-postgresql`. Desde o Flyway 10, o suporte a cada banco é um módulo separado. Só com `flyway-core`, a subida falha com `FlywayException: Unsupported Database: PostgreSQL 17.10`. No Quarkus, a extensão já traz o módulo.
 
 ---
 
@@ -300,11 +237,9 @@ ambiente.
 
 ### 4.1 O que é o Exposed
 
-Exposed é a biblioteca de acesso a banco da JetBrains para Kotlin. Oferece duas formas de
-uso:
+Exposed é a biblioteca de acesso a banco da JetBrains para Kotlin. Oferece duas formas de uso:
 
-- DSL: consultas escritas em Kotlin com a forma do SQL (`selectAll().where { ... }`). É a
-  usada no exemplo.
+- DSL: consultas escritas em Kotlin com a forma do SQL (`selectAll().where { ... }`). É a usada no exemplo.
 - DAO: entidades com propriedades, no estilo de um ORM.
 
 A DSL deixa o SQL visível e não esconde quando uma consulta acontece; é um bom começo.
@@ -316,8 +251,7 @@ implementation("org.jetbrains.exposed:exposed-core:1.5.0")
 implementation("org.jetbrains.exposed:exposed-jdbc:1.5.0")
 ```
 
-A partir do Exposed 1.0, os pacotes começam com `org.jetbrains.exposed.v1`. Exemplos da
-internet com `org.jetbrains.exposed.sql` são da série 0.x e não compilam sem ajuste.
+A partir do Exposed 1.0, os pacotes começam com `org.jetbrains.exposed.v1`. Exemplos da internet com `org.jetbrains.exposed.sql` são da série 0.x e não compilam sem ajuste.
 
 📖 Ref. Exposed — Get started: <https://www.jetbrains.com/help/exposed/get-started-with-exposed.html>
 
@@ -332,10 +266,8 @@ object Tarefas : Table("tarefas") {
 }
 ```
 
-- `object`: uma única instância, que representa a tabela. Kotlin para quem conhece Java: é
-  um singleton sem precisar de `static` nem construtor privado.
-- Cada coluna é uma propriedade tipada. `Tarefas.titulo` é uma `Column<String>`; o
-  compilador impede comparar com um `Int`.
+- `object`: uma única instância, que representa a tabela. Kotlin para quem conhece Java: é um singleton sem precisar de `static` nem construtor privado.
+- Cada coluna é uma propriedade tipada. `Tarefas.titulo` é uma `Column<String>`; o compilador impede comparar com um `Int`.
 - O nome entre aspas (`"tarefas"`, `"titulo"`) é o do banco. Tem de bater com a migração.
 
 ### 4.3 Consultas
@@ -363,32 +295,25 @@ class RepositorioPostgres(private val db: Database) : RepositorioDeTarefas {
 }
 ```
 
-- `selectAll()` monta um `SELECT`; `.where { Tarefas.id eq id }` acrescenta o `WHERE`.
-  `eq` é uma função infixa: `Tarefas.id eq id` é o mesmo que `Tarefas.id.eq(id)`.
+- `selectAll()` monta um `SELECT`; `.where { Tarefas.id eq id }` acrescenta o `WHERE`. `eq` é uma função infixa: `Tarefas.id eq id` é o mesmo que `Tarefas.id.eq(id)`.
 - A consulta só vai ao banco quando o resultado é percorrido (`map`, `singleOrNull`).
 - `insert { ... } get Tarefas.id` devolve o id gerado pelo `SERIAL`.
-- `ResultRow` é uma linha do resultado. A função de extensão `paraTarefa()` converte linha
-  em objeto de domínio, num lugar só.
+- `ResultRow` é uma linha do resultado. A função de extensão `paraTarefa()` converte linha em objeto de domínio, num lugar só.
 
 📖 Ref. Exposed — CRUD operations (DSL): <https://www.jetbrains.com/help/exposed/dsl-crud-operations.html>
 
 ### 4.4 Transações
 
-Toda operação do Exposed precisa acontecer dentro de uma transação. É a transação que
-pega uma conexão do pool, faz `COMMIT` no fim ou `ROLLBACK` se houver exceção, e devolve a
-conexão.
+Toda operação do Exposed precisa acontecer dentro de uma transação. É a transação que pega uma conexão do pool, faz `COMMIT` no fim ou `ROLLBACK` se houver exceção, e devolve a conexão.
 
 - `transaction(db) { ... }` é a forma bloqueante.
 - `suspendTransaction(db) { ... }` é a forma para código com corrotinas, usada no exemplo.
 
-> Erro comum: consultar fora de uma transação. `Tarefas.selectAll().toList()` solto no
-> código falha com `IllegalStateException: No transaction in context.`
+> Erro comum: consultar fora de uma transação. `Tarefas.selectAll().toList()` solto no código falha com `IllegalStateException: No transaction in context.`
 
 ### 4.5 Por que a porta ganhou `suspend`
 
-Em 14/09 (capítulo 9 daquele guia), a regra era não travar a thread do servidor. JDBC é
-bloqueante: enquanto espera o banco, a thread fica parada. Por isso a interface do Ktor
-mudou:
+Em 14/09 (capítulo 9 daquele guia), a regra era não travar a thread do servidor. JDBC é bloqueante: enquanto espera o banco, a thread fica parada. Por isso a interface do Ktor mudou:
 
 ```kotlin
 interface RepositorioDeTarefas {
@@ -398,9 +323,7 @@ interface RepositorioDeTarefas {
 }
 ```
 
-Os handlers de rota do Ktor já são `suspend`, então chamar `repositorio.listar()` não muda
-nada na rota. A implementação com banco usa `suspendTransaction`; a em memória só ganha a
-palavra `suspend`.
+Os handlers de rota do Ktor já são `suspend`, então chamar `repositorio.listar()` não muda nada na rota. A implementação com banco usa `suspendTransaction`; a em memória só ganha a palavra `suspend`.
 
 📖 Ref. Exposed — Transactions: <https://www.jetbrains.com/help/exposed/transactions.html>
 
@@ -425,11 +348,9 @@ fun Application.configurar(repositorio: RepositorioDeTarefas) {
 }
 ```
 
-A ordem importa: pool, migração, conexão do Exposed, e só então as rotas. Se a migração
-falhar, a aplicação nem sobe, o que é melhor do que subir com o esquema errado.
+A ordem importa: pool, migração, conexão do Exposed, e só então as rotas. Se a migração falhar, a aplicação nem sobe, o que é melhor do que subir com o esquema errado.
 
-A divisão entre `modulo` e `configurar` é o que permite testar as rotas sem banco
-(seção 7.2).
+A divisão entre `modulo` e `configurar` é o que permite testar as rotas sem banco (seção 7.2).
 
 ---
 
@@ -437,11 +358,9 @@ A divisão entre `modulo` e `configurar` é o que permite testar as rotas sem ba
 
 ### 5.1 Hibernate, JPA e Panache
 
-- JPA (Jakarta Persistence) é a especificação de ORM do Java: anotações como `@Entity` e
-  `@Id` e a API do `EntityManager`.
+- JPA (Jakarta Persistence) é a especificação de ORM do Java: anotações como `@Entity` e `@Id` e a API do `EntityManager`.
 - Hibernate ORM é a implementação de JPA usada pelo Quarkus.
-- Panache é uma camada do Quarkus sobre o Hibernate que elimina o código repetitivo:
-  métodos prontos como `listAll`, `findById` e `persist`.
+- Panache é uma camada do Quarkus sobre o Hibernate que elimina o código repetitivo: métodos prontos como `listAll`, `findById` e `persist`.
 
 Dependências no `pom.xml` (versões vêm do BOM do Quarkus):
 
@@ -474,14 +393,11 @@ quarkus.hibernate-orm.schema-management.strategy=none
 quarkus.flyway.migrate-at-start=true
 ```
 
-O prefixo `%prod.` faz a URL valer só no perfil de produção (o `java -jar`). Em `dev`
-(`quarkus dev`) e `test`, não há URL configurada, e aí entra o Dev Services.
+O prefixo `%prod.` faz a URL valer só no perfil de produção (o `java -jar`). Em `dev` (`quarkus dev`) e `test`, não há URL configurada, e aí entra o Dev Services.
 
 ### 5.3 Dev Services: o banco que aparece sozinho
 
-Com Docker disponível e sem URL configurada, o Quarkus sobe um PostgreSQL num container
-ao iniciar em modo dev ou nos testes, liga a aplicação a ele e o descarta no fim. O log
-do teste do exemplo:
+Com Docker disponível e sem URL configurada, o Quarkus sobe um PostgreSQL num container ao iniciar em modo dev ou nos testes, liga a aplicação a ele e o descarta no fim. O log do teste do exemplo:
 
 ```
 Dev Services for PostgreSQL started.
@@ -490,8 +406,7 @@ Migrating schema "public" to version "1 - cria tarefas"
 quarkus-tarefas 0.1.0 on JVM (powered by Quarkus 3.28.2) started in 54.616s.
 ```
 
-Os 54 segundos incluem baixar a imagem `postgres:17` (158 MB) na primeira vez. Na execução
-seguinte, o container subiu em 1,5 segundo e a aplicação em 4,4 segundos.
+Os 54 segundos incluem baixar a imagem `postgres:17` (158 MB) na primeira vez. Na execução seguinte, o container subiu em 1,5 segundo e a aplicação em 4,4 segundos.
 
 📖 Ref. Quarkus — Dev Services for Databases: <https://quarkus.io/guides/databases-dev-services>
 
@@ -518,20 +433,14 @@ public class TarefaEntidade extends PanacheEntityBase {
 
 - `@Entity` marca a classe como mapeada; `@Table` diz o nome da tabela da migração.
 - `GenerationType.IDENTITY` diz ao Hibernate que o id é gerado pelo banco (o `SERIAL`).
-- Campos públicos são o estilo do Panache: na compilação, ele gera getters e setters e
-  troca os acessos a campo por chamadas a eles.
-- A entidade não é o `record Tarefa` do domínio. O recurso REST continua devolvendo
-  `Tarefa`; a entidade fica restrita ao adaptador de persistência. `paraTarefa()` faz a
-  conversão.
+- Campos públicos são o estilo do Panache: na compilação, ele gera getters e setters e troca os acessos a campo por chamadas a eles.
+- A entidade não é o `record Tarefa` do domínio. O recurso REST continua devolvendo `Tarefa`; a entidade fica restrita ao adaptador de persistência. `paraTarefa()` faz a conversão.
 
-Por que não anotar o `record` com `@Entity`? JPA exige construtor sem argumentos e campos
-mutáveis, e um `record` não tem nenhum dos dois.
+Por que não anotar o `record` com `@Entity`? JPA exige construtor sem argumentos e campos mutáveis, e um `record` não tem nenhum dos dois.
 
 ### 5.5 O repositório
 
-O Panache oferece dois estilos: active record (métodos estáticos na própria entidade, como
-`TarefaEntidade.listAll()`) e repositório. O exemplo usa repositório, porque é ele que
-implementa a porta:
+O Panache oferece dois estilos: active record (métodos estáticos na própria entidade, como `TarefaEntidade.listAll()`) e repositório. O exemplo usa repositório, porque é ele que implementa a porta:
 
 ```java
 @ApplicationScoped
@@ -560,17 +469,11 @@ public class RepositorioPanache
 }
 ```
 
-- `PanacheRepositoryBase<TarefaEntidade, Integer>` traz `listAll`, `findByIdOptional`,
-  `persist` e outros; o segundo parâmetro é o tipo do id.
-- A porta passou a devolver `Optional<Tarefa>` em `buscar`, e o recurso transforma
-  ausência em `404` com `orElseThrow(NotFoundException::new)`.
-- O `RepositorioEmMemoria` perdeu o `@ApplicationScoped`. Com dois beans implementando a
-  mesma interface, o CDI não saberia qual injetar (em 14/09, seção 8.7, o build falhava
-  por dependência ambígua). Ele continua útil no teste unitário do recurso (seção 7.5).
+- `PanacheRepositoryBase<TarefaEntidade, Integer>` traz `listAll`, `findByIdOptional`, `persist` e outros; o segundo parâmetro é o tipo do id.
+- A porta passou a devolver `Optional<Tarefa>` em `buscar`, e o recurso transforma ausência em `404` com `orElseThrow(NotFoundException::new)`.
+- O `RepositorioEmMemoria` perdeu o `@ApplicationScoped`. Com dois beans implementando a mesma interface, o CDI não saberia qual injetar (em 14/09, seção 8.7, o build falhava por dependência ambígua). Ele continua útil no teste unitário do recurso (seção 7.5).
 
-Sobre threads: métodos de recurso que devolvem um valor comum (não `Uni`) rodam numa
-thread de trabalho no Quarkus REST, não no event loop (guia de 14/09, seção 9.4). Por isso
-o JDBC bloqueante do Hibernate é seguro aqui sem nenhuma anotação extra.
+Sobre threads: métodos de recurso que devolvem um valor comum (não `Uni`) rodam numa thread de trabalho no Quarkus REST, não no event loop (guia de 14/09, seção 9.4). Por isso o JDBC bloqueante do Hibernate é seguro aqui sem nenhuma anotação extra.
 
 > Erro comum: gravar sem `@Transactional`. O `persist` falha e a requisição devolve `500`:
 >
@@ -585,19 +488,14 @@ o JDBC bloqueante do Hibernate é seguro aqui sem nenhuma anotação extra.
 
 ### 5.6 O banco como última barreira
 
-Um achado de 14/09 era que o Quarkus aceitava `{}` e `{"titulo":null}` no `POST`,
-criando uma tarefa com título `null` na lista em memória. Com o banco, a coluna é
-`NOT NULL`, e o mesmo pedido agora falha:
+Um achado de 14/09 era que o Quarkus aceitava `{}` e `{"titulo":null}` no `POST`, criando uma tarefa com título `null` na lista em memória. Com o banco, a coluna é `NOT NULL`, e o mesmo pedido agora falha:
 
 ```
 ERROR: null value in column "titulo" of relation "tarefas" violates not-null constraint
 org.hibernate.exception.ConstraintViolationException: could not execute statement
 ```
 
-A resposta é `500 Internal Server Error`. O dado ruim não entrou, mas o cliente recebeu um
-erro do servidor por uma falha dele, que deveria ser `400` ou `422`. A restrição do banco é
-a última barreira; a primeira é validar a entrada, que é critério da rubrica. O Passo 11 do
-exemplo faz isso nos dois stacks (capítulo 10).
+A resposta é `500 Internal Server Error`. O dado ruim não entrou, mas o cliente recebeu um erro do servidor por uma falha dele, que deveria ser `400` ou `422`. A restrição do banco é a última barreira; a primeira é validar a entrada, que é critério da rubrica. O Passo 11 do exemplo faz isso nos dois stacks (capítulo 10).
 
 ---
 
@@ -616,11 +514,7 @@ exemplo faz isso nos dois stacks (capítulo 10).
 | Esquema | nunca `SchemaUtils.create` | `schema-management.strategy=none` |
 | Bloqueio de thread | `suspend` + `suspendTransaction` | método comum roda em worker thread |
 
-Qual é melhor depende do grupo. Com Exposed, cada SQL é visível e nada acontece sem estar
-escrito. Com Panache, o CRUD sai quase pronto, mas vale conhecer o que o Hibernate faz por
-baixo: carregamento preguiçoso de relacionamentos, cache de primeiro nível dentro da
-transação e o problema N+1 (uma consulta para a lista e mais uma por item) aparecem assim
-que o domínio tiver relacionamentos.
+Qual é melhor depende do grupo. Com Exposed, cada SQL é visível e nada acontece sem estar escrito. Com Panache, o CRUD sai quase pronto, mas vale conhecer o que o Hibernate faz por baixo: carregamento preguiçoso de relacionamentos, cache de primeiro nível dentro da transação e o problema N+1 (uma consulta para a lista e mais uma por item) aparecem assim que o domínio tiver relacionamentos.
 
 📖 Ref. Quarkus — Using Hibernate ORM and Jakarta Persistence: <https://quarkus.io/guides/hibernate-orm>
 
@@ -630,16 +524,12 @@ que o domínio tiver relacionamentos.
 
 ### 7.1 Que testes escrever
 
-A pirâmide de testes resume a ideia: muitos testes pequenos e rápidos na base, menos testes
-grandes e lentos no topo. Para a API de tarefas:
+A pirâmide de testes resume a ideia: muitos testes pequenos e rápidos na base, menos testes grandes e lentos no topo. Para a API de tarefas:
 
-- Testes de rota com o repositório em memória: verificam HTTP (status, JSON, parâmetros)
-  sem banco. Rodam em milissegundos, sem Docker.
-- Testes de integração com banco de verdade: verificam o que só o banco mostra (a migração
-  aplica, o SQL está certo, o id vem do `SERIAL`, a restrição `NOT NULL` vale).
+- Testes de rota com o repositório em memória: verificam HTTP (status, JSON, parâmetros) sem banco. Rodam em milissegundos, sem Docker.
+- Testes de integração com banco de verdade: verificam o que só o banco mostra (a migração aplica, o SQL está certo, o id vem do `SERIAL`, a restrição `NOT NULL` vale).
 
-A rubrica pede os dois: unitários do domínio e integração com Testcontainers, passando no
-Docker Desktop e no CI sem mudar configuração.
+A rubrica pede os dois: unitários do domínio e integração com Testcontainers, passando no Docker Desktop e no CI sem mudar configuração.
 
 📖 Ref. Martin Fowler — Test Pyramid: <https://martinfowler.com/bliki/TestPyramid.html>
 
@@ -663,24 +553,17 @@ class RotasTest {
 }
 ```
 
-Os dois testes rodaram em 0,5 segundo. O que torna isso possível é `configurar` receber a
-porta: o teste passa a implementação em memória, e o resto da aplicação não percebe.
+Os dois testes rodaram em 0,5 segundo. O que torna isso possível é `configurar` receber a porta: o teste passa a implementação em memória, e o resto da aplicação não percebe.
 
 ### 7.3 Testcontainers
 
-Testcontainers é uma biblioteca que sobe containers Docker a partir do teste: um PostgreSQL
-de verdade, na versão que você escolher, descartado no fim. Isso resolve o "no meu
-computador funciona": o banco do teste é o mesmo em qualquer máquina com Docker, inclusive
-no CI.
+Testcontainers é uma biblioteca que sobe containers Docker a partir do teste: um PostgreSQL de verdade, na versão que você escolher, descartado no fim. Isso resolve o "no meu computador funciona": o banco do teste é o mesmo em qualquer máquina com Docker, inclusive no CI.
 
 ```kotlin
 testImplementation("org.testcontainers:testcontainers-postgresql:2.0.5")
 ```
 
-No Testcontainers 2.x, o módulo se chama `testcontainers-postgresql` e a classe fica em
-`org.testcontainers.postgresql.PostgreSQLContainer`. Tutoriais com
-`org.testcontainers:postgresql` e `org.testcontainers.containers.PostgreSQLContainer` são
-da série 1.x.
+No Testcontainers 2.x, o módulo se chama `testcontainers-postgresql` e a classe fica em `org.testcontainers.postgresql.PostgreSQLContainer`. Tutoriais com `org.testcontainers:postgresql` e `org.testcontainers.containers.PostgreSQLContainer` são da série 1.x.
 
 📖 Ref. Testcontainers — Postgres Module: <https://java.testcontainers.org/modules/databases/postgres/>
 
@@ -727,24 +610,14 @@ class TarefasTest {
 }
 ```
 
-- O container fica no `companion object`: sobe uma vez para a classe, não uma vez por
-  teste. Os quatro testes da classe (os três acima e o de OpenAPI, seção 8.2) rodaram em
-  2,6 segundos com a imagem já baixada.
-- Cada `testApplication` chama `modulo`, que roda o Flyway. Na primeira vez ele migra; nas
-  seguintes, registra `Schema "public" is up to date`.
-- `createClient { install(ContentNegotiation) { json() } }` cria um cliente que converte
-  JSON em objetos, e `body<Tarefa>()` faz a conversão. Precisa da dependência
-  `io.ktor:ktor-client-content-negotiation` no escopo de teste.
-- `useJUnitPlatform()` no `build.gradle.kts`: o `kotlin("test")` escolhe o JUnit 5 como
-  executor quando a task de teste usa a plataforma JUnit.
+- O container fica no `companion object`: sobe uma vez para a classe, não uma vez por teste. Os quatro testes da classe (os três acima e o de OpenAPI, seção 8.2) rodaram em 2,6 segundos com a imagem já baixada.
+- Cada `testApplication` chama `modulo`, que roda o Flyway. Na primeira vez ele migra; nas seguintes, registra `Schema "public" is up to date`.
+- `createClient { install(ContentNegotiation) { json() } }` cria um cliente que converte JSON em objetos, e `body<Tarefa>()` faz a conversão. Precisa da dependência `io.ktor:ktor-client-content-negotiation` no escopo de teste.
+- `useJUnitPlatform()` no `build.gradle.kts`: o `kotlin("test")` escolhe o JUnit 5 como executor quando a task de teste usa a plataforma JUnit.
 
-Os testes compartilham o banco da classe. A tarefa criada em um teste aparece para os
-outros, por isso as asserções usam `any { ... }` em vez de contar itens. Quando o isolamento
-importar, limpe as tabelas antes de cada teste ou use um banco por classe.
+Os testes compartilham o banco da classe. A tarefa criada em um teste aparece para os outros, por isso as asserções usam `any { ... }` em vez de contar itens. Quando o isolamento importar, limpe as tabelas antes de cada teste ou use um banco por classe.
 
-> Erro comum: logs de DEBUG do Testcontainers inundando a saída do teste. Sem configuração
-> de log, o Logback mostra tudo. O exemplo tem `src/test/resources/logback-test.xml` com o
-> nível `WARN` e `INFO` só para o Flyway e para os containers.
+> Erro comum: logs de DEBUG do Testcontainers inundando a saída do teste. Sem configuração de log, o Logback mostra tudo. O exemplo tem `src/test/resources/logback-test.xml` com o nível `WARN` e `INFO` só para o Flyway e para os containers.
 
 📖 Ref. Ktor — Testing: <https://ktor.io/docs/server-testing.html>
 
@@ -783,19 +656,10 @@ class RecursoDeTarefasTest {
 ```
 
 - Não há nenhuma linha sobre banco no teste. O Dev Services usa o Testcontainers por baixo.
-- O equivalente ao teste de rota sem banco do Ktor é um teste JUnit comum, sem
-  `@QuarkusTest`: `RecursoDeTarefasUnitarioTest` cria `new RecursoDeTarefas()`, põe um
-  `RepositorioEmMemoria` no campo `repositorio` (o que o CDI faria) e chama os métodos
-  direto. Os três testes rodaram em 0,017 segundo, sem Docker.
-- `quarkus.http.test-port=8083` no `application.properties` resolve o achado de 14/09: a
-  porta padrão de teste (8081) colidia com a porta da aplicação, e `mvn test` falhava com o
-  modo dev aberto.
+- O equivalente ao teste de rota sem banco do Ktor é um teste JUnit comum, sem `@QuarkusTest`: `RecursoDeTarefasUnitarioTest` cria `new RecursoDeTarefas()`, põe um `RepositorioEmMemoria` no campo `repositorio` (o que o CDI faria) e chama os métodos direto. Os três testes rodaram em 0,017 segundo, sem Docker.
+- `quarkus.http.test-port=8083` no `application.properties` resolve o achado de 14/09: a porta padrão de teste (8081) colidia com a porta da aplicação, e `mvn test` falhava com o modo dev aberto.
 
-> Erro comum: Docker Desktop atualizado e `@QuarkusTest` falhando com
-> `Could not find a valid Docker environment`, com `BadRequestException (Status 400)` nos
-> detalhes. O Quarkus 3.28 traz o Testcontainers 1.21.3, que não conversa com o Docker
-> Engine 29. A correção no exemplo é importar o BOM do Testcontainers 1.21.4 antes do BOM
-> do Quarkus, no `dependencyManagement`:
+> Erro comum: Docker Desktop atualizado e `@QuarkusTest` falhando com `Could not find a valid Docker environment`, com `BadRequestException (Status 400)` nos detalhes. O Quarkus 3.28 traz o Testcontainers 1.21.3, que não conversa com o Docker Engine 29. A correção no exemplo é importar o BOM do Testcontainers 1.21.4 antes do BOM do Quarkus, no `dependencyManagement`:
 >
 > ```xml
 > <dependency>
@@ -809,9 +673,7 @@ class RecursoDeTarefasTest {
 >
 > Versões mais novas do Quarkus (3.33 em diante) já trazem o Testcontainers 2.x.
 
-No fim de cada `mvn test` com Java 25, aparece um `IllegalAccessError` sobre
-`thread-local-reset` e `--add-opens`. Ele acontece no encerramento, depois de os testes já
-terem passado, e não afeta o resultado.
+No fim de cada `mvn test` com Java 25, aparece um `IllegalAccessError` sobre `thread-local-reset` e `--add-opens`. Ele acontece no encerramento, depois de os testes já terem passado, e não afeta o resultado.
 
 📖 Ref. Quarkus — Testing your application: <https://quarkus.io/guides/getting-started-testing>
 
@@ -825,8 +687,7 @@ terem passado, e não afeta o resultado.
 | Banco | Testcontainers, declarado no teste | Dev Services, implícito |
 | Executor | JUnit Platform (`useJUnitPlatform()`) | JUnit Platform (Surefire) |
 
-O `kotlin-test` é uma camada fina: no Gradle com JUnit Platform, os testes rodam no JUnit 5.
-Dá para misturar os dois no mesmo projeto Kotlin.
+O `kotlin-test` é uma camada fina: no Gradle com JUnit Platform, os testes rodam no JUnit 5. Dá para misturar os dois no mesmo projeto Kotlin.
 
 ---
 
@@ -834,12 +695,9 @@ Dá para misturar os dois no mesmo projeto Kotlin.
 
 ### 8.1 O que é
 
-OpenAPI é um formato (YAML ou JSON) que descreve uma API HTTP: caminhos, métodos,
-parâmetros, corpos e respostas com seus esquemas. A partir dele saem a Swagger UI (uma
-página para explorar e testar a API) e clientes gerados.
+OpenAPI é um formato (YAML ou JSON) que descreve uma API HTTP: caminhos, métodos, parâmetros, corpos e respostas com seus esquemas. A partir dele saem a Swagger UI (uma página para explorar e testar a API) e clientes gerados.
 
-Gerar a especificação do código evita a defasagem: se a rota mudar, a documentação muda
-junto.
+Gerar a especificação do código evita a defasagem: se a rota mudar, a documentação muda junto.
 
 📖 Ref. OpenAPI Specification 3.1.1: <https://spec.openapis.org/oas/v3.1.1.html>
 
@@ -898,12 +756,9 @@ fun Application.rotas() {
 }
 ```
 
-- `swaggerUI(path = "docs")` serve a página em `/docs` e a especificação, gerada das rotas,
-  em `/docs/documentation.yaml`.
-- `jsonSchema<Tarefa>()` deriva o esquema da classe `@Serializable`. No resultado,
-  `feita` aparece como opcional, porque tem valor padrão na `data class`.
-- A API de `describe` é experimental no Ktor 3.5 (`@OptIn(ExperimentalKtorApi::class)`):
-  pode mudar entre versões.
+- `swaggerUI(path = "docs")` serve a página em `/docs` e a especificação, gerada das rotas, em `/docs/documentation.yaml`.
+- `jsonSchema<Tarefa>()` deriva o esquema da classe `@Serializable`. No resultado, `feita` aparece como opcional, porque tem valor padrão na `data class`.
+- A API de `describe` é experimental no Ktor 3.5 (`@OptIn(ExperimentalKtorApi::class)`): pode mudar entre versões.
 
 Trecho da especificação gerada (OpenAPI 3.1.1):
 
@@ -928,17 +783,9 @@ paths:
           description: Tarefa inexistente
 ```
 
-> Erro comum (Ktor): parâmetro de caminho documentado como `string`. Sem a linha
-> `parameters { path("id") { ... } }`, o `{id}` aparece com `type: string`, porque na rota
-> ele chega como texto. Quem gera cliente a partir dessa especificação recebe o tipo
-> errado. Declare o tipo real.
+> Erro comum (Ktor): parâmetro de caminho documentado como `string`. Sem a linha `parameters { path("id") { ... } }`, o `{id}` aparece com `type: string`, porque na rota ele chega como texto. Quem gera cliente a partir dessa especificação recebe o tipo errado. Declare o tipo real.
 
-Há uma alternativa mantida pela comunidade, `io.github.smiley4:ktor-openapi` (o
-"ktor-openapi" do plano de curso), em que a documentação vai como primeiro argumento de
-`get`/`post`. Os dois produzem OpenAPI a partir do código, e o grupo escolhe um. O MUSI
-usava o smiley4 e passou para o gerador nativo, mantido pela própria JetBrains: lá, os
-blocos `describe` de todas as rotas ficam num arquivo à parte (`RotasDoc.kt`), o que
-mantém a árvore de rotas legível sem perder a geração a partir do código.
+Há uma alternativa mantida pela comunidade, `io.github.smiley4:ktor-openapi` (o "ktor-openapi" do plano de curso), em que a documentação vai como primeiro argumento de `get`/`post`. Os dois produzem OpenAPI a partir do código, e o grupo escolhe um. O MUSI usava o smiley4 e passou para o gerador nativo, mantido pela própria JetBrains: lá, os blocos `describe` de todas as rotas ficam num arquivo à parte (`RotasDoc.kt`), o que mantém a árvore de rotas legível sem perder a geração a partir do código.
 
 📖 Ref. Ktor — OpenAPI specification generation: <https://ktor.io/docs/openapi-spec-generation.html>
 
@@ -955,9 +802,7 @@ mantém a árvore de rotas legível sem perder a geração a partir do código.
 </dependency>
 ```
 
-Só com a dependência, o Quarkus lê as anotações JAX-RS e gera a especificação em
-`/q/openapi`. O parâmetro `{id}` sai como `integer`/`int32`, porque o método recebe
-`@PathParam("id") int id`. Para os resumos, o exemplo usa `@Operation`:
+Só com a dependência, o Quarkus lê as anotações JAX-RS e gera a especificação em `/q/openapi`. O parâmetro `{id}` sai como `integer`/`int32`, porque o método recebe `@PathParam("id") int id`. Para os resumos, o exemplo usa `@Operation`:
 
 ```java
 @GET
@@ -968,10 +813,7 @@ public Tarefa buscar(@PathParam("id") int id) {
 }
 ```
 
-- A Swagger UI fica em `/q/swagger-ui`, mas por padrão só nos modos dev e test. No
-  `java -jar` (produção), `/q/openapi` respondeu `200` e `/q/swagger-ui/` respondeu `404`.
-  Para incluir a UI no build de produção: `quarkus.swagger-ui.always-include=true`
-  (conferido: com ela, `/q/swagger-ui/` respondeu `200`).
+- A Swagger UI fica em `/q/swagger-ui`, mas por padrão só nos modos dev e test. No `java -jar` (produção), `/q/openapi` respondeu `200` e `/q/swagger-ui/` respondeu `404`. Para incluir a UI no build de produção: `quarkus.swagger-ui.always-include=true` (conferido: com ela, `/q/swagger-ui/` respondeu `200`).
 - `quarkus.smallrye-openapi.info-title=Tarefas` define o título da especificação.
 
 📖 Ref. Quarkus — Using OpenAPI and Swagger UI: <https://quarkus.io/guides/openapi-swaggerui>
@@ -986,8 +828,7 @@ public Tarefa buscar(@PathParam("id") int id) {
 | Swagger UI | `/docs` | `/q/swagger-ui` (dev e test; em prod, com `always-include`) |
 | Estabilidade | experimental no Ktor 3.5 | estável |
 
-No Quarkus o esforço é menor: sem escrever nada, a especificação já existe. No Ktor, como
-as rotas são código e não anotações, a descrição também é código.
+No Quarkus o esforço é menor: sem escrever nada, a especificação já existe. No Ktor, como as rotas são código e não anotações, a descrição também é código.
 
 ---
 
@@ -1011,14 +852,10 @@ volumes:
   dados:
 ```
 
-- `volumes`: os dados ficam num volume nomeado e sobrevivem a `docker compose down`.
-  `docker compose down -v` apaga o volume e volta ao banco vazio.
-- Os valores de ambiente batem com os padrões de `ConfigBanco.doAmbiente()` e do perfil
-  `%prod` do Quarkus, então as duas APIs usam esse banco sem configuração extra.
+- `volumes`: os dados ficam num volume nomeado e sobrevivem a `docker compose down`. `docker compose down -v` apaga o volume e volta ao banco vazio.
+- Os valores de ambiente batem com os padrões de `ConfigBanco.doAmbiente()` e do perfil `%prod` do Quarkus, então as duas APIs usam esse banco sem configuração extra.
 
-Na Sprint 1, a rubrica pede o banco subindo por `docker compose`. Na Sprint 2, o mesmo
-arquivo cresce: `docker compose up` passa a subir a API, o serviço Go e o banco, do zero. A
-API entra quando houver um `Dockerfile` (como os do MUSI).
+Na Sprint 1, a rubrica pede o banco subindo por `docker compose`. Na Sprint 2, o mesmo arquivo cresce: `docker compose up` passa a subir a API, o serviço Go e o banco, do zero. A API entra quando houver um `Dockerfile` (como os do MUSI).
 
 📖 Ref. Docker Compose: <https://docs.docker.com/compose/>
 
@@ -1045,8 +882,7 @@ HTTP/1.1 201 Created
 {"id":3,"titulo":"Persistir","feita":false}
 ```
 
-Depois de parar e subir a aplicação de novo, `GET /tarefas` devolveu as três tarefas, e o
-Flyway registrou `Schema "public" is up to date`.
+Depois de parar e subir a aplicação de novo, `GET /tarefas` devolveu as três tarefas, e o Flyway registrou `Schema "public" is up to date`.
 
 Para o Quarkus, contra o mesmo banco:
 
@@ -1055,9 +891,7 @@ mvn package -DskipTests
 java -jar target/quarkus-app/quarkus-run.jar
 ```
 
-A aplicação subiu em 1,4 segundo na porta 8081. Como o banco era novo, o Flyway do Quarkus
-aplicou o `V1`. Se o Ktor já tivesse migrado o banco, o Quarkus encontraria o histórico e
-não faria nada: os dois exemplos compartilham a mesma migração.
+A aplicação subiu em 1,4 segundo na porta 8081. Como o banco era novo, o Flyway do Quarkus aplicou o `V1`. Se o Ktor já tivesse migrado o banco, o Quarkus encontraria o histórico e não faria nada: os dois exemplos compartilham a mesma migração.
 
 ### 9.3 Respostas que diferem entre os stacks
 
@@ -1067,14 +901,11 @@ não faria nada: os dois exemplos compartilham a mesma migração.
 | `GET /tarefas/999` | `404` | `404` |
 | `POST` com `{}` | `400`, `Failed to convert request body to class ...NovaTarefa` (kotlinx.serialization exige `titulo`) | `500` (chega ao banco e viola `NOT NULL`) |
 
-As duas primeiras linhas são escolhas defensáveis. A terceira mostra o que acontece sem
-validação (seção 5.6); o capítulo 10 a resolve.
+As duas primeiras linhas são escolhas defensáveis. A terceira mostra o que acontece sem validação (seção 5.6); o capítulo 10 a resolve.
 
 ### 9.4 No MUSI: o mesmo assunto, em escala de projeto
 
-O exemplo desta aula tem uma entidade e um repositório. O projeto de referência
-(`github.com/fmarquesfilho/musi`) faz o que a rubrica da Sprint 1 pede, nos dois stacks, e
-serve para ver as mesmas ideias com mais peças:
+O exemplo desta aula tem uma entidade e um repositório. O projeto de referência (`github.com/fmarquesfilho/musi`) faz o que a rubrica da Sprint 1 pede, nos dois stacks, e serve para ver as mesmas ideias com mais peças:
 
 | Para ver | Onde, no MUSI |
 |---|---|
@@ -1087,36 +918,21 @@ serve para ver as mesmas ideias com mais peças:
 
 Quatro cuidados que apareceram ao montar isso, e que valem para o projeto de vocês:
 
-> Erro comum (Quarkus): a aplicação não sobe sem banco.
-> Sem URL, o Quarkus desativa o datasource sozinho — mas o Hibernate e o Flyway continuam
-> exigindo um, e a subida falha com `Unable to find datasource '<default>'`. Para subir sem
-> banco (o caso de um deploy antes de ter Postgres), é preciso desligar os dois:
-> `quarkus.hibernate-orm.active=false` e `quarkus.flyway.active=false`.
+> Erro comum (Quarkus): a aplicação não sobe sem banco. Sem URL, o Quarkus desativa o datasource sozinho — mas o Hibernate e o Flyway continuam exigindo um, e a subida falha com `Unable to find datasource '<default>'`. Para subir sem banco (o caso de um deploy antes de ter Postgres), é preciso desligar os dois: `quarkus.hibernate-orm.active=false` e `quarkus.flyway.active=false`.
 
-> Erro comum (Quarkus): parâmetro de consulta com tipo errado vira `404`.
-> `?pagina=abc` em `@QueryParam("pagina") Integer pagina` não dá `400`: a especificação
-> Jakarta REST manda devolver `404`. É a mesma regra da tabela da seção 9.3, agora na query
-> string. Para responder `400`, receba como `String` e converta à mão.
+> Erro comum (Quarkus): parâmetro de consulta com tipo errado vira `404`. `?pagina=abc` em `@QueryParam("pagina") Integer pagina` não dá `400`: a especificação Jakarta REST manda devolver `404`. É a mesma regra da tabela da seção 9.3, agora na query string. Para responder `400`, receba como `String` e converta à mão.
 
-> Erro comum (Exposed 1.5): `uuid()` não é `java.util.UUID`.
-> Os pacotes agora são `org.jetbrains.exposed.v1.core` e `.v1.jdbc`, e `uuid()` mapeia
-> `kotlin.uuid.Uuid`. Para a `java.util.UUID` de sempre, a coluna é `javaUUID()`.
+> Erro comum (Exposed 1.5): `uuid()` não é `java.util.UUID`. Os pacotes agora são `org.jetbrains.exposed.v1.core` e `.v1.jdbc`, e `uuid()` mapeia `kotlin.uuid.Uuid`. Para a `java.util.UUID` de sempre, a coluna é `javaUUID()`.
 
-> Erro comum (Hibernate): trocar uma lista inteira num `PUT`.
-> Com `@ElementCollection` e `@OrderColumn`, substituir a lista pode violar a chave da
-> tabela filha quando os itens só trocam de posição. Esvaziar a coleção e dar `flush()`
-> antes de repor resolve.
+> Erro comum (Hibernate): trocar uma lista inteira num `PUT`. Com `@ElementCollection` e `@OrderColumn`, substituir a lista pode violar a chave da tabela filha quando os itens só trocam de posição. Esvaziar a coleção e dar `flush()` antes de repor resolve.
 
-O MUSI também mostra como rodar a suíte sem Docker: os testes de integração levam a tag
-`integracao`, e `./gradlew test -PsemDocker` (ou `mvn test -DexcludedGroups=integracao`)
-deixa só os que não precisam de banco. No CI, tudo roda.
+O MUSI também mostra como rodar a suíte sem Docker: os testes de integração levam a tag `integracao`, e `./gradlew test -PsemDocker` (ou `mvn test -DexcludedGroups=integracao`) deixa só os que não precisam de banco. No CI, tudo roda.
 
 ---
 
 ## 10. Validação e erros em *problem details*
 
-É o Passo 11 dos exemplos. A rubrica pede validação em todas as entradas, erros no formato
-*problem details* e nenhuma resposta `500` para erro do cliente.
+É o Passo 11 dos exemplos. A rubrica pede validação em todas as entradas, erros no formato *problem details* e nenhuma resposta `500` para erro do cliente.
 
 ### 10.1 400 ou 422
 
@@ -1127,13 +943,11 @@ deixa só os que não precisam de banco. No CI, tudo roda.
 | O recurso não existe | `404` | `GET /tarefas/9999` |
 | Erro do servidor | `500`, sem detalhe interno | exceção não prevista |
 
-O capítulo 6 da leitura de 14/09 explica a RFC 9457 e a escolha entre `400` e `422`. Aqui
-está como o exemplo aplica.
+O capítulo 6 da leitura de 14/09 explica a RFC 9457 e a escolha entre `400` e `422`. Aqui está como o exemplo aplica.
 
 ### 10.2 A regra fica no domínio
 
-A regra não sabe de HTTP. Ela devolve a lista do que está errado, e quem chama decide o que
-fazer:
+A regra não sabe de HTTP. Ela devolve a lista do que está errado, e quem chama decide o que fazer:
 
 ```kotlin
 // Tarefa.kt
@@ -1194,13 +1008,11 @@ public Response criar(NovaTarefa nova) {
 }
 ```
 
-O `201` passa a levar o cabeçalho `Location` com o endereço da tarefa criada, como pede a
-tarefa T5.
+O `201` passa a levar o cabeçalho `Location` com o endereço da tarefa criada, como pede a tarefa T5.
 
 ### 10.3 Um lugar só decide a resposta
 
-No Ktor, o plugin `StatusPages` (dependência `io.ktor:ktor-server-status-pages`) associa cada
-exceção a uma resposta:
+No Ktor, o plugin `StatusPages` (dependência `io.ktor:ktor-server-status-pages`) associa cada exceção a uma resposta:
 
 ```kotlin
 fun Application.tratarErros() {
@@ -1228,8 +1040,7 @@ fun Application.tratarErros() {
 }
 ```
 
-No Quarkus REST, o equivalente é uma classe com um método `@ServerExceptionMapper` por tipo
-de exceção:
+No Quarkus REST, o equivalente é uma classe com um método `@ServerExceptionMapper` por tipo de exceção:
 
 ```java
 public class Erros {
@@ -1264,8 +1075,7 @@ Content-Type: application/problem+json
 {"type":"/problemas/entrada-invalida","title":"Entrada inválida","status":422,"detail":"A entrada viola 1 regra(s).","violacoes":["titulo: não pode ficar em branco"]}
 ```
 
-`type` identifica a classe do erro; `detail`, esta ocorrência. `violacoes` é um membro de
-extensão, que a RFC permite.
+`type` identifica a classe do erro; `detail`, esta ocorrência. `violacoes` é um membro de extensão, que a RFC permite.
 
 ### 10.4 As respostas depois do Passo 11
 
@@ -1280,14 +1090,9 @@ extensão, que a RFC permite.
 
 O `500` da seção 5.6 deixa de acontecer: a entrada inválida não chega ao banco.
 
-No Quarkus, a alternativa comum é o Bean Validation (`quarkus-hibernate-validator`,
-`@NotBlank` no record e `@Valid` no parâmetro). O exemplo usa uma função do domínio, igual à
-do Ktor, para o domínio não depender de anotações de framework (capítulo 11). O MUSI usa as
-duas formas: Bean Validation para a forma do corpo e regras do domínio para o conteúdo.
+No Quarkus, a alternativa comum é o Bean Validation (`quarkus-hibernate-validator`, `@NotBlank` no record e `@Valid` no parâmetro). O exemplo usa uma função do domínio, igual à do Ktor, para o domínio não depender de anotações de framework (capítulo 11). O MUSI usa as duas formas: Bean Validation para a forma do corpo e regras do domínio para o conteúdo.
 
-> Erro comum (Quarkus): campo com tipo errado respondido fora do formato. Sem um método para
-> `MismatchedInputException`, o Quarkus responde `{"titulo":[1,2]}` com um JSON próprio
-> (`{"objectName":"Class","attributeName":"titulo",...}`), e não com *problem details*.
+> Erro comum (Quarkus): campo com tipo errado respondido fora do formato. Sem um método para `MismatchedInputException`, o Quarkus responde `{"titulo":[1,2]}` com um JSON próprio (`{"objectName":"Class","attributeName":"titulo",...}`), e não com *problem details*.
 
 📖 Ref. RFC 9457 — Problem Details for HTTP APIs: <https://www.rfc-editor.org/rfc/rfc9457>
 
@@ -1312,18 +1117,13 @@ br.ufrn.exemplo.tarefas
     └── memoria/      RepositorioEmMemoria
 ```
 
-A regra de dependência do capítulo 7 da leitura de 14/09 vira uma regra sobre pacotes: os
-adaptadores dependem do domínio, e o domínio não depende de ninguém. No Ktor, `Aplicacao.kt`
-fica na raiz e liga as camadas; no Quarkus, quem liga é o CDI.
+A regra de dependência do capítulo 7 da leitura de 14/09 vira uma regra sobre pacotes: os adaptadores dependem do domínio, e o domínio não depende de ninguém. No Ktor, `Aplicacao.kt` fica na raiz e liga as camadas; no Quarkus, quem liga é o CDI.
 
-O projeto do grupo tem mais uma camada, a dos casos de uso (o MUSI a chama de `aplicacao`).
-O exemplo, com três operações, não precisa dela.
+O projeto do grupo tem mais uma camada, a dos casos de uso (o MUSI a chama de `aplicacao`). O exemplo, com três operações, não precisa dela.
 
 ### 11.2 O teste que verifica a regra
 
-Pacote é convenção: nada impede um `import` de framework no domínio. O ArchUnit lê as classes
-compiladas e transforma a regra num teste (dependência de teste
-`com.tngtech.archunit:archunit:1.5.0`, nos dois stacks):
+Pacote é convenção: nada impede um `import` de framework no domínio. O ArchUnit lê as classes compiladas e transforma a regra num teste (dependência de teste `com.tngtech.archunit:archunit:1.5.0`, nos dois stacks):
 
 ```kotlin
 class ArquiteturaTest {
@@ -1345,11 +1145,9 @@ class ArquiteturaTest {
 }
 ```
 
-No Quarkus, a lista proibida é `jakarta..`, `io.quarkus..`, `org.hibernate..`,
-`com.fasterxml..`, `java.sql..` e `..adaptadores..`.
+No Quarkus, a lista proibida é `jakarta..`, `io.quarkus..`, `org.hibernate..`, `com.fasterxml..`, `java.sql..` e `..adaptadores..`.
 
-A rubrica pede que o teste falhe quando a regra é violada. Conferido: com um método que
-devolve `jakarta.ws.rs.core.Response` no `dominio/Tarefa.java`, `mvn test` falha com
+A rubrica pede que o teste falhe quando a regra é violada. Conferido: com um método que devolve `jakarta.ws.rs.core.Response` no `dominio/Tarefa.java`, `mvn test` falha com
 
 ```
 Architecture Violation [Priority: MEDIUM] - Rule 'no classes that reside in a package
@@ -1357,19 +1155,13 @@ Architecture Violation [Priority: MEDIUM] - Rule 'no classes that reside in a pa
 was violated (3 times)
 ```
 
-O exemplo tem também um teste que faz essa prova sozinho: `a regra do dominio pega uma
-violacao` avalia a regra contra uma classe que só existe nos testes
-(`arquitetura/violacao/dominio/Contaminado`) e confere que há violação.
+O exemplo tem também um teste que faz essa prova sozinho: `a regra do dominio pega uma violacao` avalia a regra contra uma classe que só existe nos testes (`arquitetura/violacao/dominio/Contaminado`) e confere que há violação.
 
-No Ktor, o domínio do exemplo aceita `kotlinx.serialization` (o `@Serializable` da `Tarefa`).
-No MUSI, o domínio é Kotlin puro e a serialização fica em DTOs do adaptador web.
+No Ktor, o domínio do exemplo aceita `kotlinx.serialization` (o `@Serializable` da `Tarefa`). No MUSI, o domínio é Kotlin puro e a serialização fica em DTOs do adaptador web.
 
-No Kotlin, o Konsist é uma alternativa ao ArchUnit: lê o código-fonte em vez das classes
-compiladas.
+No Kotlin, o Konsist é uma alternativa ao ArchUnit: lê o código-fonte em vez das classes compiladas.
 
-> Erro comum (Quarkus): `GET /tarefas is declared by` duas classes, ao abrir o
-> `mvn quarkus:dev` depois de mudar classes de pacote. São arquivos `.class` antigos na
-> pasta `target/`. `mvn clean` resolve.
+> Erro comum (Quarkus): `GET /tarefas is declared by` duas classes, ao abrir o `mvn quarkus:dev` depois de mudar classes de pacote. São arquivos `.class` antigos na pasta `target/`. `mvn clean` resolve.
 
 📖 Ref. ArchUnit — User Guide: <https://www.archunit.org/userguide/html/000_Index.html>
 
@@ -1377,9 +1169,7 @@ compiladas.
 
 ### 11.3 O que o projeto precisa além do exemplo
 
-O exemplo tem uma entidade e três operações. A rubrica pede duas entidades com
-relacionamento, todas as operações, paginação e filtros. O MUSI mostra essas peças; os
-trechos abaixo são dele.
+O exemplo tem uma entidade e três operações. A rubrica pede duas entidades com relacionamento, todas as operações, paginação e filtros. O MUSI mostra essas peças; os trechos abaixo são dele.
 
 Relacionamento. Na migração, a chave estrangeira:
 
@@ -1408,8 +1198,7 @@ public ObraEntidade obra;
 
 Na API, o relacionamento aparece como rota aninhada: `/obras/{id}/anotacoes`.
 
-Paginação e filtro, no SQL. O banco devolve só a fatia pedida; a aplicação não carrega a
-tabela inteira:
+Paginação e filtro, no SQL. O banco devolve só a fatia pedida; a aplicação não carrega a tabela inteira:
 
 ```kotlin
 val itens = Anotacoes.selectAll().where(onde)
@@ -1424,14 +1213,11 @@ var itens = find(onde + " order by criadoEm, id", params)
     .list().stream().map(AnotacaoEntidade::paraAnotacao).toList();
 ```
 
-- O tamanho da página tem um teto (100, no MUSI): sem ele, `?tamanho=1000000` traria a
-  tabela inteira.
-- A listagem tem ordem definida (`ORDER BY`): sem ela, as páginas podem repetir ou pular
-  itens.
+- O tamanho da página tem um teto (100, no MUSI): sem ele, `?tamanho=1000000` traria a tabela inteira.
+- A listagem tem ordem definida (`ORDER BY`): sem ela, as páginas podem repetir ou pular itens.
 - A resposta traz também o total, para quem consome saber quantas páginas há.
 
-Atualizar e remover seguem os métodos e status do capítulo 6 da leitura de 14/09: `PUT` ou
-`PATCH` com `200`, `DELETE` com `204`, `404` para id inexistente.
+Atualizar e remover seguem os métodos e status do capítulo 6 da leitura de 14/09: `PUT` ou `PATCH` com `200`, `DELETE` com `204`, `404` para id inexistente.
 
 ---
 
@@ -1442,11 +1228,9 @@ Atualizar e remover seguem os métodos e status do capítulo 6 da leitura de 14/
 1. Por que as rotas não mudaram quando o repositório passou a usar PostgreSQL?
 2. O que o Flyway guarda na tabela `flyway_schema_history`, e para que serve o checksum?
 3. Por que a rubrica proíbe `ddl-auto` e `SchemaUtils.create`?
-4. O que acontece com uma consulta do Exposed fora de `transaction` ou
-   `suspendTransaction`?
+4. O que acontece com uma consulta do Exposed fora de `transaction` ou `suspendTransaction`?
 5. Por que a interface do Ktor ganhou `suspend` e a do Quarkus não?
-6. Qual a diferença entre `RepositorioEmMemoria` e `RepositorioPostgres` do ponto de vista
-   dos testes?
+6. Qual a diferença entre `RepositorioEmMemoria` e `RepositorioPostgres` do ponto de vista dos testes?
 7. O que o Dev Services faz, e em quais perfis ele entra?
 8. Antes do Passo 11, por que o `POST {}` no Quarkus dava `500`? Onde isso foi resolvido?
 9. Qual a diferença entre responder `400` e `422`?
@@ -1455,52 +1239,26 @@ Atualizar e remover seguem os métodos e status do capítulo 6 da leitura de 14/
 
 ### 12.2 Exercícios práticos
 
-1. Adicione a coluna `prazo DATE` (opcional) numa migração `V2__adiciona_prazo.sql`.
-   Atualize a tabela do Exposed ou a entidade, o domínio e as respostas. Confira no log que
-   só o `V2` foi aplicado.
-2. Implemente `PATCH /tarefas/{id}/feita`, que marca a tarefa como feita, nos dois stacks.
-   Escreva um teste de integração que cria, marca e confere.
+1. Adicione a coluna `prazo DATE` (opcional) numa migração `V2__adiciona_prazo.sql`. Atualize a tabela do Exposed ou a entidade, o domínio e as respostas. Confira no log que só o `V2` foi aplicado.
+2. Implemente `PATCH /tarefas/{id}/feita`, que marca a tarefa como feita, nos dois stacks. Escreva um teste de integração que cria, marca e confere.
 3. Edite o `V1` depois de aplicado e veja a mensagem de checksum. Desfaça a edição.
-4. No Quarkus, troque a função `violacoes()` por Bean Validation
-   (`quarkus-hibernate-validator`, `@NotBlank` no `titulo` e `@Valid` no parâmetro). Compare
-   a resposta de `POST {}` e veja o que acontece com o teste de arquitetura.
-5. No Ktor, escreva um teste que roda com o banco vazio: suba um segundo container, rode só
-   o Flyway e confirme que existem exatamente duas tarefas.
-6. Remova `parameters { path("id") ... }` e compare o tipo do `{id}` no
-   `documentation.yaml`.
-7. Acrescente uma segunda regra à `NovaTarefa` (por exemplo, título com pelo menos 3
-   caracteres) e um teste de rota que confira o `422` com as duas violações possíveis.
-8. Importe uma classe do framework no pacote `dominio` e rode os testes. Leia a mensagem do
-   ArchUnit e desfaça.
-9. Implemente `GET /tarefas?feita=true&pagina=0&tamanho=10`, com a paginação no SQL e um
-   teto para `tamanho`.
+4. No Quarkus, troque a função `violacoes()` por Bean Validation (`quarkus-hibernate-validator`, `@NotBlank` no `titulo` e `@Valid` no parâmetro). Compare a resposta de `POST {}` e veja o que acontece com o teste de arquitetura.
+5. No Ktor, escreva um teste que roda com o banco vazio: suba um segundo container, rode só o Flyway e confirme que existem exatamente duas tarefas.
+6. Remova `parameters { path("id") ... }` e compare o tipo do `{id}` no `documentation.yaml`.
+7. Acrescente uma segunda regra à `NovaTarefa` (por exemplo, título com pelo menos 3 caracteres) e um teste de rota que confira o `422` com as duas violações possíveis.
+8. Importe uma classe do framework no pacote `dominio` e rode os testes. Leia a mensagem do ArchUnit e desfaça.
+9. Implemente `GET /tarefas?feita=true&pagina=0&tamanho=10`, com a paginação no SQL e um teto para `tamanho`.
 
 ### 12.3 Dúvidas frequentes
 
-- Preciso de Docker para rodar os testes? Para os de integração, sim, nos dois stacks. Os
-  testes de rota do Ktor com o repositório em memória e o teste unitário do recurso no
-  Quarkus rodam sem Docker.
-- Não tenho Docker, ou meu computador não dá conta. Como rodo? Num Codespace do repositório
-  (Code → Codespaces), que é também o ambiente usado no laboratório. Ele traz Java 25, Maven,
-  Go e Docker, com as dependências e as imagens do PostgreSQL já baixadas; a criação leva
-  cerca de 5 minutos. Os comandos são os mesmos (`./gradlew run`, `mvn quarkus:dev`,
-  `docker compose up -d`, `mise run test`), e as portas 8080 e 8081 aparecem na aba Portas.
-  O uso gratuito mensal é limitado: pare o Codespace ao terminar.
-- Posso usar o Codespace no projeto do grupo? Sim. Copie a pasta `.devcontainer/` para o
-  repositório do grupo e ajuste o que for preciso; a feature `docker-in-docker` é o que
-  permite rodar o `docker compose` e o Testcontainers lá dentro.
-- Posso usar H2 em memória nos testes em vez de PostgreSQL? Funciona para coisas simples,
-  mas o H2 não é o PostgreSQL: tipos, funções e mensagens de erro diferem. A rubrica pede
-  Testcontainers, justamente para testar contra o banco real.
-- A imagem do banco é `postgres:17-alpine` no Ktor e `postgres:17` no Quarkus. Faz
-  diferença? Não para o exemplo. A do Dev Services é a padrão do Quarkus; dá para trocar
-  com `quarkus.datasource.devservices.image-name`.
-- Os testes estão lentos na primeira vez. É normal? Sim. A primeira execução baixa as
-  imagens (a `postgres:17` tem 158 MB). Depois, o container sobe em cerca de 1,5 segundo.
-- Onde ficam os dados do banco do Compose? No volume `dados`. Para começar do zero:
-  `docker compose down -v`.
-- Exposed ou Ktorm? O plano de curso permite os dois. O exemplo usa Exposed por ser mantido
-  pela JetBrains e ter integração documentada com Ktor.
+- Preciso de Docker para rodar os testes? Para os de integração, sim, nos dois stacks. Os testes de rota do Ktor com o repositório em memória e o teste unitário do recurso no Quarkus rodam sem Docker.
+- Não tenho Docker, ou meu computador não dá conta. Como rodo? Num Codespace do repositório (Code → Codespaces), que é também o ambiente usado no laboratório. Ele traz Java 25, Maven, Go e Docker, com as dependências e as imagens do PostgreSQL já baixadas; a criação leva cerca de 5 minutos. Os comandos são os mesmos (`./gradlew run`, `mvn quarkus:dev`, `docker compose up -d`, `mise run test`), e as portas 8080 e 8081 aparecem na aba Portas. O uso gratuito mensal é limitado: pare o Codespace ao terminar.
+- Posso usar o Codespace no projeto do grupo? Sim. Copie a pasta `.devcontainer/` para o repositório do grupo e ajuste o que for preciso; a feature `docker-in-docker` é o que permite rodar o `docker compose` e o Testcontainers lá dentro.
+- Posso usar H2 em memória nos testes em vez de PostgreSQL? Funciona para coisas simples, mas o H2 não é o PostgreSQL: tipos, funções e mensagens de erro diferem. A rubrica pede Testcontainers, justamente para testar contra o banco real.
+- A imagem do banco é `postgres:17-alpine` no Ktor e `postgres:17` no Quarkus. Faz diferença? Não para o exemplo. A do Dev Services é a padrão do Quarkus; dá para trocar com `quarkus.datasource.devservices.image-name`.
+- Os testes estão lentos na primeira vez. É normal? Sim. A primeira execução baixa as imagens (a `postgres:17` tem 158 MB). Depois, o container sobe em cerca de 1,5 segundo.
+- Onde ficam os dados do banco do Compose? No volume `dados`. Para começar do zero: `docker compose down -v`.
+- Exposed ou Ktorm? O plano de curso permite os dois. O exemplo usa Exposed por ser mantido pela JetBrains e ter integração documentada com Ktor.
 
 ---
 
