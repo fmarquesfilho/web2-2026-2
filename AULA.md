@@ -32,7 +32,7 @@ O `./passo.sh` guarda o que você tinha digitado (`git stash list`) antes de tro
 
 Ao voltar para um passo anterior no Quarkus, rode `mvn clean` antes de subir de novo.
 
-## Roteiro da segunda, 19/10: introdução a Go e o Passo 13
+## Roteiro da quarta, 21/10: introdução a Go e o Passo 13
 
 1. **Os exemplos do Curso básico de Go**, em `/workspaces/aprenda-go-com-testes` (no seu computador: `git clone https://github.com/classrooms-fmarquesfilho/aprenda-go-com-testes`).
 
@@ -55,7 +55,21 @@ Ao voltar para um passo anterior no Quarkus, rode `mvn clean` antes de subir de 
    go run ./cmd/demo    # o tempo é o do canal mais lento, não a soma
    ```
 
-## Roteiro da quarta, 21/10: passos 14 a 18
+## Demonstração de Processos (21/10): o sistema inteiro em containers
+
+O branch `aula` está no Passo 12, e o `compose.yaml` só existe a partir do Passo 17. Por isso a demonstração usa uma cópia do Passo 18 numa pasta ao lado, sem mexer no código da aula:
+
+```bash
+cd /workspaces/web2-2026-2
+git worktree add /workspaces/compose-demo passo-18   # só na primeira vez
+cd /workspaces/compose-demo/exemplos
+docker compose up --build    # banco, serviço Go e API Ktor
+docker compose ps            # em outro terminal: os três healthy
+curl localhost:8080/tarefas
+docker compose down          # no fim
+```
+
+## Roteiro da segunda, 26/10: passos 14 a 18
 
 Cada linha começa na raiz do repositório (`/workspaces/web2-2026-2`), onde fica o `passo.sh`.
 
