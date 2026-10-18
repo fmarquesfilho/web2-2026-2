@@ -143,8 +143,8 @@ Esta é a última sprint: o que for entregue em 30/11 é o produto final do seme
 
 | Data | Dia | Tipo | Atividade |
 |------|-----|------|-----------|
-| 19/10 | Seg | 🟢 | Go idiomático para serviços: pacotes, interfaces, erros e `context`. Protocol Buffers e Buf: mensagens, serviços, `buf lint` e geração de stubs. gRPC unário, deadlines e tratamento de erro |
-| 21/10 | Qua | 🟢 | Integração do serviço principal (Ktor/Quarkus) com o serviço Go, e `docker compose` com tudo. Implantação: banco gerenciado, plataforma de container, imagens no GHCR, migrações por task ou CI, health checks |
+| 19/10 | Seg | 🟢 | Introdução a Go, com testes: ferramentas, tipos, funções como valores, métodos e interfaces, ponteiros, erros e injeção de dependência (exemplos do Curso básico de Go). O domínio do serviço Go: goroutines e `context` (Passo 13) |
+| 21/10 | Qua | 🟢 | Protocol Buffers e Buf; o servidor gRPC, com deadlines e tratamento de erro; a integração do serviço principal (Ktor/Quarkus) com o serviço Go; `docker compose` com tudo. Implantação: banco gerenciado, plataforma de container, imagens no GHCR, migrações por task ou CI, health checks (passos 14 a 18) |
 | 26/10 | Seg | 🔵 | Encontro online de acompanhamento de projetos |
 | 28/10 | Qua | 🔴 | Dia do Servidor Público |
 | 02/11 | Seg | 🔴 | Finados |
