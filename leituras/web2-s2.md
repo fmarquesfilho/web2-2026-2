@@ -1,6 +1,6 @@
 # Leitura — Um serviço em Go, gRPC e implantação (Sprint 2)
 
-Guia de apoio para as duas aulas da Sprint 2: introdução a Go, com os exemplos do Curso básico de Go, e o domínio do serviço Go (19/10, Passo 13); o contrato em Protocol Buffers, o servidor gRPC, a integração com a API, os containers e a implantação (21/10, passos 14 a 18). Na Sprint 1, a API de Tarefas ganhou banco, testes, validação e camadas. Nesta, ela passa a conversar com um segundo serviço, escrito em Go, e vai para o ar.
+Guia de apoio para as duas aulas da Sprint 2: introdução a Go, com os exemplos do Curso básico de Go, e o domínio do serviço Go (21/10, Passo 13); o contrato em Protocol Buffers, o servidor gRPC, a integração com a API, os containers e a implantação (26/10, passos 14 a 18). Na Sprint 1, a API de Tarefas ganhou banco, testes, validação e camadas. Nesta, ela passa a conversar com um segundo serviço, escrito em Go, e vai para o ar.
 
 Exemplo de referência: `exemplos/avisos-go/` (com o `PASSOS.md` dos passos 13 a 18), `exemplos/protos/`, `exemplos/ktor-tarefas/`, `exemplos/quarkus-tarefas/`, `exemplos/compose.yaml` e `exemplos/implantacao/`. Os slides são `slides/web2-slides-07.md` e `slides/web2-slides-08.md`. No branch `aula`, as tags `passo-13` a `passo-18` guardam o estado de cada passo.
 
@@ -64,7 +64,7 @@ O `*` indica que o receptor é um ponteiro: o método age sobre o mesmo `Avisado
 
 ### 2.1 Aprender Go com testes
 
-A aula de 19/10 usa os exemplos do Curso básico de Go, que segue o livro *Aprenda Go com Testes*: cada assunto é construído a partir de um teste que falha. O repositório dos exemplos tem uma pasta por aula, e cada uma roda com `go test -v`:
+A aula de 21/10 usa os exemplos do Curso básico de Go, que segue o livro *Aprenda Go com Testes*: cada assunto é construído a partir de um teste que falha. O repositório dos exemplos tem uma pasta por aula, e cada uma roda com `go test -v`:
 
 | Pasta | Assunto | O que levar para o serviço Go |
 |---|---|---|
