@@ -1,8 +1,6 @@
 # Branch `aula` — o exemplo de Tarefas, passo a passo
 
-Este branch guarda o exemplo de Tarefas (Ktor e Quarkus) em cada etapa da construção. O
-branch começa no **Passo 4**, onde a primeira parte da Sprint 1 terminou, e cada passo
-seguinte está numa tag (`passo-05` a `passo-12`). O estado final é o mesmo da `main`.
+Este branch guarda o exemplo de Tarefas (Ktor e Quarkus, e na Sprint 2 o serviço Go) em cada etapa da construção. O branch começa no **Passo 12**, onde a Sprint 1 terminou, e cada passo está numa tag (`passo-05` a `passo-18`). O estado final é o mesmo da `main`.
 
 ## Como usar
 
@@ -33,6 +31,41 @@ O `./passo.sh` guarda o que você tinha digitado (`git stash list`) antes de tro
 | Banco (Passo 6 em diante) | `docker compose up -d` | sobe sozinho (Dev Services) |
 
 Ao voltar para um passo anterior no Quarkus, rode `mvn clean` antes de subir de novo.
+
+## Roteiro da segunda, 19/10: introdução a Go e o Passo 13
+
+1. **Os exemplos do Curso básico de Go**, em `/workspaces/aprenda-go-com-testes` (no seu computador: `git clone https://github.com/classrooms-fmarquesfilho/aprenda-go-com-testes`).
+
+   ```bash
+   cd /workspaces/aprenda-go-com-testes/2-hello-world
+   go test -v                          # quebre um caso de propósito e leia a falha
+   go test -run 'TestHello/região' -v  # só os casos com "região" no nome
+   cd ../3-metodos-interfaces && go test -v
+   cd ../4-ponteiros-erros && go test -v   # tire o * de Depositar e rode de novo: saldo 0
+   cd ../5-injecao-de-dependencia && go test -v
+   ```
+
+2. **Passo 13, o serviço de avisos**, de volta ao repositório da disciplina:
+
+   ```bash
+   cd /workspaces/web2-2026-2
+   ./passo.sh 13
+   cd exemplos/avisos-go
+   go test ./...        # 3 testes: ao mesmo tempo, prazo do context, aviso inválido
+   go run ./cmd/demo    # o tempo é o do canal mais lento, não a soma
+   ```
+
+## Roteiro da quarta, 21/10: passos 14 a 18
+
+Cada linha começa na raiz do repositório (`/workspaces/web2-2026-2`), onde fica o `passo.sh`.
+
+| Passo | Comandos |
+|---|---|
+| 14 | `./passo.sh 14` · `cd exemplos/protos && buf lint && buf generate` |
+| 15 | `./passo.sh 15` · `cd exemplos/avisos-go && go run ./cmd/avisos` · em outro terminal, os `grpcurl` do Passo 15 em `exemplos/avisos-go/PASSOS.md` (list, Avisar, `-max-time 0.3`, título em branco, Health) |
+| 16 | `./passo.sh 16` · terminal 1: `cd exemplos/avisos-go && go run ./cmd/avisos` · terminal 2: `cd exemplos/ktor-tarefas && docker compose up -d && ./gradlew run` · terminal 3: o `curl -X POST` do Passo 16; depois, pare o serviço Go e repita |
+| 17 | `./passo.sh 17` · pare o que estiver rodando · `cd exemplos && docker compose up --build` · em outro terminal, `docker compose ps` |
+| 18 | `./passo.sh 18` · os modelos em `exemplos/implantacao/`; o resto está na leitura da sprint, capítulo 8 |
 
 ## O que muda em cada passo
 
