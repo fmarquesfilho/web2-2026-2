@@ -11,6 +11,11 @@ mise trust && mise install || echo "aviso: mise não terminou; os comandos compl
 go install github.com/bufbuild/buf/cmd/buf@v1.71.0 || echo "aviso: buf não instalou"
 go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest || echo "aviso: grpcurl não instalou"
 
+# Aula de introdução a Go: os exemplos do Curso básico de Go, um módulo por pasta.
+go_curso=/workspaces/aprenda-go-com-testes
+[ -d "$go_curso" ] || git clone --quiet https://github.com/classrooms-fmarquesfilho/aprenda-go-com-testes "$go_curso" || echo "aviso: não clonou o curso de Go"
+for d in "$go_curso"/*/; do [ -f "$d/go.mod" ] && (cd "$d" && go test ./... > /dev/null) || true; done
+
 (cd exemplos/ktor-tarefas && ./gradlew --quiet testClasses) || echo "aviso: Gradle não terminou"
 (cd exemplos/quarkus-tarefas && mvn -q -B test-compile) || echo "aviso: Maven não terminou"
 
