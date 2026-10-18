@@ -87,7 +87,7 @@ style: |
 
 # Desenvolvimento de Sistemas Web II
 
-## Um serviço em Go, o contrato em Protobuf e o servidor gRPC
+## Serviço em Go, Protobuf e o servidor gRPC
 
 DIM0547 — Turma 01 · Sprint 2 · aula de 19/10
 
@@ -95,14 +95,14 @@ Prof. Fernando · UFRN · 2026.2
 
 ---
 
-# A Sprint 2, a última
+# Sprint 2
 
 | | Data |
 |---|---|
 | Conteúdo | hoje (passos 13 a 15) e quarta, 21/10 (passos 16 a 18) |
 | Acompanhamento online | 26/10, 09/11 e 16/11 |
-| Prova escrita | **11/11 (quarta)**, em laboratório |
-| *Daily meetings* online | 23 e 25/11 (presencial, se preferirem, em 18/11) |
+| Prova escrita | **11/11 (quarta)**, no laboratório |
+| *Daily meetings* online | 23 e 25/11 |
 | **Entrega final** | **30/11, 23:59** |
 
 | Critério | Peso | Aula |
