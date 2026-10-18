@@ -87,7 +87,7 @@ style: |
 
 # Desenvolvimento de Sistemas Web II
 
-## A API chama o Go, tudo em containers e a implantação
+## O contrato gRPC, a API chamando o Go, containers e implantação
 
 DIM0547 — Turma 01 · Sprint 2 · aula de 21/10
 
@@ -98,18 +98,181 @@ Prof. Fernando · UFRN · 2026.2
 # Onde paramos
 
 ```
-  passo 13   o domínio em Go: Avisador, Canal, context, erros
-  passo 14   o contrato: avisos.proto, buf lint, buf generate
-  passo 15   o servidor gRPC: status, prazo, health, reflection
+  segunda   Go com testes: tipos, funções como valores, interfaces, ponteiros, erros, io.Writer
+  passo 13  o domínio do serviço de avisos: Avisador, Canal, goroutines, context, erros com nome
 ```
 
 | Passo | Hoje |
 |---|---|
-| 16 | A API (Ktor e Quarkus) chama o serviço Go por gRPC, com prazo, e continua funcionando sem ele |
+| 14 | O contrato: Protocol Buffers e Buf |
+| 15 | O servidor gRPC em Go |
+| 16 | A API (Ktor e Quarkus) chama o serviço Go, com prazo, e continua funcionando sem ele |
 | 17 | Tudo em containers: Dockerfiles, health checks e `docker compose up` do zero |
 | 18 | Implantação: configuração por ambiente, migração por comando, imagens no GHCR, Render e Neon |
 
-**Branch `aula`:** `./passo.sh 15`.
+**Branch `aula`:** `./passo.sh 13`.
+
+---
+
+# Passo 14
+
+## O contrato: Protocol Buffers e Buf
+
+---
+
+# O contrato `.proto`
+
+```protobuf
+syntax = "proto3";
+
+package tarefas.avisos.v1;                 // a versão faz parte do nome
+
+option go_package = "avisos/gen/tarefas/avisos/v1;avisosv1";
+option java_package = "br.ufrn.exemplo.tarefas.avisos.v1";
+option java_multiple_files = true;
+
+// Envia avisos sobre tarefas.
+service AvisosService {
+  // Avisa, em todos os canais ao mesmo tempo, que uma tarefa foi criada. ...
+  rpc Avisar(AvisarRequest) returns (AvisarResponse);
+}
+
+// O pedido de aviso.
+message AvisarRequest {
+  int64 tarefa_id = 1;                     // o número identifica o campo no binário
+  string titulo = 2;
+}
+```
+
+- Um arquivo, três linguagens: o Go, o Kotlin e o Java geram o código a partir dele
+- Números de campo nunca mudam e nunca são reaproveitados: é o que mantém a compatibilidade
+- Mudança incompatível vira `v2`, ao lado da `v1`
+
+📖 **Ref.** [Protocol Buffers — proto3](https://protobuf.dev/programming-guides/proto3/)
+
+---
+
+# Buf: conferir e gerar
+
+```yaml
+# protos/buf.yaml                         # protos/buf.gen.yaml
+version: v2                               version: v2
+lint:                                     plugins:
+  use:                                      - remote: buf.build/protocolbuffers/go:v1.36.12
+    - STANDARD                                out: ../avisos-go/gen
+    - COMMENTS   # tudo comentado             opt: paths=source_relative
+                                            - remote: buf.build/grpc/go:v1.6.0
+                                              out: ../avisos-go/gen
+                                              opt: paths=source_relative
+```
+
+```bash
+cd exemplos/protos
+buf lint          # sem saída: o contrato segue as regras (nomes, pacote com versão, comentários)
+buf generate      # escreve avisos-go/gen/tarefas/avisos/v1/*.pb.go
+```
+
+- Plugins remotos: nada de `protoc` instalado na máquina
+- `buf lint` vai para o CI: a rubrica pede o contrato verde lá
+- Os stubs de Kotlin e Java são gerados pelo Gradle e pelo Quarkus, no build
+
+📖 **Ref.** [Buf — lint rules](https://buf.build/docs/lint/rules/)
+
+---
+
+# Passo 15
+
+## O servidor gRPC: status, prazo, health e reflection
+
+---
+
+# O adaptador: do contrato para o domínio
+
+```go
+type Servidor struct {
+    avisosv1.UnimplementedAvisosServiceServer   // métodos novos no contrato não quebram o build
+    avisador *avisos.Avisador
+}
+
+func (s *Servidor) Avisar(ctx context.Context, req *avisosv1.AvisarRequest) (*avisosv1.AvisarResponse, error) {
+    entregas, err := s.avisador.Avisar(ctx, avisos.Aviso{TarefaID: req.GetTarefaId(), Titulo: req.GetTitulo()})
+    if errors.Is(err, avisos.ErrAvisoInvalido) {
+        return nil, status.Error(codes.InvalidArgument, err.Error())   // erro do domínio → código gRPC
+    }
+    ...                                                                 // entregas → mensagens do contrato
+}
+```
+
+| Situação | Código gRPC | Equivalente HTTP |
+|---|---|---|
+| entrada inválida | `INVALID_ARGUMENT` | 400 |
+| prazo vencido | `DEADLINE_EXCEEDED` | 504 |
+| serviço fora do ar | `UNAVAILABLE` | 503 |
+| erro interno | `INTERNAL` | 500 |
+
+📖 **Ref.** [gRPC — Status codes](https://grpc.io/docs/guides/status-codes/)
+
+---
+
+# O prazo atravessa a rede
+
+```go
+// O deadline do cliente chega no ctx do servidor. O servidor encerra os envios 50 ms
+// antes, para que a resposta, com as entregas parciais, ainda chegue a tempo.
+if prazo, ok := ctx.Deadline(); ok {
+    var cancelar context.CancelFunc
+    ctx, cancelar = context.WithDeadline(ctx, prazo.Add(-folga))
+    defer cancelar()
+}
+```
+
+```
+cliente com prazo de 300 ms
+  └─► servidor encerra em 250 ms ─► push (50 ms) e chat (150 ms) entregues; email (400 ms) não
+        └─► resposta chega antes dos 300 ms: o cliente recebe a lista
+```
+
+- Sem a folga, o servidor esperaria até o fim e o cliente veria só `DEADLINE_EXCEEDED`
+- O prazo viaja no cabeçalho `grpc-timeout`: dá para vê-lo no log do cliente
+
+📖 **Ref.** [gRPC — Deadlines](https://grpc.io/docs/guides/deadlines/)
+
+---
+
+# O servidor e a demonstração
+
+`cmd/avisos/main.go`: registra o serviço, o *health check* padrão e o *reflection*; encerra com `GracefulStop` ao receber SIGTERM.
+
+```bash
+go run ./cmd/avisos                                   # escuta na 50051
+
+grpcurl -plaintext localhost:50051 list               # o reflection lista os serviços
+grpcurl -plaintext -d '{"tarefa_id": 7, "titulo": "Estudar gRPC"}' \
+  localhost:50051 tarefas.avisos.v1.AvisosService/Avisar
+grpcurl -plaintext -max-time 0.3 -d '{"tarefa_id": 7, "titulo": "Estudar gRPC"}' \
+  localhost:50051 tarefas.avisos.v1.AvisosService/Avisar      # email volta não entregue
+grpcurl -plaintext -d '{"tarefa_id": 7, "titulo": " "}' \
+  localhost:50051 tarefas.avisos.v1.AvisosService/Avisar      # Code: InvalidArgument
+grpcurl -plaintext localhost:50051 grpc.health.v1.Health/Check   # SERVING
+```
+
+Testes do servidor: `bufconn`, uma conexão em memória que passa pela pilha gRPC inteira, sem abrir porta.
+
+---
+
+# gRPC ou REST?
+
+| | REST com JSON | gRPC com Protobuf |
+|---|---|---|
+| Contrato | OpenAPI, gerado ou escrito | `.proto`, a fonte de onde o código é gerado |
+| Formato | texto (JSON), legível | binário, compacto |
+| Transporte | HTTP/1.1 ou 2 | HTTP/2 |
+| Erros | status HTTP e *problem details* | códigos gRPC |
+| Bom para | APIs públicas, navegador, apps | serviço falando com serviço, dentro do sistema |
+
+> No projeto, as duas convivem: REST na API que o cliente usa; gRPC entre a API e o serviço Go.
+
+📖 **Ref.** [gRPC — Introduction](https://grpc.io/docs/what-is-grpc/introduction/)
 
 ---
 
@@ -462,7 +625,7 @@ Cada imagem leva a etiqueta do commit: voltar a uma versão é apontar para a et
 | Contrato e gRPC | 25% | `.proto` comentado, `buf lint` verde no CI, stubs gerados, chamada com prazo e erro tratado, teste de integração |
 | Sistema no ar | 25% | API e banco gerenciado no ar, URL no README, migração por task ou CI, segredos fora do repositório, health check, API que funciona sem o Go (o Go no ar é opcional) |
 | Ambiente e testes | 15% | `docker compose up` do zero; unitários, integração e teste de arquitetura, verdes local e no CI |
-| Prontidão | 10% | README em menos de 10 min, OpenAPI por URL, 2 ADRs novas, licença |
+| Documentação | 10% | README completo (roda em menos de 10 min), OpenAPI por URL, 2 ADRs novas, `LICENSE` |
 
 Prova em **11/11**; *daily meetings* em 23 e 25/11; **entrega em 30/11**.
 

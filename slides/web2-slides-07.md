@@ -87,7 +87,7 @@ style: |
 
 # Desenvolvimento de Sistemas Web II
 
-## Serviço em Go, Protobuf e o servidor gRPC
+## Introdução a Go, com testes, e o domínio do serviço Go
 
 DIM0547 — Turma 01 · Sprint 2 · aula de 19/10
 
@@ -99,7 +99,7 @@ Prof. Fernando · UFRN · 2026.2
 
 | | Data |
 |---|---|
-| Conteúdo | hoje (passos 13 a 15) e quarta, 21/10 (passos 16 a 18) |
+| Conteúdo | hoje: introdução a Go e o Passo 13 · quarta, 21/10: passos 14 a 18 |
 | Acompanhamento online | 26/10, 09/11 e 16/11 |
 | Prova escrita | **11/11 (quarta)**, no laboratório |
 | *Daily meetings* online | 23 e 25/11 |
@@ -108,10 +108,10 @@ Prof. Fernando · UFRN · 2026.2
 | Critério | Peso | Aula |
 |---|---|---|
 | Microsserviço Go | 25% | hoje |
-| Contrato Protobuf e integração gRPC | 25% | hoje e quarta |
+| Contrato Protobuf e integração gRPC | 25% | quarta |
 | Sistema no ar | 25% | quarta |
 | Ambiente e testes (inclui os testes que saíram da Sprint 1) | 15% | quarta |
-| Prontidão do repositório | 10% | — |
+| Documentação | 10% | — |
 
 ---
 
@@ -154,30 +154,305 @@ Maus motivos: "microsserviço é moderno"; separar um CRUD em dois serviços que
 
 ---
 
-# Passo 13
+# Roteiro de hoje
 
-## O serviço Go: pacotes, interfaces, erros e `context`
+| Min | Bloco | Exemplo |
+|---|---|---|
+| 10 | A Sprint 2 e por que um serviço em Go | a figura do sistema |
+| 10 | Ferramentas e tipos | `go mod`, `go run`, `go test` |
+| 20 | Olá, Mundo com testes; funções como valores | `2-hello-world` |
+| 15 | Métodos e interfaces | `3-metodos-interfaces` |
+| 15 | Ponteiros e erros | `4-ponteiros-erros` |
+| 10 | Injeção de dependência | `5-injecao-de-dependencia` |
+| 20 | Passo 13: o domínio do serviço de avisos | `exemplos/avisos-go` |
+
+Os exemplos de Go vêm do repositório do [Curso básico de Go](https://www.youtube.com/playlist?list=PLTr2C2xXIaIqO7Yr7FHohhgG_OgONpYIx), que segue o livro *Aprenda Go com Testes*:
+
+```bash
+git clone https://github.com/classrooms-fmarquesfilho/aprenda-go-com-testes.git
+cd aprenda-go-com-testes/2-hello-world && go test -v
+```
 
 ---
 
-# Go para quem vem de Kotlin e Java
+# Parte 1
 
-| Assunto | Kotlin / Java | Go |
-|---|---|---|
-| Unidade de código | classe, pacote | pacote (uma pasta); o módulo é o `go.mod` |
-| Visibilidade | `private`, `public` | inicial maiúscula é exportada (`Avisar`); minúscula, não (`canais`) |
-| Objetos | classes, herança | `struct` com métodos; sem herança |
-| Interfaces | `implements` explícito | satisfeitas implicitamente: quem tem os métodos implementa |
-| Erros | exceções | valores: `func f() (T, error)`, e quem chama confere `if err != nil` |
-| Concorrência | threads, corrotinas | goroutines (`go f()`) e canais |
-| Nulo | `null` | o valor zero de cada tipo; `nil` para ponteiros, interfaces, fatias |
+## Go com testes
 
-```go
-func (av *Avisador) Avisar(ctx context.Context, aviso Aviso) ([]Entrega, error)
-//    └ receptor (o "this")  └ prazo e cancelamento         └ dois resultados: valor e erro
+---
+
+# As ferramentas
+
+```bash
+go mod init exemplo.com/hello     # cria o módulo: o go.mod, com o nome e a versão do Go
+go run .                          # compila e roda o pacote main
+go test -v                        # roda os testes (arquivos *_test.go), mostrando cada um
+go test -run TestHello/região     # só os testes cujo nome casa com o padrão
+gofmt -l .                        # lista os arquivos fora do formato (o formato é um só)
+go vet ./...                      # aponta erros comuns que compilam
 ```
 
-Para começar em Go: o [Curso básico de Go](https://www.youtube.com/playlist?list=PLTr2C2xXIaIqO7Yr7FHohhgG_OgONpYIx), em vídeo, com os exercícios do *Aprenda Go com Testes*.
+| Termo | O que é |
+|---|---|
+| módulo | o projeto: uma pasta com `go.mod`, que declara o nome e as dependências |
+| pacote | uma pasta de arquivos `.go` com o mesmo `package`; `main` gera um executável |
+| teste | uma função `TestXxx(t *testing.T)` num arquivo `_test.go`, ao lado do código |
+
+O teste vem com a linguagem: não há biblioteca de teste para escolher nem configurar.
+
+---
+
+# Tipagem: estática, forte e com inferência
+
+```go
+var nome string = "Maria"     // tipo declarado
+idade := 20                   // tipo inferido (int), só dentro de funções
+const HourNotSpecified = -1   // constante
+
+total := idade + 2.5          // erro de compilação: int + float64
+total := float64(idade) + 2.5 // conversão sempre explícita
+```
+
+| | Go | Java | Python |
+|---|---|---|---|
+| Quando os tipos são verificados | compilação (estática) | compilação | execução (dinâmica) |
+| Conversão implícita entre tipos | não (forte) | em alguns casos (`int` → `double`) | não, mas os tipos só aparecem na execução |
+| Precisa escrever o tipo? | não, quando o compilador deduz | `var` desde o Java 10 | não |
+
+> Inferência não é tipagem dinâmica: `idade := 20` tem tipo `int` para sempre.
+
+📖 **Ref.** Curso básico de Go, `2-hello-world/slides/slides-tipos-em-go.md`
+
+---
+
+# Olá, Mundo, com o teste primeiro
+
+O ciclo do livro: **vermelho** (um teste que falha) → **verde** (o mínimo para passar) → **refatorar** (melhorar com os testes verdes).
+
+```go
+func assertMessage(t testing.TB, got, want string) {
+    t.Helper()                       // a falha aponta a linha de quem chamou
+    if got != want {
+        t.Errorf("got %q want %q", got, want)
+    }
+}
+
+func TestHello(t *testing.T) {
+    t.Run("sem opções", func(t *testing.T) {          // subteste com nome
+        assertMessage(t, Hello(), "Olá, Mundo")
+    })
+    t.Run("nome e hora", func(t *testing.T) {
+        assertMessage(t, Hello(WithName("Maria"), WithHour(9)), "Bom dia, Maria")
+    })
+    t.Run("hora 24 - inválida", func(t *testing.T) {   // os limites também são casos
+        assertMessage(t, Hello(WithHour(24)), "Olá, Mundo")
+    })
+}
+```
+
+**Na tela:** `cd 2-hello-world && go test -v`; quebrar um caso e ler a mensagem; `go test -run 'TestHello/região'`.
+
+---
+
+# Funções como valores: *functional options*
+
+```go
+type HelloOption func(*HelloConfig)          // um tipo que é uma função
+
+func WithName(name string) HelloOption {
+    return func(cfg *HelloConfig) { cfg.Name = name }   // devolve uma função que lembra de name
+}
+
+func Hello(options ...HelloOption) string {  // variádica: zero ou mais opções
+    cfg := HelloConfig{Hour: HourNotSpecified}
+    for _, option := range options {
+        option(&cfg)                         // cada opção altera a configuração
+    }
+    ...
+}
+
+Hello()
+Hello(WithName("João"), WithHour(20), WithRegion(RegionRN))
+```
+
+- Go não tem sobrecarga nem parâmetros com valor padrão: as opções resolvem as duas coisas
+- `WithName` devolve uma *closure*: uma função que guarda o `name` recebido
+- `&cfg` passa o endereço da configuração; é por ele que a opção consegue alterá-la (mais adiante, ponteiros)
+
+📖 **Ref.** Curso básico de Go, `3-metodos-interfaces/slides/polimorfismo-em-go.md` (Overloading × Functional Options)
+
+---
+
+# Métodos e interfaces: satisfação implícita
+
+```go
+type Forma interface {
+    Area() float64
+}
+
+type Retangulo struct {
+    Largura float64
+    Altura  float64
+}
+
+func (r Retangulo) Area() float64 {          // um método: a função tem um receptor
+    return r.Largura * r.Altura
+}
+
+type Circulo struct{ Raio float64 }
+
+func (c Circulo) Area() float64 { return math.Pi * c.Raio * c.Raio }
+```
+
+```go
+func checarArea(t testing.TB, forma Forma, want float64) { ... }   // aceita qualquer Forma
+
+checarArea(t, Retangulo{Largura: 12, Altura: 6}, 72.0)
+checarArea(t, Circulo{Raio: 10}, 314.1592653589793)
+```
+
+Nenhum `implements`: quem tem o método `Area() float64` é uma `Forma`, e o compilador confere.
+
+📖 **Ref.** Curso básico de Go, `3-metodos-interfaces/slides/polimorfismo-em-go.md`
+
+---
+
+# Interfaces em Java e em Go
+
+<div class="columns">
+<div class="col">
+
+**<span class="pill-red">Java</span>**
+
+```java
+interface Forma { double area(); }
+
+class Retangulo implements Forma {
+    public double area() { ... }
+}
+```
+
+A classe declara que implementa. A interface precisa existir antes, e a classe depende dela.
+
+</div>
+<div class="col">
+
+**<span class="pill-green">Go</span>**
+
+```go
+type Forma interface { Area() float64 }
+
+type Retangulo struct{ ... }
+
+func (r Retangulo) Area() float64 { ... }
+```
+
+O tipo não sabe da interface. Quem usa declara a interface de que precisa.
+
+</div>
+</div>
+
+Consequência: em Go, a interface fica **com quem usa**, e costuma ter um ou dois métodos. É o que vamos ver em `io.Writer` e no serviço de avisos (`Canal`).
+
+---
+
+# Ponteiros: o receptor por valor recebe uma cópia
+
+```go
+type Carteira struct {
+    saldo int                                     // minúscula: invisível fora do pacote
+}
+
+func (c *Carteira) Depositar(quantia int) {        // *Carteira: o método altera a carteira original
+    c.saldo += quantia
+}
+```
+
+O que acontece sem o `*`:
+
+```go
+func (c Carteira) Depositar(quantia int) { c.saldo += quantia }   // c é uma cópia
+
+carteira := Carteira{}
+carteira.Depositar(10)
+carteira.Saldo()          // 0: o depósito foi feito na cópia
+```
+
+| Receptor | Quando usar |
+|---|---|
+| por valor `(c Carteira)` | o método só lê; o tipo é pequeno |
+| por ponteiro `(c *Carteira)` | o método altera o estado, ou o tipo é grande |
+
+**Na tela:** em `4-ponteiros-erros`, tirar o `*` de `Depositar` e rodar `go test -v`.
+
+---
+
+# Erros: valores, com tipo próprio
+
+```go
+type ErroSaldoInsuficiente struct{ Solicitado, Disponivel int }
+
+func (e ErroSaldoInsuficiente) Error() string {   // quem tem Error() string é um error
+    return fmt.Sprintf("não é possível sacar %d, pois o saldo disponível é %d", e.Solicitado, e.Disponivel)
+}
+
+func (c *Carteira) Sacar(quantia int) error {
+    if quantia > c.saldo {
+        return ErroSaldoInsuficiente{Solicitado: quantia, Disponivel: c.saldo}
+    }
+    c.saldo -= quantia
+    return nil                                     // nil: deu certo
+}
+```
+
+```go
+if err := carteira.Sacar(10); err != nil {
+    var falta ErroSaldoInsuficiente
+    if errors.As(err, &falta) {                    // recupera o erro com os campos
+        fmt.Println("faltam", falta.Solicitado-falta.Disponivel)
+    }
+}
+```
+
+- `error` é uma interface com um método, `Error() string`; o erro aparece na assinatura e é tratado por quem chamou
+
+📖 **Ref.** [Go — errors](https://pkg.go.dev/errors)
+
+---
+
+# Injeção de dependência: `io.Writer`
+
+```go
+type Writer interface { Write(p []byte) (n int, err error) }   // io.Writer: um método só
+
+func Saudar(escritor io.Writer, options ...HelloOption) {
+    fmt.Fprintf(escritor, "%s", Hello(options...))
+}
+```
+
+| Quem chama passa | E a saudação vai para |
+|---|---|
+| `os.Stdout` | o terminal |
+| `&bytes.Buffer{}` | a memória, para o teste conferir |
+| o `http.ResponseWriter` de um servidor HTTP | a resposta da requisição |
+
+```go
+func TestSaudar(t *testing.T) {
+    buffer := bytes.Buffer{}
+    Saudar(&buffer, WithName("Maria"))
+    if buffer.String() != "Olá, Maria" { t.Errorf(...) }
+}
+```
+
+Depender de uma interface, e não de um destino concreto, é o que torna a função testável: a ideia das portas da API de Tarefas.
+
+📖 **Ref.** Curso básico de Go, `5-injecao-de-dependencia/slides/5-injecao-dependencia-slides.md`
+
+---
+
+# Parte 2 — Passo 13
+
+## O domínio do serviço de avisos
 
 ---
 
@@ -202,7 +477,7 @@ func NovoAvisador(canais ...Canal) *Avisador {        // "construtor": uma funç
 
 - `CanalSimulado` tem `Nome()` e `Enviar(...)`: é um `Canal`, sem declarar nada
 - O pacote `avisos` é o domínio: não importa gRPC, HTTP nem banco
-- Em Go, interfaces costumam ter um ou dois métodos, e ficam com quem as usa
+- Como o `io.Writer`: uma interface pequena, declarada por quem usa, com um método que pode falhar
 
 ---
 
@@ -258,7 +533,7 @@ entregas, err := av.Avisar(ctx, aviso)       // push (50 ms) entrega; email e ch
 
 ---
 
-# Erros como valores
+# Erros com nome, e a demonstração
 
 ```go
 var ErrAvisoInvalido = errors.New("aviso inválido")           // um erro com nome
@@ -268,11 +543,10 @@ return nil, fmt.Errorf("%w: tarefa %d", ErrAvisoInvalido, id) // %w embrulha, se
 if errors.Is(err, avisos.ErrAvisoInvalido) { ... }            // compara pela identidade, não pelo texto
 ```
 
-| Exceções (Kotlin, Java) | Erros como valores (Go) |
-|---|---|
-| saem da função por um caminho escondido | aparecem na assinatura: `(T, error)` |
-| quem chama pode esquecer de tratar | quem chama recebe o erro e decide ali |
-| `catch (e: Tipo)` | `errors.Is(err, ErrX)` ou `errors.As(err, &alvo)` |
+| | Quando usar | Como conferir |
+|---|---|---|
+| erro com nome (`ErrAvisoInvalido`) | quem chama só precisa saber **qual** erro foi | `errors.Is(err, ErrAvisoInvalido)` |
+| tipo de erro (`ErroSaldoInsuficiente`) | quem chama precisa de **dados** do erro | `errors.As(err, &alvo)` |
 
 **Demonstração**
 
@@ -286,191 +560,29 @@ go run ./cmd/demo      # prazo de 1 s: 3 entregues em 400 ms; prazo de 100 ms: s
 
 ---
 
-# Passo 14
-
-## O contrato: Protocol Buffers e Buf
-
----
-
-# O contrato `.proto`
-
-```protobuf
-syntax = "proto3";
-
-package tarefas.avisos.v1;                 // a versão faz parte do nome
-
-option go_package = "avisos/gen/tarefas/avisos/v1;avisosv1";
-option java_package = "br.ufrn.exemplo.tarefas.avisos.v1";
-option java_multiple_files = true;
-
-// Envia avisos sobre tarefas.
-service AvisosService {
-  // Avisa, em todos os canais ao mesmo tempo, que uma tarefa foi criada. ...
-  rpc Avisar(AvisarRequest) returns (AvisarResponse);
-}
-
-// O pedido de aviso.
-message AvisarRequest {
-  int64 tarefa_id = 1;                     // o número identifica o campo no binário
-  string titulo = 2;
-}
-```
-
-- Um arquivo, três linguagens: o Go, o Kotlin e o Java geram o código a partir dele
-- Números de campo nunca mudam e nunca são reaproveitados: é o que mantém a compatibilidade
-- Mudança incompatível vira `v2`, ao lado da `v1`
-
-📖 **Ref.** [Protocol Buffers — proto3](https://protobuf.dev/programming-guides/proto3/)
-
----
-
-# Buf: conferir e gerar
-
-```yaml
-# protos/buf.yaml                         # protos/buf.gen.yaml
-version: v2                               version: v2
-lint:                                     plugins:
-  use:                                      - remote: buf.build/protocolbuffers/go:v1.36.12
-    - STANDARD                                out: ../avisos-go/gen
-    - COMMENTS   # tudo comentado             opt: paths=source_relative
-                                            - remote: buf.build/grpc/go:v1.6.0
-                                              out: ../avisos-go/gen
-                                              opt: paths=source_relative
-```
-
-```bash
-cd exemplos/protos
-buf lint          # sem saída: o contrato segue as regras (nomes, pacote com versão, comentários)
-buf generate      # escreve avisos-go/gen/tarefas/avisos/v1/*.pb.go
-```
-
-- Plugins remotos: nada de `protoc` instalado na máquina
-- `buf lint` vai para o CI: a rubrica pede o contrato verde lá
-- Os stubs de Kotlin e Java são gerados pelo Gradle e pelo Quarkus, no build
-
-📖 **Ref.** [Buf — lint rules](https://buf.build/docs/lint/rules/)
-
----
-
-# Passo 15
-
-## O servidor gRPC: status, prazo, health e reflection
-
----
-
-# O adaptador: do contrato para o domínio
-
-```go
-type Servidor struct {
-    avisosv1.UnimplementedAvisosServiceServer   // métodos novos no contrato não quebram o build
-    avisador *avisos.Avisador
-}
-
-func (s *Servidor) Avisar(ctx context.Context, req *avisosv1.AvisarRequest) (*avisosv1.AvisarResponse, error) {
-    entregas, err := s.avisador.Avisar(ctx, avisos.Aviso{TarefaID: req.GetTarefaId(), Titulo: req.GetTitulo()})
-    if errors.Is(err, avisos.ErrAvisoInvalido) {
-        return nil, status.Error(codes.InvalidArgument, err.Error())   // erro do domínio → código gRPC
-    }
-    ...                                                                 // entregas → mensagens do contrato
-}
-```
-
-| Situação | Código gRPC | Equivalente HTTP |
-|---|---|---|
-| entrada inválida | `INVALID_ARGUMENT` | 400 |
-| prazo vencido | `DEADLINE_EXCEEDED` | 504 |
-| serviço fora do ar | `UNAVAILABLE` | 503 |
-| erro interno | `INTERNAL` | 500 |
-
-📖 **Ref.** [gRPC — Status codes](https://grpc.io/docs/guides/status-codes/)
-
----
-
-# O prazo atravessa a rede
-
-```go
-// O deadline do cliente chega no ctx do servidor. O servidor encerra os envios 50 ms
-// antes, para que a resposta, com as entregas parciais, ainda chegue a tempo.
-if prazo, ok := ctx.Deadline(); ok {
-    var cancelar context.CancelFunc
-    ctx, cancelar = context.WithDeadline(ctx, prazo.Add(-folga))
-    defer cancelar()
-}
-```
-
-```
-cliente com prazo de 300 ms
-  └─► servidor encerra em 250 ms ─► push (50 ms) e chat (150 ms) entregues; email (400 ms) não
-        └─► resposta chega antes dos 300 ms: o cliente recebe a lista
-```
-
-- Sem a folga, o servidor esperaria até o fim e o cliente veria só `DEADLINE_EXCEEDED`
-- O prazo viaja no cabeçalho `grpc-timeout`: dá para vê-lo no log do cliente
-
-📖 **Ref.** [gRPC — Deadlines](https://grpc.io/docs/guides/deadlines/)
-
----
-
-# O servidor e a demonstração
-
-`cmd/avisos/main.go`: registra o serviço, o *health check* padrão e o *reflection*; encerra com `GracefulStop` ao receber SIGTERM.
-
-```bash
-go run ./cmd/avisos                                   # escuta na 50051
-
-grpcurl -plaintext localhost:50051 list               # o reflection lista os serviços
-grpcurl -plaintext -d '{"tarefa_id": 7, "titulo": "Estudar gRPC"}' \
-  localhost:50051 tarefas.avisos.v1.AvisosService/Avisar
-grpcurl -plaintext -max-time 0.3 -d '{"tarefa_id": 7, "titulo": "Estudar gRPC"}' \
-  localhost:50051 tarefas.avisos.v1.AvisosService/Avisar      # email volta não entregue
-grpcurl -plaintext -d '{"tarefa_id": 7, "titulo": " "}' \
-  localhost:50051 tarefas.avisos.v1.AvisosService/Avisar      # Code: InvalidArgument
-grpcurl -plaintext localhost:50051 grpc.health.v1.Health/Check   # SERVING
-```
-
-Testes do servidor: `bufconn`, uma conexão em memória que passa pela pilha gRPC inteira, sem abrir porta.
-
----
-
-# gRPC ou REST?
-
-| | REST com JSON | gRPC com Protobuf |
-|---|---|---|
-| Contrato | OpenAPI, gerado ou escrito | `.proto`, a fonte de onde o código é gerado |
-| Formato | texto (JSON), legível | binário, compacto |
-| Transporte | HTTP/1.1 ou 2 | HTTP/2 |
-| Erros | status HTTP e *problem details* | códigos gRPC |
-| Bom para | APIs públicas, navegador, apps | serviço falando com serviço, dentro do sistema |
-
-> No projeto, as duas convivem: REST na API que o cliente usa; gRPC entre a API e o serviço Go.
-
-📖 **Ref.** [gRPC — Introduction](https://grpc.io/docs/what-is-grpc/introduction/)
-
----
-
 # Na quarta, 21/10
 
 | Passo | Assunto |
 |---|---|
-| 16 | A API chama o Go: cliente gRPC no Ktor e no Quarkus, com prazo e degradação |
+| 14 | O contrato: Protocol Buffers e Buf |
+| 15 | O servidor gRPC em Go: status, prazo, health e reflection |
+| 16 | A API chama o Go: cliente gRPC no Ktor e no Quarkus |
 | 17 | Tudo em containers: Dockerfiles, health checks e `docker compose` |
 | 18 | Implantação: imagens no GHCR, migração por comando, Render e Neon |
 
 Até lá, no projeto do grupo:
 
-- escolham a responsabilidade do serviço Go e escrevam a justificativa (uma ADR)
-- escrevam o `.proto` e deixem o `buf lint` verde
-- comecem o servidor com um teste
+- fazer os exercícios do curso de Go que faltarem (`2-hello-world` a `5-injecao-de-dependencia`)
+- escolher a responsabilidade do serviço Go e escrever a justificativa (uma ADR)
+- escrever o domínio do serviço, com testes, como no Passo 13
 
 ---
 
 # Onde estudar depois
 
-- Leitura da sprint: `leituras/web2-s2.md`, capítulos 1 a 5
-- [Curso básico de Go](https://www.youtube.com/playlist?list=PLTr2C2xXIaIqO7Yr7FHohhgG_OgONpYIx) (vídeos do professor) e o [repositório dos exercícios](https://github.com/classrooms-fmarquesfilho/aprenda-go-com-testes): Olá, mundo; métodos e interfaces; ponteiros e erros; injeção de dependência
-- [Aprenda Go com Testes](https://larien.gitbook.io/aprenda-go-com-testes/): [Concorrência](https://larien.gitbook.io/aprenda-go-com-testes/primeiros-passos-com-go/concorrencia) · [Select](https://larien.gitbook.io/aprenda-go-com-testes/primeiros-passos-com-go/select) · [Context](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/context) (em inglês)
-- Passos: `exemplos/avisos-go/PASSOS.md` · branch `aula`, tags `passo-13` a `passo-15`
+- [Curso básico de Go](https://www.youtube.com/playlist?list=PLTr2C2xXIaIqO7Yr7FHohhgG_OgONpYIx) (vídeos do professor) e o [repositório dos exemplos](https://github.com/classrooms-fmarquesfilho/aprenda-go-com-testes)
+- [Aprenda Go com Testes](https://larien.gitbook.io/aprenda-go-com-testes/): os capítulos de Olá, Mundo; estruturas, métodos e interfaces; ponteiros e erros; injeção de dependência; [concorrência](https://larien.gitbook.io/aprenda-go-com-testes/primeiros-passos-com-go/concorrencia) e [select](https://larien.gitbook.io/aprenda-go-com-testes/primeiros-passos-com-go/select)
+- [Learn Go with Tests — Context](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/context) (em inglês)
 - [A Tour of Go](https://go.dev/tour/) · [Effective Go](https://go.dev/doc/effective_go)
-- [Go — context](https://pkg.go.dev/context) · [Go — errors](https://pkg.go.dev/errors)
-- [Protocol Buffers — proto3](https://protobuf.dev/programming-guides/proto3/) · [Buf — lint rules](https://buf.build/docs/lint/rules/)
-- [gRPC — Deadlines](https://grpc.io/docs/guides/deadlines/) · [Status codes](https://grpc.io/docs/guides/status-codes/) · [Health checking](https://grpc.io/docs/guides/health-checking/)
+- Leitura da sprint: `leituras/web2-s2.md`, capítulos 1 a 3
+- Passo a passo: `exemplos/avisos-go/PASSOS.md` · branch `aula`, tag `passo-13`

@@ -1,6 +1,6 @@
 # Leitura — Um serviço em Go, gRPC e implantação (Sprint 2)
 
-Guia de apoio para as duas aulas da Sprint 2: o serviço Go, o contrato em Protocol Buffers e o servidor gRPC (19/10, passos 13 a 15), e a integração com a API, os containers e a implantação (21/10, passos 16 a 18). Na Sprint 1, a API de Tarefas ganhou banco, testes, validação e camadas. Nesta, ela passa a conversar com um segundo serviço, escrito em Go, e vai para o ar.
+Guia de apoio para as duas aulas da Sprint 2: introdução a Go, com os exemplos do Curso básico de Go, e o domínio do serviço Go (19/10, Passo 13); o contrato em Protocol Buffers, o servidor gRPC, a integração com a API, os containers e a implantação (21/10, passos 14 a 18). Na Sprint 1, a API de Tarefas ganhou banco, testes, validação e camadas. Nesta, ela passa a conversar com um segundo serviço, escrito em Go, e vai para o ar.
 
 Exemplo de referência: `exemplos/avisos-go/` (com o `PASSOS.md` dos passos 13 a 18), `exemplos/protos/`, `exemplos/ktor-tarefas/`, `exemplos/quarkus-tarefas/`, `exemplos/compose.yaml` e `exemplos/implantacao/`. Os slides são `slides/web2-slides-07.md` e `slides/web2-slides-08.md`. No branch `aula`, as tags `passo-13` a `passo-18` guardam o estado de cada passo.
 
@@ -28,7 +28,7 @@ O que a Sprint 2 cobra:
 | Contrato Protobuf e integração gRPC | 25% | 4, 5 e 6 |
 | Sistema no ar | 25% | 8 |
 | Ambiente e testes | 15% | 6 e 7 (e os testes que saíram da Sprint 1) |
-| Prontidão do repositório | 10% | 8 |
+| Documentação | 10% | 8 |
 
 No exemplo, a responsabilidade do serviço Go é avisar que uma tarefa foi criada, por três canais (e-mail, push e chat, simulados). Quando uma tarefa é criada, a API chama o serviço por gRPC; o serviço avisa os três canais ao mesmo tempo e responde quais entregaram.
 
@@ -61,6 +61,22 @@ func (av *Avisador) Avisar(ctx context.Context, aviso Aviso) ([]Entrega, error)
 ```
 
 O `*` indica que o receptor é um ponteiro: o método age sobre o mesmo `Avisador`, e não sobre uma cópia. Construtores não existem; o costume é uma função `NovoAvisador(...)` que devolve o valor montado.
+
+### 2.1 Aprender Go com testes
+
+A aula de 19/10 usa os exemplos do Curso básico de Go, que segue o livro *Aprenda Go com Testes*: cada assunto é construído a partir de um teste que falha. O repositório dos exemplos tem uma pasta por aula, e cada uma roda com `go test -v`:
+
+| Pasta | Assunto | O que levar para o serviço Go |
+|---|---|---|
+| `2-hello-world` | ferramentas, tipos, testes com `t.Run` e `t.Helper`; funções como valores (*functional options*) | o teste ao lado do código, desde o primeiro passo |
+| `3-metodos-interfaces` | `struct`, métodos e interfaces satisfeitas implicitamente | interfaces pequenas, declaradas por quem usa |
+| `4-ponteiros-erros` | receptor por valor × por ponteiro; erros como valores, com tipo próprio | receptor ponteiro quando o método altera; erros com nome ou com tipo |
+| `5-injecao-de-dependencia` | `io.Writer`, e o teste com `bytes.Buffer` | depender de uma interface para poder testar |
+
+Dois pontos que costumam pegar quem vem de Java:
+
+- **Receptor por valor recebe uma cópia.** Em `func (c Carteira) Depositar(q int)`, o depósito acontece na cópia, e o saldo da carteira original não muda. Com `func (c *Carteira)`, o método age sobre a original. A regra: ponteiro quando o método altera o estado.
+- **Dois jeitos de reconhecer um erro.** Um erro com nome (`var ErrAvisoInvalido = errors.New(...)`) é conferido com `errors.Is`, quando basta saber qual erro foi. Um tipo de erro (`ErroSaldoInsuficiente`, com os campos `Solicitado` e `Disponivel`) é recuperado com `errors.As(err, &alvo)`, quando quem chama precisa dos dados.
 
 Para quem está começando em Go, o caminho sugerido é o Curso básico de Go, em vídeo, que segue o *Aprenda Go com Testes*: cada assunto é construído a partir de um teste. Os capítulos de métodos e interfaces, ponteiros e erros, e injeção de dependência cobrem o que o serviço de avisos usa; os de concorrência, `select` e `context`, do mesmo livro, cobrem o capítulo 3 desta leitura.
 
