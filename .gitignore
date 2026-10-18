@@ -35,6 +35,8 @@ node_modules/
 .gradle/
 target/
 
-# Slides gerados — o PDF é distribuído pelo SIGAA, não pelo repositório
+# PDFs gerados: só os dos slides e das leituras vão para o repositório
 *.pdf
+!slides/*.pdf
+!leituras/*.pdf
 slides/*.html
