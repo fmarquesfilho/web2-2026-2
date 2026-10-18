@@ -14,7 +14,7 @@ A Sprint 2 é a última do semestre: o que for entregue em 30/11 é o produto fi
 | Contrato Protobuf e integração gRPC | 25% | `.proto` comentado, `buf lint` verde no CI, stubs gerados; a API chama o Go com prazo e erro tratado, e um teste automatizado cobre o fluxo |
 | Sistema no ar | 25% | API e banco gerenciado no ar, com URL no README, migração por task ou CI, segredos fora do repositório, health check e API que funciona sem o Go |
 | Ambiente e testes | 15% | `docker compose up` sobe API, Go e banco do zero; testes unitários, de integração com banco e de arquitetura, verdes local e no CI |
-| Prontidão do repositório | 10% | README que roda em menos de 10 min, OpenAPI por URL, duas ADRs novas e licença |
+| Documentação | 10% | README completo, que permite rodar o sistema em menos de 10 min; OpenAPI por URL; duas ADRs novas; licença |
 
 Além da entrega técnica, a nota da sprint tem a atividade no repositório (30%) e a comunicação (20%): ver [AVALIACAO.md](AVALIACAO.md#2-nota-de-cada-sprint).
 
@@ -22,7 +22,7 @@ Além da entrega técnica, a nota da sprint tem a atividade no repositório (30%
 
 ## Material de apoio
 
-- Leitura da sprint: [`leituras/web2-s2.md`](../leituras/web2-s2.md) — Go, Protobuf e o servidor gRPC (19/10); a API chamando o Go, containers e implantação (21/10).
+- Leitura da sprint: [`leituras/web2-s2.md`](../leituras/web2-s2.md) — introdução a Go e o domínio do serviço Go (19/10); Protobuf, o servidor gRPC, a API chamando o Go, containers e implantação (21/10).
 - Slides: `slides/web2-slides-07.md` (19/10) e `slides/web2-slides-08.md` (21/10).
 - Exemplo: `exemplos/avisos-go/` com o [`PASSOS.md`](../exemplos/avisos-go/PASSOS.md) dos passos 13 a 18, `exemplos/protos/`, `exemplos/compose.yaml` e os modelos em `exemplos/implantacao/`. No branch `aula`, as tags `passo-13` a `passo-18` guardam cada passo.
 - Para aprender Go: o [Curso básico de Go](https://www.youtube.com/playlist?list=PLTr2C2xXIaIqO7Yr7FHohhgG_OgONpYIx), em vídeo, com os [exercícios](https://github.com/classrooms-fmarquesfilho/aprenda-go-com-testes) do *Aprenda Go com Testes* (<https://larien.gitbook.io/aprenda-go-com-testes/>).
@@ -70,12 +70,33 @@ Além da entrega técnica, a nota da sprint tem a atividade no repositório (30%
 
 ---
 
-## Prontidão do repositório
+## Documentação
 
-- README que permite a terceiros rodar o sistema em menos de 10 minutos: pré-requisitos, `docker compose up`, como chamar a API.
-- OpenAPI acessível por URL (local e no ar).
-- Duas ADRs novas: o serviço Go (responsabilidade e justificativa) e a implantação (plataforma, banco, segredos, o que ficou fora do ar e por quê).
-- Licença definida.
+O critério avalia se outra pessoa consegue entender, rodar e avaliar o sistema só com o que está no repositório.
+
+**README**, na raiz, com:
+
+| Seção | O que contém |
+|---|---|
+| O que é | o problema que o sistema resolve, em dois ou três parágrafos |
+| Arquitetura | um diagrama dos serviços (API, serviço Go, banco) e de como conversam (REST, gRPC, SQL) |
+| No ar | a URL pública da API e da documentação OpenAPI |
+| Pré-requisitos | o que instalar (Docker, e o que mais for necessário), com versões |
+| Como rodar | `docker compose up --build` e o que esperar ao final; as variáveis de ambiente, com exemplo |
+| Como testar | os comandos dos testes (serviço principal e Go) e o que cada suíte cobre |
+| Exemplos | duas ou três chamadas à API (`curl` ou HTTP), com a resposta esperada |
+| Vídeo | o link do vídeo da sprint |
+
+O teste do README: uma pessoa de fora do grupo, seguindo só o README, roda o sistema em menos de 10 minutos.
+
+**OpenAPI** acessível por URL, local e no ar, com todas as rotas, os parâmetros com os tipos certos e as respostas de erro (*problem details*).
+
+**ADRs**, em `docs/decisoes/`, pelo menos duas novas, no formato contexto, decisão, alternativas consideradas e consequências:
+
+- o serviço Go: a responsabilidade, por que fica fora da API, o que aconteceria se ficasse dentro;
+- a implantação: a plataforma, o banco gerenciado, como os segredos são guardados, como as migrações são aplicadas, e o que ficou fora do ar (o serviço Go, se for o caso) e por quê.
+
+**Licença**: um arquivo `LICENSE` na raiz (MIT, Apache 2.0 ou outra), citada no README.
 
 ---
 

@@ -11,7 +11,7 @@ vez de repeti-la. Os pesos vêm de [RUBRICAS.md](RUBRICAS.md#sprint-2). Prazo em
 | # | Tarefa | Critério da rubrica |
 |---|---|---|
 | T1 | Quebrar o trabalho em cartões da sprint | Atividade no repositório |
-| T2 | Escolher e justificar a responsabilidade do serviço Go | Microsserviço Go (25%) · Prontidão (10%) |
+| T2 | Escolher e justificar a responsabilidade do serviço Go | Microsserviço Go (25%) · Documentação (10%) |
 | T3 | Escrever o domínio do serviço Go, com testes | Microsserviço Go (25%) |
 | T4 | Escrever o contrato `.proto` e gerar os stubs | Contrato Protobuf e integração gRPC (25%) |
 | T5 | Expor o serviço por gRPC | Contrato Protobuf e integração gRPC (25%) |
@@ -20,7 +20,7 @@ vez de repeti-la. Os pesos vêm de [RUBRICAS.md](RUBRICAS.md#sprint-2). Prazo em
 | T8 | Subir tudo com `docker compose` | Ambiente e testes (15%) |
 | T9 | Ampliar o CI | Contrato (25%) · Ambiente e testes (15%) |
 | T10 | Pôr a API no ar com banco gerenciado | Sistema no ar (25%) |
-| T11 | Deixar o repositório pronto para terceiros | Prontidão do repositório (10%) |
+| T11 | Documentar o sistema | Documentação (10%) |
 | T12 | Gravar o vídeo de 5 minutos | Comunicação |
 
 > Exemplo de referência: `exemplos/avisos-go/` deste repositório, passos 13 a 18 do
@@ -193,20 +193,20 @@ vez de repeti-la. Os pesos vêm de [RUBRICAS.md](RUBRICAS.md#sprint-2). Prazo em
 
 ---
 
-## T11 — Deixar o repositório pronto para terceiros
+## T11 — Documentar o sistema
 
-**Objetivo.** Qualquer pessoa consegue rodar e entender o sistema.
+**Objetivo.** Qualquer pessoa entende, roda e avalia o sistema só com o repositório.
 
 **O que fazer.**
-- [ ] README: pré-requisitos, `docker compose up`, exemplos de chamada, URL no ar, link do vídeo
-- [ ] OpenAPI acessível por URL
-- [ ] Conferir que as duas ADRs novas estão em `docs/decisoes/`
-- [ ] Escolher e acrescentar a licença
+- [ ] README com as seções do guia: o que é, arquitetura (diagrama dos serviços), no ar, pré-requisitos, como rodar, como testar, exemplos de chamada e o link do vídeo
+- [ ] OpenAPI acessível por URL, local e no ar, com todas as rotas e as respostas de erro
+- [ ] As duas ADRs novas em `docs/decisoes/` (o serviço Go e a implantação), com contexto, decisão, alternativas e consequências
+- [ ] Arquivo `LICENSE` na raiz, citado no README
 - [ ] Pedir a alguém de fora do grupo que siga o README e cronometrar
 
-**Pronto quando.** Uma pessoa de fora roda o sistema em menos de 10 minutos.
+**Pronto quando.** Uma pessoa de fora roda o sistema em menos de 10 minutos, e o README, o OpenAPI, as ADRs e a licença estão no repositório.
 
-**Referência.** [RUBRICAS.md](RUBRICAS.md#sprint-2) *Prontidão do repositório*.
+**Referência.** [SPRINT-2.md](SPRINT-2.md) *Documentação* · [RUBRICAS.md](RUBRICAS.md#sprint-2).
 
 ---
 
