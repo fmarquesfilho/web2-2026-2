@@ -137,8 +137,7 @@ Esta é a última sprint: o que for entregue em 30/11 é o produto final do seme
 |------|-----|------|-----------|
 | 19/10 | Seg | 🔴 | Aula cancelada |
 | 21/10 | Qua | 🔴 | Aula cancelada |
-| 23/10 | Sex | 🎥 | Aulas em vídeo, publicadas no SIGAA até esta data: Introdução a Go, com testes: ferramentas, tipos, funções como valores, métodos e interfaces, ponteiros, erros e injeção de dependência (exemplos do Curso básico de Go). O domínio do serviço Go: goroutines e `context` (Passo 13) |
-| 26/10 | Seg | 🟢 | Protocol Buffers e Buf; o servidor gRPC, com deadlines e tratamento de erro; a integração do serviço principal (Ktor/Quarkus) com o serviço Go; `docker compose` com tudo. Implantação: banco gerenciado, plataforma de container, imagens no GHCR, migrações por task ou CI, health checks (passos 14 a 18) |
+| 26/10 | Seg | 🟢 | **Introdução a Go (vídeo); gRPC, integração, containers e implantação**. Em vídeo, publicado no SIGAA até 23/10: Introdução a Go, com testes: ferramentas, tipos, funções como valores, métodos e interfaces, ponteiros, erros e injeção de dependência (exemplos do Curso básico de Go). O domínio do serviço Go: goroutines e `context` (Passo 13). Em sala: Protocol Buffers e Buf; o servidor gRPC, com deadlines e tratamento de erro; a integração do serviço principal (Ktor/Quarkus) com o serviço Go; `docker compose` com tudo. Implantação: banco gerenciado, plataforma de container, imagens no GHCR, migrações por task ou CI, health checks (passos 14 a 18) |
 | 28/10 | Qua | 🔴 | Dia do Servidor Público |
 | 02/11 | Seg | 🔴 | Finados |
 | 04/11 | Qua | 🔵 | Encontro online: revisão para a prova e dúvidas |
