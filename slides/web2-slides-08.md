@@ -98,7 +98,7 @@ Prof. Fernando · UFRN · 2026.2
 # Onde paramos
 
 ```
-  quarta    Go com testes: tipos, funções como valores, interfaces, ponteiros, erros, io.Writer
+  vídeo     Go com testes: tipos, funções como valores, interfaces, ponteiros, erros, io.Writer
   passo 13  o domínio do serviço de avisos: Avisador, Canal, goroutines, context, erros com nome
 ```
 

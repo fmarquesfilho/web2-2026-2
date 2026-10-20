@@ -1,6 +1,6 @@
 # Exemplos da aula — a mesma API em dois stacks
 
-Uma API de tarefas, construída do zero. Na Sprint 1, a visão comparativa Kotlin/Ktor × Java/Quarkus (14/09), persistência, migrações, testes, OpenAPI, validação e arquitetura. Na Sprint 2 (21 e 26/10), um serviço em Go que a API chama por gRPC, os containers e a implantação.
+Uma API de tarefas, construída do zero. Na Sprint 1, a visão comparativa Kotlin/Ktor × Java/Quarkus (14/09), persistência, migrações, testes, OpenAPI, validação e arquitetura. Na Sprint 2, um serviço em Go que a API chama por gRPC, os containers e a implantação.
 
 | Pasta | Stack | Roda em | Reconstruir ao vivo |
 |-------|-------|---------|---------------------|
@@ -17,7 +17,7 @@ Os passos são numerados igualmente nos dois: **1** servidor no ar · **2** mode
 
 Na Sprint 2, os passos continuam, iguais para os dois: **13** o serviço Go · **14** o contrato `.proto` com Buf · **15** o servidor gRPC · **16** a API chama o Go por gRPC · **17** tudo em containers (`exemplos/compose.yaml`) · **18** implantação (modelos em `implantacao/`).
 
-## Introdução a Go (aula de 21/10)
+## Introdução a Go
 
 A aula começa pelos exemplos do Curso básico de Go, que segue o livro *Aprenda Go com Testes*. Eles ficam num repositório à parte, com uma pasta por assunto; no Codespace do branch `aula`, já vêm clonados em `/workspaces/aprenda-go-com-testes`.
 

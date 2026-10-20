@@ -40,7 +40,7 @@ Todos os grupos participam da *daily meeting* em todas as sprints, exceto na Spr
 |-------|---------|------|---------------|---------|
 | Sprint 0 | 17/08 a 14/09 | Fundamentos e ambiente poliglota | — | 16/09 |
 | Sprint 1 | 14/09 a 16/10 | Serviço de CRUD em Ktor ou Quarkus | 28 e 30/09, online | 16/10 |
-| Sprint 2 (final) | 01/11 a 30/11, com o conteúdo em 21 e 26/10 | Serviço Go, gRPC e implantação | 23 e 25/11, online | 30/11 |
+| Sprint 2 (final) | 01/11 a 30/11, com o conteúdo em vídeo (até 23/10) e em 26/10 | Serviço Go, gRPC e implantação | 23 e 25/11, online | 30/11 |
 | Prova escrita | 11/11 | Sprints 0 e 1 e o conteúdo da Sprint 2 | — | — |
 | Prova de reposição | 02/12 | Sprints 0 a 2, cumulativa e opcional | — | — |
 
@@ -76,7 +76,7 @@ No fim de cada sprint, o professor conversa com cada grupo no formato de uma *da
 |--------|---------|--------|
 | 05 e 07/10 | 🟢 presencial | 🟢 presencial |
 | 12 e 14/10 | 🔴 feriado | 🔵 online |
-| 19 e 21/10 | 🔴 cancelada | 🟢 presencial |
+| 19 e 21/10 | 🔴 cancelada | 🔴 cancelada |
 | 26 e 28/10 | 🟢 presencial | 🔴 feriado |
 | 02 e 04/11 | 🔴 feriado | 🔵 online |
 | 09 e 11/11 | 🔵 online | 🟢 presencial (prova) |
@@ -135,8 +135,9 @@ Esta é a última sprint: o que for entregue em 30/11 é o produto final do seme
 
 | Data | Dia | Tipo | Atividade |
 |------|-----|------|-----------|
-| 19/10 | Seg | 🔴 | Aula cancelada — conteúdo deslocado para 21 e 26/10 |
-| 21/10 | Qua | 🟢 | Introdução a Go, com testes: ferramentas, tipos, funções como valores, métodos e interfaces, ponteiros, erros e injeção de dependência (exemplos do Curso básico de Go). O domínio do serviço Go: goroutines e `context` (Passo 13) |
+| 19/10 | Seg | 🔴 | Aula cancelada |
+| 21/10 | Qua | 🔴 | Aula cancelada |
+| 23/10 | Sex | 🎥 | Aulas em vídeo, publicadas no SIGAA até esta data: Introdução a Go, com testes: ferramentas, tipos, funções como valores, métodos e interfaces, ponteiros, erros e injeção de dependência (exemplos do Curso básico de Go). O domínio do serviço Go: goroutines e `context` (Passo 13) |
 | 26/10 | Seg | 🟢 | Protocol Buffers e Buf; o servidor gRPC, com deadlines e tratamento de erro; a integração do serviço principal (Ktor/Quarkus) com o serviço Go; `docker compose` com tudo. Implantação: banco gerenciado, plataforma de container, imagens no GHCR, migrações por task ou CI, health checks (passos 14 a 18) |
 | 28/10 | Qua | 🔴 | Dia do Servidor Público |
 | 02/11 | Seg | 🔴 | Finados |
