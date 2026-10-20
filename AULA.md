@@ -32,7 +32,7 @@ O `./passo.sh` guarda o que você tinha digitado (`git stash list`) antes de tro
 
 Ao voltar para um passo anterior no Quarkus, rode `mvn clean` antes de subir de novo.
 
-## Roteiro da quarta, 21/10: introdução a Go e o Passo 13
+## Roteiro do vídeo: introdução a Go e o Passo 13
 
 1. **Os exemplos do Curso básico de Go**, em `/workspaces/aprenda-go-com-testes` (no seu computador: `git clone https://github.com/classrooms-fmarquesfilho/aprenda-go-com-testes`).
 
@@ -55,7 +55,7 @@ Ao voltar para um passo anterior no Quarkus, rode `mvn clean` antes de subir de 
    go run ./cmd/demo    # o tempo é o do canal mais lento, não a soma
    ```
 
-## Demonstração de Processos (21/10): o sistema inteiro em containers
+## Demonstração: o sistema inteiro em containers
 
 O branch `aula` está no Passo 12, e o `compose.yaml` só existe a partir do Passo 17. Por isso a demonstração usa uma cópia do Passo 18 numa pasta ao lado, sem mexer no código da aula:
 
