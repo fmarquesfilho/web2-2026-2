@@ -21,7 +21,7 @@ O Componente A (entrega técnica, 50%) é a média ponderada dos critérios da s
 
 Critérios marcados com ⚙️ têm resultado binário e podem ser conferidos localmente antes da entrega.
 
-### Portão de qualidade
+### Exigências do pipeline
 
 O pipeline mínimo exigido em todas as sprints está em [STACK.md](STACK.md#verificações-do-pipeline). Pipeline com falha no momento do prazo limita o Componente A à nota 6.
 
