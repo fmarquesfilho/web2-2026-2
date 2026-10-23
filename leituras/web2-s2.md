@@ -433,7 +433,7 @@ O plano gratuito do Render tem limites que afetam diretamente este desenho (cons
 |---|---|
 | serviço privado não tem instância gratuita | o Go num serviço privado é pago |
 | web service gratuito envia, mas não recebe, tráfego pela rede privada | o Go como web service gratuito não é alcançável pela API |
-| o endereço público não encaminha gRPC | não dá para chamar o Go pela internet |
+| o endereço público não encaminha gRPC | não é possível chamar o Go pela internet |
 | o comando antes da implantação só existe em plano pago | no gratuito, a API migra na subida |
 
 Por isso, na entrega, o critério "Sistema no ar" pede a API e o banco gerenciado no ar, e a API precisa continuar respondendo quando o serviço Go não está acessível (o prazo e a degradação do capítulo 6). O serviço Go é avaliado rodando junto da API no `docker compose`. Pô-lo no ar é opcional: o grupo que fizer isso, num plano pago ou noutra plataforma com HTTP/2 de ponta a ponta, registra como fez numa ADR.

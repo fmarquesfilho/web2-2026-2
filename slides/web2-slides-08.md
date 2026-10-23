@@ -233,7 +233,7 @@ cliente com prazo de 300 ms
 ```
 
 - Sem a folga, o servidor esperaria até o fim e o cliente veria só `DEADLINE_EXCEEDED`
-- O prazo viaja no cabeçalho `grpc-timeout`: dá para vê-lo no log do cliente
+- O prazo viaja no cabeçalho `grpc-timeout`: é possível vê-lo no log do cliente
 
 📖 **Ref.** [gRPC — Deadlines](https://grpc.io/docs/guides/deadlines/)
 
@@ -608,7 +608,7 @@ Cada imagem leva a etiqueta do commit: voltar a uma versão é apontar para a et
 |---|---|
 | serviço privado não tem instância gratuita | o Go num serviço privado custa |
 | web service gratuito não recebe tráfego pela rede privada | o Go como web service gratuito não é alcançável pela API |
-| o endereço público não encaminha gRPC | não dá para chamar o Go pela internet |
+| o endereço público não encaminha gRPC | não é possível chamar o Go pela internet |
 | `preDeployCommand` só em plano pago | no gratuito, a API migra na subida |
 
 > Na entrega, o critério **Sistema no ar** pede a API e o banco no ar. O serviço Go roda junto da API no `docker compose`; pô-lo no ar é opcional, registrado numa ADR.
