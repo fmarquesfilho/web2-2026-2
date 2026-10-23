@@ -32,7 +32,7 @@ O `./passo.sh` guarda o que você tinha digitado (`git stash list`) antes de tro
 
 Ao voltar para um passo anterior no Quarkus, rode `mvn clean` antes de subir de novo.
 
-## Roteiro do vídeo: introdução a Go e o Passo 13
+## Roteiro de segunda, 26/10: introdução a Go e o Passo 13
 
 1. **Os exemplos do Curso básico de Go**, em `/workspaces/aprenda-go-com-testes` (no seu computador: `git clone https://github.com/classrooms-fmarquesfilho/aprenda-go-com-testes`).
 
@@ -55,6 +55,18 @@ Ao voltar para um passo anterior no Quarkus, rode `mvn clean` antes de subir de 
    go run ./cmd/demo    # o tempo é o do canal mais lento, não a soma
    ```
 
+## Roteiro do vídeo: passos 14 a 18
+
+Cada linha começa na raiz do repositório (`/workspaces/web2-2026-2`), onde fica o `passo.sh`.
+
+| Passo | Comandos |
+|---|---|
+| 14 | `./passo.sh 14` · `cd exemplos/protos && buf lint && buf generate` |
+| 15 | `./passo.sh 15` · `cd exemplos/avisos-go && go run ./cmd/avisos` · em outro terminal, os `grpcurl` do Passo 15 em `exemplos/avisos-go/PASSOS.md` (list, Avisar, `-max-time 0.3`, título em branco, Health) |
+| 16 | `./passo.sh 16` · terminal 1: `cd exemplos/avisos-go && go run ./cmd/avisos` · terminal 2: `cd exemplos/ktor-tarefas && docker compose up -d && ./gradlew run` · terminal 3: o `curl -X POST` do Passo 16; depois, pare o serviço Go e repita |
+| 17 | `./passo.sh 17` · pare o que estiver rodando · `cd exemplos && docker compose up --build` · em outro terminal, `docker compose ps` |
+| 18 | `./passo.sh 18` · os modelos em `exemplos/implantacao/`; o resto está na leitura da sprint, capítulo 8 |
+
 ## Demonstração: o sistema inteiro em containers
 
 O branch `aula` está no Passo 12, e o `compose.yaml` só existe a partir do Passo 17. Por isso a demonstração usa uma cópia do Passo 18 numa pasta ao lado, sem mexer no código da aula:
@@ -68,18 +80,6 @@ docker compose ps            # em outro terminal: os três healthy
 curl localhost:8080/tarefas
 docker compose down          # no fim
 ```
-
-## Roteiro da segunda, 26/10: passos 14 a 18
-
-Cada linha começa na raiz do repositório (`/workspaces/web2-2026-2`), onde fica o `passo.sh`.
-
-| Passo | Comandos |
-|---|---|
-| 14 | `./passo.sh 14` · `cd exemplos/protos && buf lint && buf generate` |
-| 15 | `./passo.sh 15` · `cd exemplos/avisos-go && go run ./cmd/avisos` · em outro terminal, os `grpcurl` do Passo 15 em `exemplos/avisos-go/PASSOS.md` (list, Avisar, `-max-time 0.3`, título em branco, Health) |
-| 16 | `./passo.sh 16` · terminal 1: `cd exemplos/avisos-go && go run ./cmd/avisos` · terminal 2: `cd exemplos/ktor-tarefas && docker compose up -d && ./gradlew run` · terminal 3: o `curl -X POST` do Passo 16; depois, pare o serviço Go e repita |
-| 17 | `./passo.sh 17` · pare o que estiver rodando · `cd exemplos && docker compose up --build` · em outro terminal, `docker compose ps` |
-| 18 | `./passo.sh 18` · os modelos em `exemplos/implantacao/`; o resto está na leitura da sprint, capítulo 8 |
 
 ## O que muda em cada passo
 
