@@ -89,7 +89,7 @@ style: |
 
 ## Introdução a Go, com testes, e o domínio do serviço Go
 
-DIM0547 — Turma 01 · Sprint 2 · aula em vídeo
+DIM0547 — Turma 01 · Sprint 2 · aula de 26/10
 
 Prof. Fernando · UFRN · 2026.2
 
@@ -99,7 +99,7 @@ Prof. Fernando · UFRN · 2026.2
 
 | | Data |
 |---|---|
-| Conteúdo | hoje: introdução a Go e o Passo 13 · segunda, 26/10: passos 14 a 18 |
+| Conteúdo | hoje: introdução a Go e o Passo 13 · em vídeo, até 30/10: passos 14 a 18 |
 | Acompanhamento online | 09/11 e 16/11 |
 | Prova escrita | **11/11 (quarta)**, no laboratório |
 | *Daily meetings* online | 23 e 25/11 |
@@ -108,9 +108,9 @@ Prof. Fernando · UFRN · 2026.2
 | Critério | Peso | Aula |
 |---|---|---|
 | Microsserviço Go | 25% | hoje |
-| Contrato Protobuf e integração gRPC | 25% | 26/10 |
-| Sistema no ar | 25% | 26/10 |
-| Ambiente e testes (inclui os testes que saíram da Sprint 1) | 15% | 26/10 |
+| Contrato Protobuf e integração gRPC | 25% | vídeo |
+| Sistema no ar | 25% | vídeo |
+| Ambiente e testes (inclui os testes que saíram da Sprint 1) | 15% | vídeo |
 | Documentação | 10% | — |
 
 ---
@@ -560,7 +560,7 @@ go run ./cmd/demo      # prazo de 1 s: 3 entregues em 400 ms; prazo de 100 ms: s
 
 ---
 
-# Na segunda, 26/10
+# No vídeo (até 30/10)
 
 | Passo | Assunto |
 |---|---|

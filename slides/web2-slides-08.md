@@ -89,7 +89,7 @@ style: |
 
 ## O contrato gRPC, a API chamando o Go, containers e implantação
 
-DIM0547 — Turma 01 · Sprint 2 · aula de 26/10
+DIM0547 — Turma 01 · Sprint 2 · aula em vídeo
 
 Prof. Fernando · UFRN · 2026.2
 
@@ -98,7 +98,7 @@ Prof. Fernando · UFRN · 2026.2
 # Onde paramos
 
 ```
-  vídeo     Go com testes: tipos, funções como valores, interfaces, ponteiros, erros, io.Writer
+  26/10    Go com testes: tipos, funções como valores, interfaces, ponteiros, erros, io.Writer
   passo 13  o domínio do serviço de avisos: Avisador, Canal, goroutines, context, erros com nome
 ```
 
