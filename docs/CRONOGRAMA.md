@@ -78,7 +78,7 @@ No fim de cada sprint, o professor conversa com cada grupo no formato de uma *da
 | 12 e 14/10 | 🔴 feriado | 🔵 online |
 | 19 e 21/10 | 🔴 cancelada | 🔴 cancelada |
 | 26 e 28/10 | 🟢 presencial | 🔴 feriado |
-| 02 e 04/11 | 🔴 feriado | 🔵 online |
+| 02 e 04/11 | 🔴 feriado | 🟢 presencial |
 | 09 e 11/11 | 🔵 online | 🟢 presencial (prova) |
 | 16 e 18/11 | 🔵 online | 🟢 presencial |
 | 23 e 25/11 | 🔵 online (*daily meetings*) | 🔵 online (*daily meetings*) |
@@ -140,8 +140,8 @@ Esta é a última sprint: o que for entregue em 30/11 é o produto final do seme
 | 26/10 | Seg | 🟢 | **Introdução a Go e o domínio do serviço Go; gRPC, containers e implantação (vídeo)**. Em sala: Introdução a Go, com testes: ferramentas, tipos, funções como valores, métodos e interfaces, ponteiros, erros e injeção de dependência (exemplos do Curso básico de Go). O domínio do serviço Go: goroutines e `context` (Passo 13). Em vídeo, publicado no SIGAA até 30/10: Protocol Buffers e Buf; o servidor gRPC, com deadlines e tratamento de erro; a integração do serviço principal (Ktor/Quarkus) com o serviço Go; `docker compose` com tudo. Implantação: banco gerenciado, plataforma de container, imagens no GHCR, migrações por task ou CI, health checks (passos 14 a 18) |
 | 28/10 | Qua | 🔴 | Dia do Servidor Público |
 | 02/11 | Seg | 🔴 | Finados |
-| 04/11 | Qua | 🔵 | Encontro online: revisão para a prova e dúvidas |
-| 09/11 | Seg | 🔵 | Encontro online de acompanhamento de projetos |
+| 04/11 | Qua | 🟢 | Revisão para a prova e dúvidas, em sala |
+| 09/11 | Seg | 🔵 | Revisão para a prova e dúvidas, online |
 | 11/11 | Qua | 📚 | **Prova escrita** — presencial, em laboratório. Sprints 0 e 1 e o conteúdo da Sprint 2 |
 | 16/11 | Seg | 🔵 | Encontro online de acompanhamento de projetos |
 | 18/11 | Qua | 🟢 | Oficina de projeto em sala. *Daily meeting* dos grupos que preferirem o presencial |

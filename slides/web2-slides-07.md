@@ -100,7 +100,8 @@ Prof. Fernando · UFRN · 2026.2
 | | Data |
 |---|---|
 | Conteúdo | hoje: introdução a Go e o Passo 13 · em vídeo, até 30/10: passos 14 a 18 |
-| Acompanhamento online | 09/11 e 16/11 |
+| Revisão para a prova | 04/11 (presencial) e 09/11 (online) |
+| Acompanhamento online | 16/11 |
 | Prova escrita | **11/11 (quarta)**, no laboratório |
 | *Daily meetings* online | 23 e 25/11 |
 | **Entrega final** | **30/11, 23:59** |
