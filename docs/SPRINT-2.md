@@ -1,6 +1,6 @@
 # Guia da Sprint 2 — DIM0547
 
-Prazo em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): entrega final em **30/11 (segunda), 23:59**. Conteúdo em vídeo, publicado no SIGAA até 23/10, e na aula presencial de 26/10 (as aulas de 19 e 21/10 foram canceladas); acompanhamento online em 09/11 e 16/11; *daily meetings* online em 23 e 25/11 (presencial em 18/11, para quem avisar antes). O que entregar e como é avaliado: [RUBRICAS.md](RUBRICAS.md#sprint-2). Os enunciados, prontos para virar cartões no quadro, estão em [SPRINT-2-TAREFAS.md](SPRINT-2-TAREFAS.md).
+Prazo em [CRONOGRAMA.md](CRONOGRAMA.md#visão-geral): entrega final em **30/11 (segunda), 23:59**. Conteúdo na aula presencial de 26/10 e em vídeo, publicado no SIGAA até 30/10 (as aulas de 19 e 21/10 foram canceladas); acompanhamento online em 09/11 e 16/11; *daily meetings* online em 23 e 25/11 (presencial em 18/11, para quem avisar antes). O que entregar e como é avaliado: [RUBRICAS.md](RUBRICAS.md#sprint-2). Os enunciados, prontos para virar cartões no quadro, estão em [SPRINT-2-TAREFAS.md](SPRINT-2-TAREFAS.md).
 
 A Sprint 2 é a última do semestre: o que for entregue em 30/11 é o produto final. O serviço principal ganha um **segundo serviço, em Go**, com uma responsabilidade justificada, ligado a ele por **gRPC**, com o contrato em Protocol Buffers. Tudo sobe com `docker compose`, a API vai para o ar com banco gerenciado, e os testes que saíram da Sprint 1 voltam, verdes no CI.
 
@@ -22,8 +22,8 @@ Além da entrega técnica, a nota da sprint tem a atividade no repositório (30%
 
 ## Material de apoio
 
-- Leitura da sprint: [`leituras/web2-s2.md`](../leituras/web2-s2.md) — introdução a Go e o domínio do serviço Go (em vídeo); Protobuf, o servidor gRPC, a API chamando o Go, containers e implantação (26/10).
-- Slides: `slides/web2-slides-07.md` (vídeo) e `slides/web2-slides-08.md` (26/10).
+- Leitura da sprint: [`leituras/web2-s2.md`](../leituras/web2-s2.md) — introdução a Go e o domínio do serviço Go (26/10); Protobuf, o servidor gRPC, a API chamando o Go, containers e implantação (vídeo).
+- Slides: `slides/web2-slides-07.md` (26/10) e `slides/web2-slides-08.md` (vídeo).
 - Exemplo: `exemplos/avisos-go/` com o [`PASSOS.md`](../exemplos/avisos-go/PASSOS.md) dos passos 13 a 18, `exemplos/protos/`, `exemplos/compose.yaml` e os modelos em `exemplos/implantacao/`. No branch `aula`, as tags `passo-13` a `passo-18` guardam cada passo.
 - Para aprender Go: o [Curso básico de Go](https://www.youtube.com/playlist?list=PLTr2C2xXIaIqO7Yr7FHohhgG_OgONpYIx), em vídeo, com os [exercícios](https://github.com/classrooms-fmarquesfilho/aprenda-go-com-testes) do *Aprenda Go com Testes* (<https://larien.gitbook.io/aprenda-go-com-testes/>).
 - Os testes da Sprint 1 (agora avaliados aqui): capítulos 7 e 11 da leitura `web2-s1-pte2.md` e passos 8 e 12 dos exemplos.
