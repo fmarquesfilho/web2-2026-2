@@ -176,6 +176,22 @@ cd aprenda-go-com-testes/2-hello-world && go test -v
 
 ---
 
+# Como acompanhar sem rodar: as tags
+
+## Cada conceito tem um ponto no repositório
+
+| Conceito | Onde |
+|---|---|
+| Ferramentas, tipos, olá mundo | `aprenda-go-com-testes/2-hello-world` |
+| Métodos e interfaces | `aprenda-go-com-testes/3-metodos-interfaces` |
+| Ponteiros e erros | `aprenda-go-com-testes/4-ponteiros-erros` |
+| Injeção de dependência | `aprenda-go-com-testes/5-injecao-de-dependencia` |
+| O serviço de avisos (Passo 13) | tag `passo-13` no branch `aula` de `web2-2026-2` |
+
+No Codespace, `./passo.sh 13` leva ao estado do Passo 13; cada pasta do curso roda com `go test -v`.
+
+---
+
 # Parte 1
 
 ## Go com testes
@@ -357,6 +373,21 @@ Consequência: em Go, a interface fica **com quem usa**, e costuma ter um ou doi
 
 ---
 
+# Go × Java: quatro trocas de mentalidade
+
+| Java | Go |
+|---|---|
+| herança e `implements` | interface satisfeita implicitamente |
+| exceções (`throw`/`catch`) | erro é um valor devolvido |
+| `Thread` e executor | goroutine (leve, barata) |
+| classes e construtores | `struct` e funções |
+
+Não é questão de "melhor": são decisões de design do Go, e é preciso aceitá-las para escrever código idiomático.
+
+📖 **Ref.** [Effective Go](https://go.dev/doc/effective_go) · pastas `3-metodos-interfaces` e `4-ponteiros-erros`
+
+---
+
 # Ponteiros: o receptor por valor recebe uma cópia
 
 ```go
@@ -508,6 +539,18 @@ func (av *Avisador) Avisar(ctx context.Context, aviso Aviso) ([]Entrega, error) 
 
 ---
 
+# Goroutine não é thread
+
+- Uma goroutine é uma linha de execução **leve**: o runtime agrupa milhares delas em poucas threads do sistema.
+- Criar uma custa quase nada: `go f()`.
+- Por isso o exemplo dispara uma goroutine por canal sem peso na consciência.
+
+> Regra de ouro: **não comunique compartilhando memória; compartilhe memória comunicando** (via canais).
+
+📖 **Ref.** [A Tour of Go — Concurrency](https://go.dev/tour/concurrency/1) · tag `passo-13`
+
+---
+
 # `context`: prazo e cancelamento
 
 ```go
@@ -529,6 +572,18 @@ entregas, err := av.Avisar(ctx, aviso)       // push (50 ms) entrega; email e ch
 
 - Toda função que pode esperar recebe `ctx context.Context` como **primeiro** parâmetro
 - O prazo atravessa as camadas: quem chama decide quanto está disposto a esperar
+
+📖 **Ref.** [Go — context](https://pkg.go.dev/context)
+
+---
+
+# `context`: o prazo atravessa as camadas
+
+- Quem chama decide **quanto está disposto a esperar** e põe isso no `context`.
+- Quem é chamado **respeita**: consulta `ctx.Done()` e desiste quando o prazo vence.
+- Isso vale na memória e, no Passo 15, **atravessa a rede** (o prazo do gRPC vira o prazo do `context`).
+
+> No Passo 13, `go run ./cmd/demo` mostra o prazo de 1 s (três entregas) e o de 100 ms (só o push). Confiram na tag `passo-13`.
 
 📖 **Ref.** [Go — context](https://pkg.go.dev/context)
 
