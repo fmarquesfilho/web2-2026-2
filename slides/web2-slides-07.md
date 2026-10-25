@@ -219,6 +219,24 @@ O teste vem com a linguagem: não há biblioteca de teste para escolher nem conf
 
 ---
 
+# Tipos básicos e o valor zero
+
+| Tipo | Exemplo | Valor zero |
+|---|---|---|
+| `bool` | `true` | `false` |
+| `string` | `"oi"` | `""` |
+| `int`, `int64` | `42` | `0` |
+| `float64` | `3.14` | `0` |
+| `byte` / `rune` | `'a'`, `'ç'` | `0` |
+
+- Não há valor "não inicializado": toda variável nasce com o **valor zero** do seu tipo.
+- `rune` é um `int32` que representa um caractere Unicode; `string` é uma sequência de bytes.
+- `int` tem o tamanho da arquitetura; `int32`/`int64` têm tamanho fixo.
+
+📖 **Ref.** [A Tour of Go — básico](https://go.dev/tour/basics/8) · [Go spec — tipos](https://go.dev/ref/spec#Types)
+
+---
+
 # Tipagem: estática, forte e com inferência
 
 ```go
@@ -239,6 +257,27 @@ total := float64(idade) + 2.5 // conversão sempre explícita
 > Inferência não é tipagem dinâmica: `idade := 20` tem tipo `int` para sempre.
 
 📖 **Ref.** Curso básico de Go, `2-hello-world/slides/slides-tipos-em-go.md`
+
+---
+
+# Variáveis, constantes e `:=`
+
+```go
+var nome string = "Maria"   // declaração explícita
+idade := 20                  // := declara e infere, só dentro de função
+const horas = 24             // constante: não muda
+
+var (                        // bloco de declarações
+    x, y int
+    ok  bool
+)
+```
+
+- `:=` é uma **declaração curta**: cria a variável e infere o tipo; não vale no escopo de pacote.
+- `const` vale em qualquer escopo; o valor é conhecido em compilação.
+- Variável declarada e não usada (dentro de função) é **erro de compilação**.
+
+📖 **Ref.** [A Tour of Go — variáveis](https://go.dev/tour/basics/8) · [Effective Go — short declarations](https://go.dev/doc/effective_go#short-declarations)
 
 ---
 
@@ -271,6 +310,23 @@ func TestHello(t *testing.T) {
 
 ---
 
+# Um laço só: o `for`
+
+```go
+for i := 0; i < 3; i++ { ... }      // o for "clássico"
+for _, t := range tarefas { ... }   // percorrer uma fatia/mapa
+for condicao { ... }                // o "while" é um for sem init/pós
+for { ... }                         // loop infinito
+```
+
+- Go tem **um único** laço, o `for`, em três formas.
+- `range` devolve índice e valor; `_` descarta o que não interessa.
+- `defer` adia uma chamada para o fim da função, em ordem LIFO: é o "garantir que fecha".
+
+📖 **Ref.** [A Tour of Go — for](https://go.dev/tour/flowcontrol/1) · [Effective Go — defer](https://go.dev/doc/effective_go#defer)
+
+---
+
 # Funções como valores: *functional options*
 
 ```go
@@ -297,6 +353,28 @@ Hello(WithName("João"), WithHour(20), WithRegion(RegionRN))
 - `&cfg` passa o endereço da configuração; é por ele que a opção consegue alterá-la (mais adiante, ponteiros)
 
 📖 **Ref.** Curso básico de Go, `3-metodos-interfaces/slides/polimorfismo-em-go.md` (Overloading × Functional Options)
+
+---
+
+# Funções: retorno múltiplo e erro por último
+
+```go
+func Divisao(a, b int) (int, error) {   // o erro vem por último, por convenção
+    if b == 0 {
+        return 0, fmt.Errorf("divisor zero")
+    }
+    return a / b, nil
+}
+
+q, err := Divisao(10, 2)
+if err != nil { ... }                   // sempre verificar o erro
+```
+
+- Uma função devolve vários valores; o par `(resultado, error)` é o idioma do Go.
+- O chamador **deve** tratar o erro — o compilador não obriga, mas o estilo sim.
+- *Named return* (`func f() (q int, err error)`) nomeia os retornos e permite `return` "nu".
+
+📖 **Ref.** [A Tour of Go — funções](https://go.dev/tour/basics/4) · [Effective Go — multiple returns](https://go.dev/doc/effective_go#multiple-returns)
 
 ---
 
@@ -331,6 +409,27 @@ checarArea(t, Circulo{Raio: 10}, 314.1592653589793)
 Nenhum `implements`: quem tem o método `Area() float64` é uma `Forma`, e o compilador confere.
 
 📖 **Ref.** Curso básico de Go, `3-metodos-interfaces/slides/polimorfismo-em-go.md`
+
+---
+
+# `struct`: agregação, sem herança
+
+```go
+type Entrega struct {
+    Canal string
+    Erro  error
+}
+
+type Avisador struct {          // "herança" não existe: compõe-se
+    canais []Canal
+}
+```
+
+- Go não tem classes nem herança: reúna dados numa `struct` e associe **métodos**.
+- Campo com letra minúscula é privado do pacote; maiúscula, exportado.
+- **Embutimento** (embedding) promove os campos/métodos do tipo embutido, sem hierarquia.
+
+📖 **Ref.** [A Tour of Go — structs](https://go.dev/tour/moretypes/2) · [Effective Go — embedding](https://go.dev/doc/effective_go#embedding)
 
 ---
 
@@ -452,6 +551,26 @@ if err := carteira.Sacar(10); err != nil {
 
 ---
 
+# Erros: embrulhar e reconhecer
+
+```go
+var ErrSaldoInsuficiente = errors.New("saldo insuficiente")   // erro sentinela
+
+return fmt.Errorf("sacar %d: %w", quantia, ErrSaldoInsuficiente)   // %w embrulha
+
+if errors.Is(err, ErrSaldoInsuficiente) { ... }   // reconhece pela identidade
+var falta ErroSaldoInsuficiente
+if errors.As(err, &falta) { ... }                 // recupera o tipo com dados
+```
+
+- `%w` preserva a cadeia de erros; `%v` não.
+- **`errors.Is`** compara, na cadeia, com um erro sentinela; **`errors.As`** recupera um tipo de erro.
+- Regra: erro com nome quando basta saber qual; tipo quando o chamador precisa dos dados.
+
+📖 **Ref.** [Go — errors](https://pkg.go.dev/errors) · [Effective Go — errors](https://go.dev/doc/effective_go#errors)
+
+---
+
 # Injeção de dependência: `io.Writer`
 
 ```go
@@ -479,6 +598,32 @@ func TestSaudar(t *testing.T) {
 Depender de uma interface, e não de um destino concreto, é o que torna a função testável: a ideia das portas da API de Tarefas.
 
 📖 **Ref.** Curso básico de Go, `5-injecao-de-dependencia/slides/5-injecao-dependencia-slides.md`
+
+---
+
+# Testes: *table-driven* e subtestes
+
+```go
+func TestHello(t *testing.T) {
+    casos := []struct{ nome string; opcoes []HelloOption; quer string }{
+        {"sem opções", nil, "Olá, Mundo"},
+        {"com nome", []HelloOption{WithName("Maria")}, "Olá, Maria"},
+    }
+    for _, c := range casos {
+        t.Run(c.nome, func(t *testing.T) {       // cada caso vira um subteste
+            if got := Hello(c.opcoes...); got != c.quer {
+                t.Errorf("got %q want %q", got, c.quer)
+            }
+        })
+    }
+}
+```
+
+- **Table-driven**: uma tabela de casos, um `for` que os percorre — a forma idiomática de testar.
+- `t.Run` dá nome a cada caso e permite rodar um só (`go test -run 'TestHello/com nome'`).
+- Testes vivem ao lado do código, em arquivos `_test.go`.
+
+📖 **Ref.** [Go — testing](https://pkg.go.dev/testing) · [Effective Go — table driven](https://go.dev/doc/effective_go#table-driven)
 
 ---
 
@@ -536,6 +681,23 @@ func (av *Avisador) Avisar(ctx context.Context, aviso Aviso) ([]Entrega, error) 
 - Canais de 400, 50 e 150 ms: em sequência, 600 ms; ao mesmo tempo, **400 ms**, o do mais lento
 
 📖 **Ref.** [Go — sync.WaitGroup](https://pkg.go.dev/sync#WaitGroup)
+
+---
+
+# Canais: comunicar compartilhando
+
+```go
+c := make(chan int)      // canal sem buffer: o envio espera quem receba
+
+go func() { c <- 42 }()  // envia
+v := <-c                 // recebe
+```
+
+- "Não comunique compartilhando memória; compartilhe memória comunicando" — o modelo de concorrência do Go.
+- Canais passam valores **e** sincronizam: o envio/recebimento é um ponto de encontro.
+- No exemplo, o cancelamento não usa channel próprio: `ctx.Done()` já é um canal, e o `select` espera ele ou o `time.After`.
+
+📖 **Ref.** [A Tour of Go — channels](https://go.dev/tour/concurrency/2) · [Effective Go — channels](https://go.dev/doc/effective_go#channels)
 
 ---
 
