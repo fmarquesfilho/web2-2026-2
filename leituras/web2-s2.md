@@ -90,6 +90,78 @@ Para quem está começando em Go, o caminho sugerido é o Curso básico de Go, e
 
 📖 Ref. Effective Go: <https://go.dev/doc/effective_go>
 
+### 2.2 Tipos básicos e o valor zero
+
+Toda variável em Go nasce com um valor, mesmo sem inicialização explícita: o **valor zero** do tipo. `int` começa em `0`, `string` em `""`, `bool` em `false`; ponteiros, interfaces, fatias e mapas começam em `nil`.
+
+| Tipo | Valor zero |
+|---|---|
+| `bool` | `false` |
+| `string` | `""` |
+| `int`, `int64`, `float64` | `0` |
+| `byte` / `rune` | `0` |
+
+`rune` é um `int32` que representa um caractere Unicode (`'ç'`); uma `string` é uma sequência de bytes. Inteiros têm o tamanho da máquina (`int`) ou tamanho fixo (`int32`, `int64`).
+
+📖 Ref. A Tour of Go — básico: <https://go.dev/tour/basics/8>
+
+### 2.3 Variáveis, constantes e `:=`
+
+```go
+var nome string = "Maria"   // declaração explícita
+idade := 20                  // := declara e infere, só dentro de função
+const horas = 24             // constante: não muda
+```
+
+- `:=` é a **declaração curta**: cria a variável e infere o tipo; não vale no escopo de pacote.
+- `const` vale em qualquer escopo, e o valor é conhecido em compilação.
+- Uma variável declarada e não usada (dentro de função) é **erro de compilação**: o Go não deixa lixo.
+
+📖 Ref. Effective Go — short declarations: <https://go.dev/doc/effective_go#short-declarations>
+
+### 2.4 Um laço só: o `for` (e o `defer`)
+
+Go tem um único laço, o `for`, em três formas: o clássico (`for i := 0; i < n; i++`), o `range` (`for _, t := range tarefas`) e o "enquanto" (`for condicao`). O `_` descarta o índice ou valor que não interessa.
+
+O `defer` adia uma chamada para o fim da função, em ordem LIFO: é o "garantir que fecha/libera", mesmo que a função saia por erro.
+
+📖 Ref. A Tour of Go — for: <https://go.dev/tour/flowcontrol/1>
+
+### 2.5 Funções: retorno múltiplo e erro por último
+
+Uma função Go devolve vários valores; o idioma é o par `(resultado, error)`, com o erro **por último**. O chamador confere o erro antes de usar o resultado:
+
+```go
+q, err := Divisao(10, 2)
+if err != nil { ... }
+```
+
+O *named return* (`func f() (q int, err error)`) nomeia os retornos e permite `return` "nu".
+
+📖 Ref. Effective Go — multiple returns: <https://go.dev/doc/effective_go#multiple-returns>
+
+### 2.6 Testes: table-driven e subtestes
+
+A forma idiomática de testar em Go é **table-driven**: uma tabela de casos, um `for` que os percorre, e `t.Run` para dar nome a cada caso. Os testes vivem ao lado do código, em arquivos `_test.go`.
+
+```go
+for _, c := range casos {
+    t.Run(c.nome, func(t *testing.T) {
+        if got := Hello(c.opcoes...); got != c.quer {
+            t.Errorf("got %q want %q", got, c.quer)
+        }
+    })
+}
+```
+
+📖 Ref. Go — testing: <https://pkg.go.dev/testing>
+
+### 2.7 Canais: comunicar compartilhando
+
+"**Não comunique compartilhando memória; compartilhe memória comunicando**" — a frase que define a concorrência do Go. Um canal (`make(chan int)`) passa valores **e** sincroniza: o envio espera quem receba. O capítulo 3 mostra o `select`, que espera o canal ou o prazo do `context`.
+
+📖 Ref. A Tour of Go — channels: <https://go.dev/tour/concurrency/2>
+
 ## 3. O domínio em Go: interfaces, concorrência, `context` e erros
 
 ### 3.1 Interfaces pequenas, do lado de quem usa
