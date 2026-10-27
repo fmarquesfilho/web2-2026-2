@@ -406,6 +406,8 @@ checarArea(t, Retangulo{Largura: 12, Altura: 6}, 72.0)
 checarArea(t, Circulo{Raio: 10}, 314.1592653589793)
 ```
 
+Uma `interface` é um conjunto de métodos que um tipo oferece; `Forma` exige o método `Area() float64`. Um método é uma função presa a um tipo pelo receptor entre parênteses.
+
 Nenhum `implements`: quem tem o método `Area() float64` é uma `Forma`, e o compilador confere.
 
 📖 **Ref.** Curso básico de Go, `3-metodos-interfaces/slides/polimorfismo-em-go.md`
@@ -677,6 +679,7 @@ func (av *Avisador) Avisar(ctx context.Context, aviso Aviso) ([]Entrega, error) 
 }
 ```
 
+- O `sync.WaitGroup` conta as goroutines disparadas: `Go` registra uma, e `Wait` bloqueia até todas terminarem
 - Cada goroutine escreve só na sua posição da fatia: não há disputa
 - Canais de 400, 50 e 150 ms: em sequência, 600 ms; ao mesmo tempo, **400 ms**, o do mais lento
 

@@ -188,6 +188,8 @@ for i, canal := range av.canais {
 wg.Wait()
 ```
 
+Uma goroutine é uma linha de execução leve: o runtime do Go agrupa muitas goroutines em poucas threads do sistema, e por isso disparar uma por canal custa pouco.
+
 - `wg.Go(f)` dispara `f` numa goroutine e a registra no `WaitGroup`; `wg.Wait()` espera todas terminarem.
 - Cada goroutine escreve só na sua posição da fatia. Como nenhuma posição é escrita por duas goroutines, não é preciso trava.
 - Desde o Go 1.22, cada volta do `for` tem as suas próprias `i` e `canal`; a goroutine captura os valores daquela volta.

@@ -144,6 +144,7 @@ message AvisarRequest {
 }
 ```
 
+- `service` declara as operações do contrato (os RPCs, como `Avisar`); `message` declara os dados que trafegam (o pedido e a resposta)
 - Um arquivo, três linguagens: o Go, o Kotlin e o Java geram o código a partir dele
 - Números de campo nunca mudam e nunca são reaproveitados: é o que mantém a compatibilidade
 - Mudança incompatível vira `v2`, ao lado da `v1`
@@ -172,6 +173,7 @@ buf lint          # sem saída: o contrato segue as regras (nomes, pacote com ve
 buf generate      # escreve avisos-go/gen/tarefas/avisos/v1/*.pb.go
 ```
 
+- `buf.yaml` diz como **conferir** (as regras de lint); `buf.gen.yaml` diz como **gerar** (quais plugins e para onde)
 - Plugins remotos: nada de `protoc` instalado na máquina
 - `buf lint` vai para o CI: a rubrica pede o contrato verde lá
 - Os stubs de Kotlin e Java são gerados pelo Gradle e pelo Quarkus, no build
@@ -202,6 +204,8 @@ func (s *Servidor) Avisar(ctx context.Context, req *avisosv1.AvisarRequest) (*av
     ...                                                                 // entregas → mensagens do contrato
 }
 ```
+
+O `Servidor` embute o `UnimplementedAvisosServiceServer` gerado pelo grpc-go: se o contrato ganhar uma operação nova, o build não quebra e a operação responde `UNIMPLEMENTED`. O método traduz o domínio para o contrato e usa `status.Error` para mapear cada erro do domínio num código gRPC.
 
 | Situação | Código gRPC | Equivalente HTTP |
 |---|---|---|
@@ -242,6 +246,8 @@ cliente com prazo de 300 ms
 # O servidor e a demonstração
 
 `cmd/avisos/main.go`: registra o serviço, o *health check* padrão e o *reflection*; encerra com `GracefulStop` ao receber SIGTERM.
+
+O *health check* gRPC responde a uma chamada padrão (`grpc.health.v1.Health`) dizendo se o serviço está de pé, para o `docker compose` e a plataforma saberem quando ele está pronto; o *reflection* deixa o `grpcurl` descobrir os serviços sem ter o `.proto`.
 
 ```bash
 go run ./cmd/avisos                                   # escuta na 50051
@@ -517,6 +523,7 @@ CMD ["/app/bin/ktor-tarefas"]
 </div>
 
 - O primeiro estágio compila; o segundo só leva o resultado. Ferramentas de build não vão para produção
+- `CGO_ENABLED=0` gera um binário estático, sem depender de bibliotecas do sistema, e a `distroless` é uma imagem mínima, sem shell: por isso os 29 MB
 - O contexto do build da API é `exemplos/`, porque ela precisa de `protos/`
 
 ---
@@ -540,6 +547,8 @@ CMD ["/app/bin/ktor-tarefas"]
       banco: { condition: service_healthy }
       avisos: { condition: service_healthy }
 ```
+
+`depends_on` com `condition: service_healthy` faz a API esperar o banco e o `avisos` ficarem saudáveis antes de subir; dentro da rede do compose, o nome do serviço é o endereço (`avisos:50051`).
 
 ```bash
 cd exemplos && docker compose up --build      # e: docker compose --profile quarkus up
@@ -593,6 +602,8 @@ jobs:
         with:
           tags: ghcr.io/${{ github.repository }}/api-ktor:${{ github.sha }}
 ```
+
+O job `testes` roda em todo push e PR; o job `imagens` roda só na `main` e depois dos testes verdes, para não publicar uma versão quebrada.
 
 Cada imagem leva a etiqueta do commit: voltar a uma versão é apontar para a etiqueta anterior.
 
