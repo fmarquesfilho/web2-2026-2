@@ -1,6 +1,6 @@
 # Leitura — Um serviço em Go, gRPC e implantação (Sprint 2)
 
-Guia de apoio para as duas aulas da Sprint 2: introdução a Go, com os exemplos do Curso básico de Go, e o domínio do serviço Go (26/10, Passo 13); o contrato em Protocol Buffers, o servidor gRPC, a integração com a API, os containers e a implantação (em vídeo, passos 14 a 18). Na Sprint 1, a API de Tarefas ganhou banco, testes, validação e camadas. Nesta, ela passa a conversar com um segundo serviço, escrito em Go, e vai para o ar.
+Guia de apoio para as duas aulas da Sprint 2: introdução a Go, com os exemplos do Curso básico de Go, e o domínio do serviço Go (28/10, Passo 13); o contrato em Protocol Buffers, o servidor gRPC, a integração com a API, os containers e a implantação (em vídeo, passos 14 a 18). Na Sprint 1, a API de Tarefas ganhou banco, testes, validação e camadas. Nesta, ela passa a conversar com um segundo serviço, escrito em Go, e vai para o ar.
 
 Exemplo de referência: `exemplos/avisos-go/` (com o `PASSOS.md` dos passos 13 a 18), `exemplos/protos/`, `exemplos/ktor-tarefas/`, `exemplos/quarkus-tarefas/`, `exemplos/compose.yaml` e `exemplos/implantacao/`. Os slides são `slides/web2-slides-07.md` e `slides/web2-slides-08.md`. No branch `aula`, as tags `passo-13` a `passo-18` guardam o estado de cada passo.
 

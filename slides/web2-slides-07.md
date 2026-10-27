@@ -89,7 +89,7 @@ style: |
 
 ## Introdução a Go, com testes, e o domínio do serviço Go
 
-DIM0547 — Turma 01 · Sprint 2 · aula de 26/10
+DIM0547 — Turma 01 · Sprint 2 · aula de 28/10
 
 Prof. Fernando · UFRN · 2026.2
 
