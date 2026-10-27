@@ -122,6 +122,16 @@ Prof. Fernando · UFRN · 2026.2
 
 ---
 
+# O que entregar na Sprint 2
+
+- **Microsserviço Go** com responsabilidade justificada (I/O, concorrência), Go idiomático, `context` e erros corretos.
+- **Contrato `.proto` comentado**, `buf lint` verde no CI, stubs gerados; a API chama o Go por gRPC com deadline e tratamento de erro, com teste de integração do fluxo.
+- **API e banco no ar** numa plataforma de container, URL no README, migração por task/CI, segredo fora do repositório, health check, e a API degrada bem sem o Go.
+- **`docker compose up` do zero**; testes unitários, de integração (banco real) e de arquitetura, verdes local e no CI.
+- **README** (roda em menos de 10 min), OpenAPI por URL, 2 ADRs novas, `LICENSE`.
+
+---
+
 # Onde vamos chegar
 
 ```
