@@ -106,7 +106,7 @@ Prof. Fernando · UFRN · 2026.2
 | *Daily meetings* online | 23 e 25/11 |
 | **Entrega final** | **30/11, 23:59** |
 
-> **Prova (11/11):** presencial, no laboratório, no horário da aula, no **Multiprova**, com questões fechadas sobre todo o conteúdo do curso. É permitida **uma folha A4 manuscrita, frente e verso**; nenhum outro material pode ser consultado.
+> **Prova (11/11):** presencial, no laboratório, no horário da aula, no **Multiprova**, com questões fechadas sobre as Sprints 0 e 1. É permitida **uma folha A4 manuscrita, frente e verso**; nenhum outro material pode ser consultado.
 
 ---
 

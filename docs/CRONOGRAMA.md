@@ -41,7 +41,7 @@ Todos os grupos participam da *daily meeting* em todas as sprints, exceto na Spr
 | Sprint 0 | 17/08 a 14/09 | Fundamentos e ambiente poliglota | — | 16/09 |
 | Sprint 1 | 14/09 a 16/10 | Serviço de CRUD em Ktor ou Quarkus | 28 e 30/09, online | 16/10 |
 | Sprint 2 (final) | 01/11 a 30/11, com o conteúdo em 28/10 (laboratório) e em vídeo (até 30/10) | Serviço Go, gRPC e implantação | 23 e 25/11, online | 30/11 |
-| Prova escrita | 11/11 | Sprints 0 e 1 e o conteúdo da Sprint 2 | — | — |
+| Prova escrita | 11/11 | Sprints 0 e 1 | — | — |
 | Prova de reposição | 02/12 | Sprints 0 a 2, cumulativa e opcional | — | — |
 
 ---
@@ -142,7 +142,7 @@ Esta é a última sprint: o que for entregue em 30/11 é o produto final do seme
 | 02/11 | Seg | 🔴 | Finados |
 | 04/11 | Qua | 🟢 | Revisão para a prova e dúvidas, em sala |
 | 09/11 | Seg | 🔵 | Revisão para a prova e dúvidas, online |
-| 11/11 | Qua | 📚 | **Prova escrita** — presencial, em laboratório. Sprints 0 e 1 e o conteúdo da Sprint 2 |
+| 11/11 | Qua | 📚 | **Prova escrita** — presencial, em laboratório. Sprints 0 e 1 |
 | 16/11 | Seg | 🔵 | Encontro online de acompanhamento de projetos |
 | 18/11 | Qua | 🟢 | Oficina de projeto em sala. *Daily meeting* dos grupos que preferirem o presencial |
 | 23/11 | Seg | 🎤 | *Daily meetings* da Sprint 2, online pelo Google Meet |
