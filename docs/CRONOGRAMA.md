@@ -20,7 +20,7 @@ As aulas de 10/08, 12/08 e 17/08 não foram realizadas. O curso inicia em 19/08.
 | 🎥 | Aula em vídeo, publicada no SIGAA |
 | 🔵 | Encontro online no Google Meet — aula ou apoio ao projeto |
 | 🚀 | Entrega da sprint, às 23:59 |
-| 📚 | Prova escrita, presencial, em laboratório |
+| 📚 | Prova escrita, no Multiprova (formato e local na linha de cada prova) |
 | 🔴 | Feriado ou atividades suspensas |
 | — | Sem encontro |
 
@@ -41,7 +41,7 @@ Todos os grupos participam da *daily meeting* em todas as sprints, exceto na Spr
 | Sprint 0 | 17/08 a 14/09 | Fundamentos e ambiente poliglota | — | 16/09 |
 | Sprint 1 | 14/09 a 16/10 | Serviço de CRUD em Ktor ou Quarkus | 28 e 30/09, online | 16/10 |
 | Sprint 2 (final) | 01/11 a 30/11, com o conteúdo em 28/10 (laboratório) e em vídeo (até 30/10) | Serviço Go, gRPC e implantação | 23 e 25/11, online | 30/11 |
-| Prova escrita | 11/11 | Sprints 0 e 1 | — | — |
+| Prova escrita | 11/11, online | Sprints 0 e 1 | — | — |
 | Prova de reposição | 02/12 | Sprints 0 a 2, cumulativa e opcional | — | — |
 
 ---
@@ -79,7 +79,7 @@ No fim de cada sprint, o professor conversa com cada grupo no formato de uma *da
 | 19 e 21/10 | 🔴 cancelada | 🔴 cancelada |
 | 26 e 28/10 | 🟢 presencial | 🟢 presencial (laboratório) |
 | 02 e 04/11 | 🔴 feriado | 🟢 presencial |
-| 09 e 11/11 | 🔵 online | 🟢 presencial (prova) |
+| 09 e 11/11 | 🔵 online | 📚 prova online, no Multiprova |
 | 16 e 18/11 | 🔵 online | 🟢 presencial |
 | 23 e 25/11 | 🔵 online (*daily meetings*) | 🔵 online (*daily meetings*) |
 | 30/11 e 02/12 | ⏳ a definir | 🟢 presencial (reposição) |
@@ -142,7 +142,7 @@ Esta é a última sprint: o que for entregue em 30/11 é o produto final do seme
 | 02/11 | Seg | 🔴 | Finados |
 | 04/11 | Qua | 🟢 | Revisão para a prova e dúvidas, em sala |
 | 09/11 | Seg | 🔵 | Revisão para a prova e dúvidas, online |
-| 11/11 | Qua | 📚 | **Prova escrita** — presencial, em laboratório. Sprints 0 e 1 |
+| 11/11 | Qua | 📚 | **Prova escrita** — online, no Multiprova, disponível de 11/11, 10:00, a 12/11, 10:00; 50 minutos a partir do início. Sprints 0 e 1. Sem aula no laboratório (a prova seria presencial; mudança avisada em 10/11) |
 | 16/11 | Seg | 🔵 | Encontro online de acompanhamento de projetos |
 | 18/11 | Qua | 🟢 | Oficina de projeto em sala. *Daily meeting* dos grupos que preferirem o presencial |
 | 23/11 | Seg | 🎤 | *Daily meetings* da Sprint 2, online pelo Google Meet |
