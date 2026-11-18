@@ -8,7 +8,7 @@ As aulas de 10/08, 12/08 e 17/08 não foram realizadas. O curso inicia em 19/08.
 
 **Ajuste de 03/10.** Para caber no que falta do semestre, o curso passa a ter **uma sprint a mais, e não três**: a Sprint 2, de novembro, é a entrega final. A Sprint 3 e o bloco final deixam de existir, e o conteúdo foi enxugado. A entrega da Sprint 1 passa para **16/10** (sexta), 23:59. A prova escrita passa para **11/11** (quarta; em 06/10 foi adiada de 09/11 para 11/11) e a de reposição, para **02/12**. No fim de cada sprint, no lugar das apresentações, o professor faz uma *daily meeting* com cada grupo, online, pelo Google Meet, como as de 28 e 30/09; quem preferir conversar em sala pode fazê-lo na aula presencial anterior. De 05/10 em diante são 7 aulas presenciais, 7 online e 1 a definir (30/11). As seções abaixo já refletem o ajuste, que substitui as datas dos ajustes anteriores.
 
-**Ajuste de 18/11.** A prova escrita foi aplicada em 11/11, online, no Multiprova. A prova de reposição continua em **02/12** e segue o mesmo formato: online, no Multiprova, disponível de 02/12, 10:00, a 03/12, 10:00 (janela de 24 horas), com 50 minutos a partir do início; não há aula no laboratório nesse dia. A aula de 18/11 foi cancelada por motivo de saúde do professor; a parte 2 do conteúdo da Sprint 2, prevista em vídeo, será publicada no SIGAA até **20/11** (sexta). As *daily meetings* de 23 e 25/11 e a entrega final de 30/11 estão mantidas.
+**Ajuste de 18/11.** A prova escrita foi aplicada em 11/11, online, no Multiprova. A prova de reposição continua em **02/12** e segue o mesmo formato: online, no Multiprova, disponível de 02/12, 10:00, a 03/12, 10:00 (janela de 24 horas), com 50 minutos a partir do início; não há aula no laboratório nesse dia. A aula de 18/11 foi cancelada por motivo de saúde do professor; a parte 2 do conteúdo da Sprint 2, prevista em vídeo, será publicada no SIGAA até **20/11** (sexta). As *daily meetings* de 23 e 25/11 e a entrega final de 30/11 estão mantidas. Correção: em 26 e 28/10 não houve aula; o conteúdo presencial da Sprint 2 foi dado em 03/11, e a aula extra de reposição registrada no SIGAA nessa data corresponde ao vídeo da parte 2.
 
 ---
 
@@ -42,7 +42,7 @@ Todos os grupos participam da *daily meeting* em todas as sprints, exceto na Spr
 |-------|---------|------|---------------|---------|
 | Sprint 0 | 17/08 a 14/09 | Fundamentos e ambiente poliglota | — | 16/09 |
 | Sprint 1 | 14/09 a 16/10 | Serviço de CRUD em Ktor ou Quarkus | 28 e 30/09, online | 16/10 |
-| Sprint 2 (final) | 01/11 a 30/11, com o conteúdo em 28/10 (laboratório) e em vídeo (parte 2 até 20/11) | Serviço Go, gRPC e implantação | 23 e 25/11, online | 30/11 |
+| Sprint 2 (final) | 01/11 a 30/11, com o conteúdo em 03/11 e em vídeo (parte 2 até 20/11) | Serviço Go, gRPC e implantação | 23 e 25/11, online | 30/11 |
 | Prova escrita | 11/11, online | Sprints 0 e 1 | — | — |
 | Prova de reposição | 02/12 | Sprints 0 a 2, cumulativa e opcional | — | — |
 
@@ -79,8 +79,8 @@ No fim de cada sprint, o professor conversa com cada grupo no formato de uma *da
 | 05 e 07/10 | 🟢 presencial | 🟢 presencial |
 | 12 e 14/10 | 🔴 feriado | 🔵 online |
 | 19 e 21/10 | 🔴 cancelada | 🔴 cancelada |
-| 26 e 28/10 | 🟢 presencial | 🟢 presencial (laboratório) |
-| 02 e 04/11 | 🔴 feriado | 🟢 presencial |
+| 26 e 28/10 | 🔴 não houve aula | 🔴 não houve aula |
+| 02 e 04/11 | 🔴 feriado (aula em 03/11) | 🟢 presencial |
 | 09 e 11/11 | 🔵 online | 📚 prova online, no Multiprova |
 | 16 e 18/11 | 🔵 online | 🔴 cancelada |
 | 23 e 25/11 | 🔵 online (*daily meetings*) | 🔵 online (*daily meetings*) |
@@ -139,8 +139,9 @@ Esta é a última sprint: o que for entregue em 30/11 é o produto final do seme
 |------|-----|------|-----------|
 | 19/10 | Seg | 🔴 | Aula cancelada |
 | 21/10 | Qua | 🔴 | Aula cancelada |
-| 26/10 | Seg | 🔴 | Aula não dada (professor doente); remanejada para 28/10 |
-| 28/10 | Qua | 🟢 | **Introdução a Go e o domínio do serviço Go; gRPC, containers e implantação (vídeo)**. Em sala: Introdução a Go, com testes: ferramentas, tipos, funções como valores, métodos e interfaces, ponteiros, erros e injeção de dependência (exemplos do Curso básico de Go). O domínio do serviço Go: goroutines e `context` (Passo 13). Em vídeo, publicado no SIGAA até 20/11: Protocol Buffers e Buf; o servidor gRPC, com deadlines e tratamento de erro; a integração do serviço principal (Ktor/Quarkus) com o serviço Go; `docker compose` com tudo. Implantação: banco gerenciado, plataforma de container, imagens no GHCR, migrações por task ou CI, health checks (passos 14 a 18) — remanejada de 26/10, no laboratório |
+| 26/10 | Seg | 🔴 | Não houve aula (professor doente) |
+| 28/10 | Qua | 🔴 | Não houve aula |
+| 03/11 | Ter | 🟢 | **Introdução a Go e o domínio do serviço Go**. Em sala: Introdução a Go, com testes: ferramentas, tipos, funções como valores, métodos e interfaces, ponteiros, erros e injeção de dependência (exemplos do Curso básico de Go). O domínio do serviço Go: goroutines e `context` (Passo 13). A aula extra de reposição registrada no SIGAA em 03/11 não foi dada em sala: o conteúdo dela sai em vídeo, publicado no SIGAA até 20/11: Protocol Buffers e Buf; o servidor gRPC, com deadlines e tratamento de erro; a integração do serviço principal (Ktor/Quarkus) com o serviço Go; `docker compose` com tudo. Implantação: banco gerenciado, plataforma de container, imagens no GHCR, migrações por task ou CI, health checks (passos 14 a 18) |
 | 02/11 | Seg | 🔴 | Finados |
 | 04/11 | Qua | 🟢 | Revisão para a prova e dúvidas, em sala |
 | 09/11 | Seg | 🔵 | Revisão para a prova e dúvidas, online |
