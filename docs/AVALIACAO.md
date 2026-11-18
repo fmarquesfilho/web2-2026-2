@@ -38,6 +38,19 @@ Nota do grupo   = 0,50·A + 0,30·B + 0,20·C
 Nota individual = Nota do grupo × Fator de Participação × (1 + Bônus)   [máximo 10,0]
 ```
 
+### 2.1 Ajustes aplicados na Unidade 1
+
+Decididos pelo professor no fechamento da U1 (16 a 18/11), valem para as Sprints 0 e 1:
+
+- **Nota mínima do grupo.** Nota do grupo entre 5,0 e 7,0 sobe para 7,0.
+- **Nota mínima individual.** Se a nota do grupo pela rubrica é de pelo menos 5,0 e o fator de participação é maior que 0, a nota individual da sprint é a maior entre 7,0 e nota do grupo × fator.
+- **Fator da Sprint 0.** Conta só as duas condições de commits (15% dos commits ou das linhas e commits em metade das semanas): as duas, 1,00; uma, 0,85; nenhuma, 0,50.
+- **Prazo da Sprint 1.** Entregas até 20/10 foram aceitas sem desconto, e a participação foi contada até essa data.
+- **O que não pôde ser conferido conta como cumprido.** Quando um item não pôde ser verificado por limitação de acesso (API fora do ar, quadro privado, vídeo que exige login), ele foi considerado atendido.
+- **Nota da U1.** U1 = 0,3 × Sprint 0 + 0,7 × Sprint 1, arredondada para uma casa decimal. Quem teve fator maior que 0 em pelo menos uma das sprints fica com U1 de pelo menos 5,0.
+
+Exemplo: grupo com 7,6 pela rubrica e integrante com fator 0,50 → 7,6 × 0,50 = 3,8 → nota individual 7,0. Integrante com fator 0,50 na Sprint 0 (nota 7,0) e fator 0 na Sprint 1 (nota 0) → U1 = 0,3 × 7,0 + 0,7 × 0 = 2,1 → U1 5,0.
+
 ---
 
 ## 3. Componente B — Atividade no repositório
@@ -122,10 +135,10 @@ Condições: declaração na Sprint 0; produto comum com repositórios vinculado
 
 | Prova | Data | Conteúdo |
 |-------|------|----------|
-| Prova escrita, obrigatória | 11/11, online | Sprints 0 e 1: HTTP, cache, REST, arquitetura de serviços, Clean Architecture, Kotlin/Ktor ou Java/Quarkus, JPA/Exposed, Flyway, testes com Testcontainers, validação e *problem details* |
-| Prova de reposição, opcional | 02/12 | Cumulativa, Sprints 0 a 2: o conteúdo da prova escrita e mais Go, Protocol Buffers, gRPC e implantação em containers |
+| Prova escrita, obrigatória | 11/11, online (realizada) | Sprints 0 e 1: HTTP, cache, REST, arquitetura de serviços, Clean Architecture, Kotlin/Ktor ou Java/Quarkus, JPA/Exposed, Flyway, testes com Testcontainers, validação e *problem details* |
+| Prova de reposição, opcional | 02/12, online | Cumulativa, Sprints 0 a 2: o conteúdo da prova escrita e mais Go, Protocol Buffers, gRPC e implantação em containers |
 
-Ambas são individuais, com questões fechadas, no Multiprova. A prova de reposição é presencial, em laboratório, no horário da aula, com consulta permitida a uma folha A4 manuscrita, frente e verso. A prova escrita de 11/11, prevista no mesmo formato, foi aplicada online (mudança avisada em 10/11): disponível de 11/11, 10:00, a 12/11, 10:00, com 50 minutos a partir do início, para 20 questões.
+Ambas são individuais, com questões fechadas, online, no Multiprova. A prova escrita ficou disponível de 11/11, 10:00, a 12/11, 10:00, com 50 minutos a partir do início, para 20 questões (estava prevista presencial, em laboratório; a mudança foi avisada em 10/11). A prova de reposição segue o mesmo formato: disponível de 02/12, 10:00, a 03/12, 10:00, com 50 minutos a partir do início. Depois de iniciada, o cronômetro não pausa: comece com tempo suficiente antes do fim da janela.
 
 A prova de reposição é aberta a qualquer estudante, inclusive a quem já obteve nota alta na primeira. Ela não substitui automaticamente a nota anterior: **vale a maior das duas**. Quem não comparecer permanece com a nota da primeira prova.
 
