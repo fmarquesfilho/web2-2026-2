@@ -47,6 +47,8 @@ Decididos pelo professor no fechamento da U1 (16 a 18/11), valem para as Sprints
 - **Fator da Sprint 0.** Conta só as duas condições de commits (15% dos commits ou das linhas e commits em metade das semanas): as duas, 1,00; uma, 0,85; nenhuma, 0,50.
 - **Prazo da Sprint 1.** Entregas até 20/10 foram aceitas sem desconto, e a participação foi contada até essa data.
 - **O que não pôde ser conferido conta como cumprido.** Quando um item não pôde ser verificado por limitação de acesso (API fora do ar, quadro privado, vídeo que exige login), ele foi considerado atendido.
+- **Docker Compose e CI opcionais na Sprint 0.** Conforme combinado com a turma, o `docker-compose.yml` e o CI deixaram de ser exigidos na Sprint 0: o critério *CI passando* e o indicador de CI verde do componente B saem do cálculo (o peso é redistribuído), e vale a maior entre a nota com e sem eles.
+- **Grupos de uma pessoa.** Quem trabalhou sozinho tem fator de participação 1,00 nas duas sprints: o fator mede a divisão do trabalho no grupo, e o ritmo de commits e PRs já entra no componente B.
 - **Nota da U1.** U1 = 0,3 × Sprint 0 + 0,7 × Sprint 1, arredondada para uma casa decimal. Quem teve fator maior que 0 em pelo menos uma das sprints fica com U1 de pelo menos 5,0.
 
 Exemplo: grupo com 7,6 pela rubrica e integrante com fator 0,50 → 7,6 × 0,50 = 3,8 → nota individual 7,0. Integrante com fator 0,50 na Sprint 0 (nota 7,0) e fator 0 na Sprint 1 (nota 0) → U1 = 0,3 × 7,0 + 0,7 × 0 = 2,1 → U1 5,0.
