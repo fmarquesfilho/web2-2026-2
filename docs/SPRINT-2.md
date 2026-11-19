@@ -53,7 +53,7 @@ Além da entrega técnica, a nota da sprint tem a atividade no repositório (30%
 
 ## Sistema no ar
 
-- A API e o banco gerenciado (Neon) no ar, numa plataforma de container, com a URL pública no README.
+- A API e o banco gerenciado (Neon) implantados numa plataforma de container. A URL pública funcionando não é exigida (ajuste de 19/11): mostrem a implantação por evidências, como o workflow de deploy, os logs, prints ou o vídeo. Se a API estiver no ar, a URL vai no README.
 - Migrações aplicadas por task ou pelo CI (o exemplo tem o comando `migrar`), e não à mão.
 - Connection string e senhas como segredos da plataforma, nunca no repositório.
 - Health check configurado na plataforma.
@@ -80,7 +80,7 @@ O critério avalia se outra pessoa consegue entender, rodar e avaliar o sistema 
 |---|---|
 | O que é | o problema que o sistema resolve, em dois ou três parágrafos |
 | Arquitetura | um diagrama dos serviços (API, serviço Go, banco) e de como conversam (REST, gRPC, SQL) |
-| No ar | a URL pública da API e da documentação OpenAPI |
+| No ar | a URL pública da API e da documentação OpenAPI, se houver; senão, como a implantação foi feita |
 | Pré-requisitos | o que instalar (Docker, e o que mais for necessário), com versões |
 | Como rodar | `docker compose up --build` e o que esperar ao final; as variáveis de ambiente, com exemplo |
 | Como testar | os comandos dos testes (serviço principal e Go) e o que cada suíte cobre |
@@ -105,7 +105,7 @@ O teste do README: uma pessoa de fora do grupo, seguindo só o README, roda o si
 | Tempo | Conteúdo |
 |---|---|
 | 30 s | O que a sprint entregou, e qual é a responsabilidade do serviço Go |
-| 1 min 30 s | O sistema no ar: uma requisição real pela URL pública, e a API respondendo sem o Go |
+| 1 min 30 s | O sistema implantado: uma requisição real pela URL pública (ou, sem ela, a implantação e os logs), e a API respondendo sem o Go |
 | 1 min | O contrato, o `buf lint` e uma chamada gRPC (pela API ou pelo `grpcurl`), com o prazo |
 | 1 min | `docker compose up` do zero e os serviços saudáveis |
 | 1 min | Os testes e o CI verde; o que o grupo faria a seguir |

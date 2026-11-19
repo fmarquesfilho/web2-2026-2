@@ -178,10 +178,10 @@ O **como** está em [SPRINT-2.md](SPRINT-2.md) e na leitura da sprint ([`leitura
 - [ ] Publicar a API numa plataforma de container (Render ou outra), com health check
 - [ ] Aplicar as migrações por task ou pelo CI
 - [ ] Conferir que a API responde sem o serviço Go
-- [ ] Pôr a URL pública no README
+- [ ] Pôr a URL pública no README, se a API estiver no ar; senão, registrar as evidências da implantação (workflow, logs, prints)
 - [ ] Escrever a ADR da implantação
 
-**Pronto quando.** A URL do README responde, e o repositório não contém nenhum segredo.
+**Pronto quando.** A implantação está demonstrada (pela URL do README ou pelas evidências), e o repositório não contém nenhum segredo. A URL pública funcionando não é exigida (ajuste de 19/11).
 
 **Referência.** [SPRINT-2.md](SPRINT-2.md) *Sistema no ar* · `web2-s2.md`, capítulo 8 · exemplo, Passo 18.
 
